@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=17" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -109,8 +109,14 @@
         </button>
       </div>
 
-      <!-- Capsule 2: Live World & Resident Simulation -->
+      <!-- Capsule 2: Live World, Pulse Telemetry & Resident Simulation -->
       <div class="hud-capsule world-capsule" role="group" aria-label="Live World Simulation">
+        <button class="hud-pill-btn pulse-hud-pill" id="hud-pulse-btn" type="button" title="Live Cross-Platform &amp; Website Analytics (IG + TikTok @bezizian0 + YouTube + Website)">
+          <span class="pulse-live-dot" id="pulse-live-dot"></span>
+          <span>📊</span>
+          <span id="hud-pulse-label">5.8K · 307 ❤️</span>
+        </button>
+
         <button class="hud-pill-btn nyc-live-pill is-synced" id="nyc-env-btn" type="button" title="Live New York Time, Weather &amp; Season (Click to customize or preview Snow/Seasons)">
           <span class="nyc-live-dot" id="nyc-live-dot"></span>
           <span id="nyc-env-icon">🗽</span>
@@ -378,6 +384,36 @@
       </div>
     </div>
 
+    <!-- Live Cross-Platform & Website Telemetry Strip for Active Song -->
+    <div class="stage-telemetry-strip" id="stage-telemetry-strip" aria-label="Live Song Telemetry">
+      <div class="stage-telemetry-top">
+        <div class="stage-telemetry-totals">
+          <span class="stage-rank-badge" id="stage-rank-badge">🏆 #1 HIT</span>
+          <span class="stage-stat-main" id="stage-total-views" title="Combined views across Instagram, TikTok @bezizian0, YouTube, FB/Threads &amp; Website">👁 1,071 Views</span>
+          <span class="stage-stat-sep">·</span>
+          <span class="stage-stat-likes" id="stage-total-likes">❤️ 70</span>
+        </div>
+        <div class="stage-telemetry-actions">
+          <button class="stage-like-btn" id="stage-like-btn" type="button" title="Like this song on Bezizian Overworld">
+            <span class="like-heart-icon" id="stage-like-icon">🤍</span>
+            <span id="stage-like-label">Like</span>
+            <span class="stage-like-count" id="stage-site-like-count">24</span>
+          </button>
+          <button class="stage-pulse-open-btn" id="stage-open-pulse-btn" type="button" title="Open Full Live Cross-Platform Analytics">
+            <span>📊</span>
+            <span id="i18n-stage-stats-btn">All Stats</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="stage-platform-chips" id="stage-platform-chips">
+        <a class="stage-plat-chip ig" id="stage-chip-ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener" title="Instagram Reels (@bezizian)">📸 IG <b>791</b></a>
+        <a class="stage-plat-chip tt" id="stage-chip-tt" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener" title="TikTok (@bezizian0)">🎵 TT <b>98</b></a>
+        <a class="stage-plat-chip yt" id="stage-chip-yt" href="https://www.youtube.com/@bezizian" target="_blank" rel="noopener" title="YouTube (@bezizian)">▶️ YT <b>46</b></a>
+        <button class="stage-plat-chip site" id="stage-chip-site" type="button" title="Direct Plays &amp; Watches on this Website">🌐 Site <b id="stage-chip-site-val">146</b></button>
+      </div>
+    </div>
+
     <!-- Drawer Scrollable Body -->
     <div class="drawer-body" id="drawer-body">
       <!-- PANE 1: 9:16 VERTICAL INSTAGRAM CLIP PLAYER / STUDIO DUBPLATE DECK -->
@@ -497,6 +533,9 @@
         </button>
         <button class="hud-pill-btn highlight-orange mobile-quick-btn" id="mobile-open-playlist-btn" type="button">
           <span>🎵</span><span id="i18n-mobile-songs-btn">All 8 Songs</span>
+        </button>
+        <button class="hud-pill-btn mobile-quick-btn" id="mobile-pulse-btn" type="button" title="Open Live Analytics &amp; Popularity">
+          <span>📊</span>
         </button>
         <button class="hud-pill-btn mobile-quick-btn" id="mobile-snap-btn" type="button" title="Take Instant Polaroid Snapshot">
           <span>📸</span>
@@ -696,8 +735,185 @@
     </div>
   </div>
 
+  <!-- ========================================================================
+       MODAL 5: BEZIZIAN LIVE PULSE & CROSS-PLATFORM ANALYTICS MINI-DASHBOARD
+       ======================================================================== -->
+  <div class="modal-backdrop" id="pulse-dashboard-modal" role="dialog" aria-modal="true" aria-label="Bezizian Live Cross-Platform &amp; Website Analytics">
+    <div class="modal-window pulse-dashboard-window">
+      <div class="modal-header pulse-modal-header">
+        <div>
+          <div class="section-micro-title" id="i18n-pulse-micro">LIVE TELEMETRY · IG (@BEZIZIAN) · TIKTOK (@BEZIZIAN0) · YOUTUBE · WEBSITE</div>
+          <h2 class="modal-title" id="i18n-pulse-title">📊 Bezizian Live Pulse &amp; Popularity</h2>
+        </div>
+        <div class="pulse-header-actions">
+          <span class="pulse-sync-status" id="pulse-sync-status">
+            <span class="pulse-live-dot"></span>
+            <span id="pulse-last-sync-text">LIVE SYNC</span>
+          </span>
+          <button class="hud-pill-btn" id="pulse-sync-now-btn" type="button" title="Scrape latest live counts from TikTok @bezizian0 &amp; YouTube @bezizian">
+            <span>🔄</span>
+            <span id="i18n-pulse-sync-btn">Sync Live</span>
+          </button>
+          <button class="drawer-close-btn" id="close-pulse-modal-btn" type="button" title="Close Dashboard (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- Household IP Exclusion Shield Bar (67.81.142.20 Filter) -->
+      <div class="household-shield-bar" id="household-shield-bar">
+        <div class="household-shield-left">
+          <span class="shield-badge-icon" id="household-shield-icon">🛡️</span>
+          <div>
+            <div class="household-shield-title" id="household-shield-title">HOUSEHOLD IP EXCLUDED (67.81.142.20 · OWNER &amp; WIFE IMMUNITY ACTIVE)</div>
+            <div class="household-shield-sub" id="household-shield-sub">Your own visits, song plays &amp; refreshes are filtered out so Website totals show 100% real external audience.</div>
+          </div>
+        </div>
+        <div class="household-shield-right">
+          <span class="filtered-events-chip" id="filtered-events-chip" title="Owner/Household events ignored by public counters">Ignored owner events: 19</span>
+          <button class="shield-toggle-btn is-protected" id="toggle-household-guard-btn" type="button" title="Toggle Owner IP Exclusion Shield">
+            <span id="household-toggle-label">🛡️ Shield ON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Hero Split: All Platforms Total vs. Website Traffic Only -->
+      <div class="pulse-hero-grid">
+        <!-- Hero Card 1: All Platforms Grand Total -->
+        <div class="pulse-hero-card grand-card">
+          <div class="pulse-card-eyebrow">
+            <span>🌍 ALL PLATFORMS COMBINED TOTAL</span>
+            <span class="pulse-live-tag">IG + TIKTOK + YT + FB + SITE</span>
+          </div>
+          <div class="pulse-big-numbers">
+            <div class="pulse-big-stat">
+              <div class="pulse-big-val" id="pulse-grand-views">5,765</div>
+              <div class="pulse-big-lbl" id="i18n-pulse-tot-views">Total Views &amp; Plays</div>
+            </div>
+            <div class="pulse-big-divider"></div>
+            <div class="pulse-big-stat">
+              <div class="pulse-big-val accent-heart" id="pulse-grand-likes">307</div>
+              <div class="pulse-big-lbl" id="i18n-pulse-tot-likes">Total Likes ❤️</div>
+            </div>
+          </div>
+          <!-- Stacked Platform Share Bar -->
+          <div class="pulse-share-bar" id="pulse-share-bar" title="Platform share of total views">
+            <div class="share-seg ig" id="share-seg-ig" style="width:71%"></div>
+            <div class="share-seg tt" id="share-seg-tt" style="width:10%"></div>
+            <div class="share-seg site" id="share-seg-site" style="width:10%"></div>
+            <div class="share-seg yt" id="share-seg-yt" style="width:5%"></div>
+            <div class="share-seg fb" id="share-seg-fb" style="width:4%"></div>
+          </div>
+          <div class="pulse-share-legend" id="pulse-share-legend">
+            <span><i class="dot ig"></i>IG: <b id="legend-ig-val">4,087</b></span>
+            <span><i class="dot tt"></i>TikTok @bezizian0: <b id="legend-tt-val">583</b></span>
+            <span><i class="dot yt"></i>YouTube: <b id="legend-yt-val">270</b></span>
+            <span><i class="dot fb"></i>FB/TH: <b id="legend-fb-val">266</b></span>
+            <span><i class="dot site"></i>Website: <b id="legend-site-val">559</b></span>
+          </div>
+        </div>
+
+        <!-- Hero Card 2: Website Traffic Only (Bezizian Overworld Direct) -->
+        <div class="pulse-hero-card website-card">
+          <div class="pulse-card-eyebrow">
+            <span>🌐 WEBSITE TRAFFIC ONLY (OVERWORLD DIRECT)</span>
+            <span class="pulse-clean-tag">EXTERNAL AUDIENCE</span>
+          </div>
+          <div class="pulse-big-numbers">
+            <div class="pulse-big-stat">
+              <div class="pulse-big-val accent-emerald" id="pulse-site-views">559</div>
+              <div class="pulse-big-lbl" id="i18n-pulse-site-plays">Site Plays &amp; Watches</div>
+            </div>
+            <div class="pulse-big-divider"></div>
+            <div class="pulse-big-stat">
+              <div class="pulse-big-val" id="pulse-site-visitors">142</div>
+              <div class="pulse-big-lbl" id="i18n-pulse-site-visitors">Unique Visitors 👥</div>
+            </div>
+          </div>
+          <div class="website-sub-metrics">
+            <div class="web-mini-pill">
+              <span>🎧 Song Plays</span>
+              <b id="pulse-site-song-plays">354</b>
+            </div>
+            <div class="web-mini-pill">
+              <span>🎬 Clip Watches</span>
+              <b id="pulse-site-clip-watches">205</b>
+            </div>
+            <div class="web-mini-pill">
+              <span>❤️ Site Likes</span>
+              <b id="pulse-site-likes">100</b>
+            </div>
+            <div class="web-mini-pill">
+              <span>📸 Polaroids</span>
+              <b id="pulse-site-polaroids">47</b>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Social Platform Breakdown Cards -->
+      <div class="pulse-platforms-row">
+        <a class="pulse-plat-card ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener">
+          <div class="plat-card-top">
+            <span class="plat-card-name">📸 Instagram</span>
+            <span class="plat-card-handle">@bezizian ↗</span>
+          </div>
+          <div class="plat-card-val" id="card-ig-views">4,087</div>
+          <div class="plat-card-meta"><span id="card-ig-likes">❤️ 179 likes</span> · <span>8 Reels</span></div>
+        </a>
+
+        <a class="pulse-plat-card tt" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener">
+          <div class="plat-card-top">
+            <span class="plat-card-name">🎵 TikTok</span>
+            <span class="plat-card-handle">@bezizian0 · LIVE ↗</span>
+          </div>
+          <div class="plat-card-val" id="card-tt-views">583</div>
+          <div class="plat-card-meta"><span id="card-tt-likes">❤️ 4 likes · 4 shares</span> · <span>9 Videos</span></div>
+        </a>
+
+        <a class="pulse-plat-card yt" href="https://www.youtube.com/@bezizian" target="_blank" rel="noopener">
+          <div class="plat-card-top">
+            <span class="plat-card-name">▶️ YouTube</span>
+            <span class="plat-card-handle">@bezizian · LIVE ↗</span>
+          </div>
+          <div class="plat-card-val" id="card-yt-views">270</div>
+          <div class="plat-card-meta"><span id="card-yt-likes">❤️ 4 likes</span> · <span>15 Videos</span></div>
+        </a>
+
+        <a class="pulse-plat-card fb" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener">
+          <div class="plat-card-top">
+            <span class="plat-card-name">📘 FB &amp; Threads</span>
+            <span class="plat-card-handle">@bezizian ↗</span>
+          </div>
+          <div class="plat-card-val" id="card-fb-views">266</div>
+          <div class="plat-card-meta"><span id="card-fb-likes">❤️ 20 likes</span> · <span>9 Posts</span></div>
+        </a>
+      </div>
+
+      <!-- Song Popularity Leaderboard Header + Filter Tabs -->
+      <div class="pulse-leaderboard-header">
+        <div>
+          <div class="section-micro-title">REAL-TIME WORK RANKING · CLICK ANY SONG TO PLAY OR LIKE</div>
+          <h3 class="pulse-leaderboard-title" id="i18n-pulse-lb-title">🏆 Most Popular Songs &amp; Clips (Ranked Live)</h3>
+        </div>
+        <div class="pulse-sort-tabs" id="pulse-sort-tabs" role="tablist">
+          <button class="pulse-sort-btn is-active" data-sort="all" type="button">🌍 All Platforms</button>
+          <button class="pulse-sort-btn" data-sort="website" type="button">🌐 Website Only</button>
+          <button class="pulse-sort-btn" data-sort="tiktok" type="button">🎵 TikTok @bezizian0</button>
+          <button class="pulse-sort-btn" data-sort="instagram" type="button">📸 Instagram</button>
+          <button class="pulse-sort-btn" data-sort="youtube" type="button">▶️ YouTube</button>
+          <button class="pulse-sort-btn" data-sort="likes" type="button">❤️ Most Liked</button>
+        </div>
+      </div>
+
+      <!-- Song Leaderboard Rows Container -->
+      <div class="pulse-leaderboard-list" id="pulse-leaderboard-list"></div>
+    </div>
+  </div>
+
+  <!-- Live Telemetry Increment Toast (Flashes when +1 View or +1 Like arrives) -->
+  <div class="pulse-live-toast" id="pulse-live-toast" aria-live="polite"></div>
+
   <!-- Scripts -->
   <script src="tracks-data.js?v=10"></script>
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

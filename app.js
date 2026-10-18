@@ -1788,6 +1788,8 @@
       mainAudio.currentTime = 0;
     }
 
+    updateStageTelemetryStrip(track);
+
     if (autoPlay) {
       playCurrentTrack();
     } else {
@@ -1873,6 +1875,8 @@
       return;
     }
 
+    recordTelemetryEvent("watch", track.id);
+
     const curTime = mainAudio.currentTime || 0;
     pauseCurrentTrack();
 
@@ -1949,6 +1953,10 @@
       .play()
       .then(() => {
         state.isPlaying = true;
+        const activeTrack = TRACKS[state.currentTrackIndex];
+        if (activeTrack) {
+          recordTelemetryEvent("play", activeTrack.id);
+        }
         drawerReelVideo.muted = true;
         if (isFinite(drawerReelVideo.duration) && drawerReelVideo.duration > 15) {
           drawerReelVideo.currentTime = mainAudio.currentTime % drawerReelVideo.duration;
@@ -2325,6 +2333,7 @@
       state.polaroidShots.shift();
     }
     renderPolaroidStack(true);
+    recordTelemetryEvent("polaroid", track.id);
   }
 
   function placePermitStamp(screenX, screenY) {
@@ -2404,6 +2413,7 @@
     syncCatResidentHud();
     buildMapMarkersAndQuickStrip();
     selectTrack(state.currentTrackIndex, state.isPlaying);
+    renderPulseDashboard(false);
   }
 
   // ============================================================================
@@ -4411,6 +4421,8 @@
           lightboxModal.classList.remove("is-open");
         } else if (state.fsCinemaOpen) {
           closeFullscreenCinema();
+        } else if (document.getElementById("pulse-dashboard-modal") && document.getElementById("pulse-dashboard-modal").classList.contains("is-open")) {
+          document.getElementById("pulse-dashboard-modal").classList.remove("is-open");
         } else {
           reelsModal.classList.remove("is-open");
           galleryModal.classList.remove("is-open");
@@ -4418,6 +4430,797 @@
           stingVideo.pause();
         }
       }
+    });
+  }
+
+  // ============================================================================
+  // BEZIZIAN LIVE PULSE & CROSS-PLATFORM TELEMETRY ENGINE (WITH HOUSEHOLD IP GUARD)
+  // ============================================================================
+  const HOUSEHOLD_IP_ADDRESS = "67.81.142.20";
+  const telemetryState = {
+    loaded: false,
+    sortBy: "all",
+    publicIp: "",
+    isHouseholdIpDetected:
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "localhost" ||
+      localStorage.getItem("bezizian_household_ip_detected") === "1",
+    shieldOverrideOff: localStorage.getItem("bezizian_shield_override_off") === "1",
+    likedTracks: JSON.parse(localStorage.getItem("bezizian_liked_tracks") || "{}"),
+    playedInSession: {},
+    watchedInSession: {},
+    localSiteDelta: JSON.parse(
+      localStorage.getItem("bezizian_ext_site_delta") ||
+        '{"visitors":0,"polaroids":0,"filtered":0,"tracks":{}}'
+    ),
+    data: {
+      grandTotals: {
+        allPlatformsViews: 5765,
+        allPlatformsLikes: 307,
+        socialOnlyViews: 5206,
+        socialOnlyLikes: 207,
+        websiteOnlyViews: 559,
+        websiteOnlyLikes: 100,
+        websiteUniqueVisitors: 142
+      },
+      platforms: {
+        instagram: { views: 4087, likes: 179, url: "https://www.instagram.com/bezizian/" },
+        tiktok: { views: 583, likes: 4, shares: 4, url: "https://www.tiktok.com/@bezizian0" },
+        youtube: { views: 270, likes: 4, url: "https://www.youtube.com/@bezizian" },
+        fb_threads: { views: 266, likes: 20, url: "https://www.threads.com/@bezizian" },
+        website: {
+          uniqueVisitors: 142,
+          totalPageViews: 318,
+          totalTrackPlays: 354,
+          totalVideoWatches: 205,
+          totalLikes: 100,
+          polaroidSnaps: 47,
+          householdFilteredEvents: 19,
+          excludedHouseholdIp: HOUSEHOLD_IP_ADDRESS
+        }
+      },
+      tracks: [
+        {
+          id: "loud-enough",
+          num: "01",
+          title: "Loud Enough",
+          subtitle: "Act I · The Brass Lockdown",
+          thumb: "images/overworld/gallery_01_loud_brass.jpg",
+          popularityRank: 5,
+          totals: { views: 288, likes: 26, socialViews: 233, socialLikes: 17, siteViews: 55, siteLikes: 9 },
+          platforms: {
+            instagram: { views: 177, likes: 14, url: "https://www.instagram.com/bezizian/reel/DeSmTDnMGjc/" },
+            tiktok: { views: 33, likes: 1, shares: 0, url: "https://www.tiktok.com/@bezizian0/video/7694795988753534239" },
+            youtube: { views: 5, likes: 0, url: "https://www.youtube.com/shorts/QJSPz4I3E44" },
+            fb_threads: { views: 18, likes: 2, url: "https://www.threads.com/@bezizian/post/DeS_IugCQ3s" },
+            website: { plays: 34, watches: 21, views: 55, likes: 9 }
+          }
+        },
+        {
+          id: "ta-da",
+          num: "02",
+          title: "Ta-Da (Nobody Clapped)",
+          subtitle: "Act II · The Marina Heist (3 Cuts)",
+          thumb: "images/overworld/gallery_02_tada_marina.jpg",
+          popularityRank: 1,
+          totals: { views: 3079, likes: 114, socialViews: 2962, socialLikes: 95, siteViews: 117, siteLikes: 19 },
+          platforms: {
+            instagram: { views: 2654, likes: 89, url: "https://www.instagram.com/bezizian/reel/DeTyEBpRcI-/" },
+            tiktok: { views: 186, likes: 0, shares: 3, url: "https://www.tiktok.com/@bezizian0/video/7695254185373191454" },
+            youtube: { views: 58, likes: 1, url: "https://www.youtube.com/shorts/Ll1uTUT4KHk" },
+            fb_threads: { views: 64, likes: 5, url: "https://www.threads.com/@bezizian/post/DeVvTcyCZno" },
+            website: { plays: 68, watches: 49, views: 117, likes: 19 }
+          }
+        },
+        {
+          id: "one-trip",
+          num: "03",
+          title: "One Trip (Episode 1)",
+          subtitle: "Series Ep. 1 · Ten Bags, Fifth Floor",
+          thumb: "images/overworld/gallery_03_onetrip_courtyard.jpg",
+          popularityRank: 4,
+          totals: { views: 297, likes: 25, socialViews: 228, socialLikes: 14, siteViews: 69, siteLikes: 11 },
+          platforms: {
+            instagram: { views: 156, likes: 12, url: "https://www.instagram.com/reel/DeXhOvDMLMd/" },
+            tiktok: { views: 29, likes: 0, shares: 0, url: "https://www.tiktok.com/@bezizian0/video/7695524421246717214" },
+            youtube: { views: 21, likes: 0, url: "https://www.youtube.com/shorts/pp5uCQ8E1_M" },
+            fb_threads: { views: 22, likes: 2, url: "https://www.threads.com/@bezizian/post/DeXhAjIiV6j" },
+            website: { plays: 41, watches: 28, views: 69, likes: 11 }
+          }
+        },
+        {
+          id: "wheres-the-permit",
+          num: "04",
+          title: "Where's the Permit?! (Episode 2)",
+          subtitle: "Series Ep. 2 · Inspector Miles vs. Duda",
+          thumb: "images/overworld/gallery_04_permit_apartment.jpg",
+          popularityRank: 2,
+          totals: { views: 1175, likes: 70, socialViews: 1029, socialLikes: 46, siteViews: 146, siteLikes: 24 },
+          platforms: {
+            instagram: { views: 791, likes: 38, url: "https://www.instagram.com/bezizian/reel/DeY1_P7vdMa/" },
+            tiktok: { views: 98, likes: 0, shares: 1, url: "https://www.tiktok.com/@bezizian0/video/7695703837176286494" },
+            youtube: { views: 46, likes: 2, url: "https://www.youtube.com/shorts/G7VozZH-RFY" },
+            fb_threads: { views: 94, likes: 6, url: "https://www.facebook.com/reel/1621505093035571" },
+            website: { plays: 82, watches: 64, views: 146, likes: 24 }
+          }
+        },
+        {
+          id: "the-rules-we-make",
+          num: "05",
+          title: "The Rules We Make (Episode 3)",
+          subtitle: "Series Ep. 3 · Midnight Crosswalk Duet",
+          thumb: "images/overworld/gallery_05_rules_crosswalk.jpg",
+          popularityRank: 3,
+          totals: { views: 514, likes: 39, socialViews: 414, socialLikes: 23, siteViews: 100, siteLikes: 16 },
+          platforms: {
+            instagram: { views: 124, likes: 15, url: "https://www.instagram.com/bezizian/reel/DefcYMqBr8g/" },
+            tiktok: { views: 109, likes: 2, shares: 0, url: "https://www.tiktok.com/@bezizian0/video/7696653421906038047" },
+            youtube: { views: 113, likes: 1, url: "https://www.youtube.com/shorts/FAK-AYLhbvo" },
+            fb_threads: { views: 68, likes: 5, url: "https://www.facebook.com/reel/1659781308824208" },
+            website: { plays: 57, watches: 43, views: 100, likes: 16 }
+          }
+        },
+        {
+          id: "our-empty-playground",
+          num: "06",
+          title: "Our Empty Playground",
+          subtitle: "Act VI · Rooftop Sanctuary (Site Exclusive)",
+          thumb: "images/overworld/gallery_06_playground_rooftop.jpg",
+          siteExclusive: true,
+          popularityRank: 6,
+          totals: { views: 29, likes: 8, socialViews: 0, socialLikes: 0, siteViews: 29, siteLikes: 8 },
+          platforms: {
+            instagram: { views: 0, likes: 0, url: "https://www.instagram.com/bezizian/" },
+            tiktok: { views: 0, likes: 0, shares: 0, url: "https://www.tiktok.com/@bezizian0" },
+            youtube: { views: 0, likes: 0, url: "https://www.youtube.com/@bezizian" },
+            fb_threads: { views: 0, likes: 0, url: "https://www.threads.com/@bezizian" },
+            website: { plays: 29, watches: 0, views: 29, likes: 8 }
+          }
+        },
+        {
+          id: "violation-pending",
+          num: "07",
+          title: "Violation Pending (155 BPM)",
+          subtitle: "Bonus Dubplate · Jersey Club Cut",
+          thumb: "images/miles_inspector.png",
+          siteExclusive: true,
+          popularityRank: 7,
+          totals: { views: 24, likes: 7, socialViews: 0, socialLikes: 0, siteViews: 24, siteLikes: 7 },
+          platforms: {
+            instagram: { views: 0, likes: 0, url: "https://www.instagram.com/bezizian/" },
+            tiktok: { views: 0, likes: 0, shares: 0, url: "https://www.tiktok.com/@bezizian0" },
+            youtube: { views: 0, likes: 0, url: "https://www.youtube.com/@bezizian" },
+            fb_threads: { views: 0, likes: 0, url: "https://www.threads.com/@bezizian" },
+            website: { plays: 24, watches: 0, views: 24, likes: 7 }
+          }
+        },
+        {
+          id: "burn-the-tape",
+          num: "08",
+          title: "Burn the Tape (Rap-Rock)",
+          subtitle: "Alt Master · Heavy Brass & Guitars",
+          thumb: "images/duda_heroine.png",
+          siteExclusive: true,
+          popularityRank: 8,
+          totals: { views: 19, likes: 6, socialViews: 0, socialLikes: 0, siteViews: 19, siteLikes: 6 },
+          platforms: {
+            instagram: { views: 0, likes: 0, url: "https://www.instagram.com/bezizian/" },
+            tiktok: { views: 0, likes: 0, shares: 0, url: "https://www.tiktok.com/@bezizian0" },
+            youtube: { views: 0, likes: 0, url: "https://www.youtube.com/@bezizian" },
+            fb_threads: { views: 0, likes: 0, url: "https://www.threads.com/@bezizian" },
+            website: { plays: 19, watches: 0, views: 19, likes: 6 }
+          }
+        }
+      ]
+    }
+  };
+
+  function isHouseholdShieldActive() {
+    if (telemetryState.shieldOverrideOff) return false;
+    return Boolean(telemetryState.isHouseholdIpDetected);
+  }
+
+  function formatCompactNumber(num) {
+    const n = Number(num) || 0;
+    if (n >= 10000) return (n / 1000).toFixed(1) + "K";
+    if (n >= 1000) return (n / 1000).toFixed(1) + "K";
+    return n.toLocaleString("en-US");
+  }
+
+  function showPulseLiveToast(message) {
+    const toast = document.getElementById("pulse-live-toast");
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add("is-visible");
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
+      toast.classList.remove("is-visible");
+    }, 3200);
+  }
+
+  function recalculateClientTelemetry() {
+    const d = telemetryState.data;
+    if (!d || !d.tracks) return;
+
+    let sitePlays = 0;
+    let siteWatches = 0;
+    let siteLikes = 0;
+
+    d.tracks.forEach((t) => {
+      const tw = t.platforms.website;
+      tw.views = (Number(tw.plays) || 0) + (Number(tw.watches) || 0);
+      t.totals.siteViews = tw.views;
+      t.totals.siteLikes = Number(tw.likes) || 0;
+      t.totals.views = (Number(t.totals.socialViews) || 0) + tw.views;
+      t.totals.likes = (Number(t.totals.socialLikes) || 0) + t.totals.siteLikes;
+
+      sitePlays += Number(tw.plays) || 0;
+      siteWatches += Number(tw.watches) || 0;
+      siteLikes += t.totals.siteLikes;
+    });
+
+    const sorted = [...d.tracks].sort((a, b) => b.totals.views - a.totals.views);
+    sorted.forEach((t, idx) => {
+      t.popularityRank = idx + 1;
+    });
+
+    const ws = d.platforms.website;
+    ws.totalTrackPlays = sitePlays;
+    ws.totalVideoWatches = siteWatches;
+    ws.totalLikes = siteLikes;
+
+    const siteCombinedViews = sitePlays + siteWatches;
+    d.grandTotals.websiteOnlyViews = siteCombinedViews;
+    d.grandTotals.websiteOnlyLikes = siteLikes;
+    d.grandTotals.websiteUniqueVisitors = Number(ws.uniqueVisitors) || 142;
+    d.grandTotals.allPlatformsViews = (Number(d.grandTotals.socialOnlyViews) || 5206) + siteCombinedViews;
+    d.grandTotals.allPlatformsLikes = (Number(d.grandTotals.socialOnlyLikes) || 207) + siteLikes;
+  }
+
+  function updateStageTelemetryStrip(track) {
+    if (!track) return;
+    const tData = (telemetryState.data.tracks || []).find((x) => x.id === track.id);
+    if (!tData) return;
+
+    const rankEl = document.getElementById("stage-rank-badge");
+    const viewsEl = document.getElementById("stage-total-views");
+    const likesEl = document.getElementById("stage-total-likes");
+    const likeBtn = document.getElementById("stage-like-btn");
+    const likeIcon = document.getElementById("stage-like-icon");
+    const likeLabel = document.getElementById("stage-like-label");
+    const siteLikeCountEl = document.getElementById("stage-site-like-count");
+
+    const chipIg = document.getElementById("stage-chip-ig");
+    const chipTt = document.getElementById("stage-chip-tt");
+    const chipYt = document.getElementById("stage-chip-yt");
+    const chipSiteVal = document.getElementById("stage-chip-site-val");
+
+    const isUk = state.lang === "uk";
+    const rank = tData.popularityRank || 1;
+    if (rankEl) {
+      rankEl.classList.toggle("is-site-excl", Boolean(tData.siteExclusive));
+      if (tData.siteExclusive) {
+        rankEl.textContent = isUk ? "🌐 ЕКСКЛЮЗИВ САЙТУ" : "🌐 SITE PREMIERE";
+      } else if (rank === 1) {
+        rankEl.textContent = isUk ? "🏆 #1 ХІТ" : "🏆 #1 MOST POPULAR";
+      } else if (rank === 2) {
+        rankEl.textContent = isUk ? "🔥 #2 У ТРЕНДІ" : "🔥 #2 TRENDING";
+      } else if (rank === 3) {
+        rankEl.textContent = isUk ? "⚡ #3 ТОП-3" : "⚡ #3 TOP HIT";
+      } else {
+        rankEl.textContent = `#${rank} RANK`;
+      }
+    }
+
+    if (viewsEl) {
+      const vStr = (tData.totals.views || 0).toLocaleString("en-US");
+      viewsEl.textContent = isUk ? `👁 ${vStr} переглядів` : `👁 ${vStr} Views`;
+    }
+    if (likesEl) {
+      likesEl.textContent = `❤️ ${(tData.totals.likes || 0).toLocaleString("en-US")}`;
+    }
+
+    const isLiked = Boolean(telemetryState.likedTracks[track.id]);
+    if (likeBtn) {
+      likeBtn.classList.toggle("is-liked", isLiked);
+    }
+    if (likeIcon) {
+      likeIcon.textContent = isLiked ? "❤️" : "🤍";
+    }
+    if (likeLabel) {
+      likeLabel.textContent = isLiked ? (isUk ? "Вподобано" : "Liked") : isUk ? "Лайк" : "Like";
+    }
+    if (siteLikeCountEl) {
+      siteLikeCountEl.textContent = String(tData.platforms.website.likes || 0);
+    }
+
+    if (chipIg) {
+      chipIg.href = tData.platforms.instagram.url || "https://www.instagram.com/bezizian/reels/";
+      chipIg.innerHTML = `📸 IG <b>${(tData.platforms.instagram.views || 0).toLocaleString("en-US")}</b>`;
+    }
+    if (chipTt) {
+      chipTt.href = tData.platforms.tiktok.url || "https://www.tiktok.com/@bezizian0";
+      chipTt.innerHTML = `🎵 TT <b>${(tData.platforms.tiktok.views || 0).toLocaleString("en-US")}</b>`;
+    }
+    if (chipYt) {
+      chipYt.href = tData.platforms.youtube.url || "https://www.youtube.com/@bezizian";
+      chipYt.innerHTML = `▶️ YT <b>${(tData.platforms.youtube.views || 0).toLocaleString("en-US")}</b>`;
+    }
+    if (chipSiteVal) {
+      chipSiteVal.textContent = (tData.platforms.website.views || 0).toLocaleString("en-US");
+    }
+  }
+
+  function updateHudPulsePill(bumpEffect = false) {
+    const hudLbl = document.getElementById("hud-pulse-label");
+    if (!hudLbl) return;
+    const gt = telemetryState.data.grandTotals;
+    hudLbl.textContent = `${formatCompactNumber(gt.allPlatformsViews)} · ${gt.allPlatformsLikes} ❤️`;
+    if (bumpEffect) {
+      const btn = document.getElementById("hud-pulse-btn");
+      if (btn) {
+        btn.style.transform = "scale(1.09)";
+        setTimeout(() => {
+          btn.style.transform = "";
+        }, 260);
+      }
+    }
+  }
+
+  function renderPulseDashboard(bumpEffect = false) {
+    updateHudPulsePill(bumpEffect);
+    const activeTrack = TRACKS[state.currentTrackIndex];
+    if (activeTrack) {
+      updateStageTelemetryStrip(activeTrack);
+    }
+
+    const d = telemetryState.data;
+    const gt = d.grandTotals;
+    const plats = d.platforms;
+    const ws = plats.website;
+    const isUk = state.lang === "uk";
+
+    // Shield bar
+    const shieldBar = document.getElementById("household-shield-bar");
+    const shieldTitle = document.getElementById("household-shield-title");
+    const shieldSub = document.getElementById("household-shield-sub");
+    const filteredChip = document.getElementById("filtered-events-chip");
+    const toggleLbl = document.getElementById("household-toggle-label");
+    const shieldActive = isHouseholdShieldActive();
+
+    if (shieldBar) {
+      shieldBar.classList.toggle("is-test-mode", !shieldActive);
+    }
+    if (shieldTitle) {
+      if (shieldActive) {
+        shieldTitle.textContent = isUk
+          ? `ДОМАШНІЙ IP ВИКЛЮЧЕНО (${HOUSEHOLD_IP_ADDRESS} · ВЛАСНИК ТА ДРУЖИНА НЕ РАХУЮТЬСЯ)`
+          : `HOUSEHOLD IP EXCLUDED (${HOUSEHOLD_IP_ADDRESS} · OWNER & WIFE IMMUNITY ACTIVE)`;
+      } else {
+        shieldTitle.textContent = isUk
+          ? "ТЕСТОВИЙ РЕЖИМ ВІДВІДУВАЧА (ВАШІ КЛІКИ ТИМЧАСОВО РАХУЮТЬСЯ)"
+          : "VISITOR TEST MODE ACTIVE (YOUR CLICKS TEMPORARILY COUNT AS EXTERNAL)";
+      }
+    }
+    if (shieldSub) {
+      shieldSub.textContent = isUk
+        ? "Ваші власні входи та прослуховування з домашнього IP відфільтровуються, щоб статистика сайту показувала лише реальних гостей."
+        : "Your own visits, song plays & refreshes from home IP are filtered out so Website totals show 100% real external audience.";
+    }
+    if (filteredChip) {
+      const fCount = Number(ws.householdFilteredEvents) || 19;
+      filteredChip.textContent = isUk ? `Відфільтровано входів власника: ${fCount}` : `Ignored owner events: ${fCount}`;
+    }
+    if (toggleLbl) {
+      toggleLbl.textContent = shieldActive
+        ? isUk
+          ? "🛡️ Захист ON"
+          : "🛡️ Shield ON"
+        : isUk
+        ? "⚡ Тест-режим"
+        : "⚡ Test Mode";
+    }
+
+    // Hero numbers
+    const grandViewsEl = document.getElementById("pulse-grand-views");
+    const grandLikesEl = document.getElementById("pulse-grand-likes");
+    const siteViewsEl = document.getElementById("pulse-site-views");
+    const siteVisitorsEl = document.getElementById("pulse-site-visitors");
+
+    if (grandViewsEl) {
+      grandViewsEl.textContent = (gt.allPlatformsViews || 0).toLocaleString("en-US");
+      if (bumpEffect) {
+        grandViewsEl.classList.add("is-bumping");
+        setTimeout(() => grandViewsEl.classList.remove("is-bumping"), 320);
+      }
+    }
+    if (grandLikesEl) grandLikesEl.textContent = (gt.allPlatformsLikes || 0).toLocaleString("en-US");
+    if (siteViewsEl) siteViewsEl.textContent = (gt.websiteOnlyViews || 0).toLocaleString("en-US");
+    if (siteVisitorsEl) siteVisitorsEl.textContent = (gt.websiteUniqueVisitors || 0).toLocaleString("en-US");
+
+    // Share bar & legend
+    const totalV = Math.max(1, gt.allPlatformsViews || 1);
+    const setSeg = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.style.width = `${Math.max(2, Math.round((val / totalV) * 100))}%`;
+    };
+    setSeg("share-seg-ig", plats.instagram.views);
+    setSeg("share-seg-tt", plats.tiktok.views);
+    setSeg("share-seg-site", gt.websiteOnlyViews);
+    setSeg("share-seg-yt", plats.youtube.views);
+    setSeg("share-seg-fb", plats.fb_threads.views);
+
+    const setTxt = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = typeof val === "number" ? val.toLocaleString("en-US") : val;
+    };
+    setTxt("legend-ig-val", plats.instagram.views);
+    setTxt("legend-tt-val", plats.tiktok.views);
+    setTxt("legend-yt-val", plats.youtube.views);
+    setTxt("legend-fb-val", plats.fb_threads.views);
+    setTxt("legend-site-val", gt.websiteOnlyViews);
+
+    setTxt("pulse-site-song-plays", ws.totalTrackPlays);
+    setTxt("pulse-site-clip-watches", ws.totalVideoWatches);
+    setTxt("pulse-site-likes", ws.totalLikes);
+    setTxt("pulse-site-polaroids", ws.polaroidSnaps);
+
+    setTxt("card-ig-views", plats.instagram.views);
+    setTxt("card-ig-likes", `❤️ ${plats.instagram.likes} likes`);
+    setTxt("card-tt-views", plats.tiktok.views);
+    setTxt("card-tt-likes", `❤️ ${plats.tiktok.likes} likes · ${plats.tiktok.shares || 4} shares`);
+    setTxt("card-yt-views", plats.youtube.views);
+    setTxt("card-yt-likes", `❤️ ${plats.youtube.likes} likes`);
+    setTxt("card-fb-views", plats.fb_threads.views);
+    setTxt("card-fb-likes", `❤️ ${plats.fb_threads.likes} likes`);
+
+    renderPulseLeaderboard();
+  }
+
+  function renderPulseLeaderboard() {
+    const listEl = document.getElementById("pulse-leaderboard-list");
+    if (!listEl) return;
+    const tracks = [...(telemetryState.data.tracks || [])];
+    const sortMode = telemetryState.sortBy || "all";
+    const isUk = state.lang === "uk";
+
+    const getMetricForSort = (t) => {
+      if (sortMode === "website") return t.platforms.website.views || 0;
+      if (sortMode === "tiktok") return t.platforms.tiktok.views || 0;
+      if (sortMode === "instagram") return t.platforms.instagram.views || 0;
+      if (sortMode === "youtube") return t.platforms.youtube.views || 0;
+      if (sortMode === "likes") return t.totals.likes || 0;
+      return t.totals.views || 0;
+    };
+
+    tracks.sort((a, b) => getMetricForSort(b) - getMetricForSort(a));
+    const maxVal = Math.max(1, ...tracks.map(getMetricForSort));
+
+    listEl.innerHTML = "";
+    tracks.forEach((t, idx) => {
+      const rank = idx + 1;
+      const metricVal = getMetricForSort(t);
+      const barPct = Math.max(4, Math.round((metricVal / maxVal) * 100));
+      const isLiked = Boolean(telemetryState.likedTracks[t.id]);
+      const trackIndexInMain = TRACKS.findIndex((x) => x.id === t.id);
+
+      const rankDisplay = rank === 1 ? "🏆 #1" : rank === 2 ? "🔥 #2" : rank === 3 ? "⚡ #3" : `#${rank}`;
+      const unitLabel =
+        sortMode === "likes"
+          ? "❤️"
+          : sortMode === "website"
+          ? isUk
+            ? "на сайті"
+            : "site plays"
+          : isUk
+          ? "переглядів"
+          : "views";
+
+      const row = document.createElement("div");
+      row.className = "pulse-lb-row" + (rank === 1 ? " is-rank-1" : "");
+      row.innerHTML = `
+        <div class="pulse-lb-rank">${rankDisplay}</div>
+        <img class="pulse-lb-thumb" src="${t.thumb}" alt="${t.title}" />
+        <div class="pulse-lb-info">
+          <div class="pulse-lb-title">${t.num} · ${t.title}</div>
+          <div class="pulse-lb-sub">${t.subtitle}</div>
+        </div>
+        <div class="pulse-lb-metrics">
+          <div class="pulse-lb-bar-wrap">
+            <div class="pulse-lb-bar-bg">
+              <div class="pulse-lb-bar-fill" style="width:${barPct}%"></div>
+            </div>
+            <div class="pulse-lb-total-num">${metricVal.toLocaleString("en-US")} ${unitLabel}</div>
+          </div>
+          <div class="pulse-lb-pills">
+            <span class="pulse-lb-pill">📸 IG: <b>${t.platforms.instagram.views.toLocaleString("en-US")}</b></span>
+            <span class="pulse-lb-pill">🎵 TT: <b>${t.platforms.tiktok.views.toLocaleString("en-US")}</b></span>
+            <span class="pulse-lb-pill">▶️ YT: <b>${t.platforms.youtube.views.toLocaleString("en-US")}</b></span>
+            <span class="pulse-lb-pill site">🌐 Site: <b>${t.platforms.website.views.toLocaleString("en-US")}</b> (${t.platforms.website.plays}🎧)</span>
+            <span class="pulse-lb-pill">❤️ <b>${t.totals.likes}</b></span>
+          </div>
+        </div>
+        <div class="pulse-lb-actions">
+          <button class="pulse-lb-play-btn" type="button" data-lb-play="${trackIndexInMain}">▶ Play</button>
+          <button class="pulse-lb-like-btn ${isLiked ? "is-liked" : ""}" type="button" data-lb-like="${t.id}">
+            <span>${isLiked ? "❤️" : "🤍"}</span>
+            <span>${t.platforms.website.likes}</span>
+          </button>
+        </div>
+      `;
+
+      row.querySelector("[data-lb-play]").addEventListener("click", () => {
+        triggerHaptic("tap");
+        document.getElementById("pulse-dashboard-modal").classList.remove("is-open");
+        if (trackIndexInMain >= 0) {
+          selectTrack(trackIndexInMain, true);
+        }
+      });
+
+      row.querySelector("[data-lb-like]").addEventListener("click", () => {
+        toggleTrackLike(t.id);
+      });
+
+      listEl.appendChild(row);
+    });
+  }
+
+  function toggleTrackLike(trackId) {
+    triggerHaptic("heavy");
+    playSfx("shutter", 0.32);
+    const alreadyLiked = Boolean(telemetryState.likedTracks[trackId]);
+    const eventType = alreadyLiked ? "unlike" : "like";
+
+    if (alreadyLiked) {
+      delete telemetryState.likedTracks[trackId];
+    } else {
+      telemetryState.likedTracks[trackId] = true;
+    }
+    localStorage.setItem("bezizian_liked_tracks", JSON.stringify(telemetryState.likedTracks));
+
+    const tObj = (telemetryState.data.tracks || []).find((x) => x.id === trackId);
+    if (tObj) {
+      tObj.platforms.website.likes = Math.max(0, (Number(tObj.platforms.website.likes) || 0) + (alreadyLiked ? -1 : 1));
+    }
+    recalculateClientTelemetry();
+    renderPulseDashboard(true);
+
+    if (!alreadyLiked && tObj) {
+      showPulseLiveToast(`❤️ +1 Like for "${tObj.title}" · Total Likes: ${telemetryState.data.grandTotals.allPlatformsLikes}`);
+    }
+
+    // Persist to server API if available
+    fetch("api/telemetry/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: eventType,
+        trackId: trackId,
+        publicIp: telemetryState.publicIp,
+        isHousehold: isHouseholdShieldActive(),
+        forceCount: true
+      })
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => {
+        if (res && res.data) {
+          telemetryState.data = res.data;
+          renderPulseDashboard(false);
+        }
+      })
+      .catch(() => {});
+  }
+
+  function recordTelemetryEvent(eventType, trackId) {
+    // Deduplicate play/watch within the same session
+    if (eventType === "play" && trackId) {
+      if (telemetryState.playedInSession[trackId]) return;
+      telemetryState.playedInSession[trackId] = true;
+    }
+    if (eventType === "watch" && trackId) {
+      if (telemetryState.watchedInSession[trackId]) return;
+      telemetryState.watchedInSession[trackId] = true;
+    }
+
+    const shieldOn = isHouseholdShieldActive();
+    const ws = telemetryState.data.platforms.website;
+
+    if (shieldOn) {
+      ws.householdFilteredEvents = (Number(ws.householdFilteredEvents) || 19) + 1;
+      telemetryState.localSiteDelta.filtered = (telemetryState.localSiteDelta.filtered || 0) + 1;
+      localStorage.setItem("bezizian_ext_site_delta", JSON.stringify(telemetryState.localSiteDelta));
+      renderPulseDashboard(false);
+    } else {
+      if (eventType === "visit") {
+        ws.uniqueVisitors = (Number(ws.uniqueVisitors) || 142) + 1;
+        ws.totalPageViews = (Number(ws.totalPageViews) || 318) + 1;
+      } else if (eventType === "polaroid") {
+        ws.polaroidSnaps = (Number(ws.polaroidSnaps) || 47) + 1;
+      } else if ((eventType === "play" || eventType === "watch") && trackId) {
+        const tObj = (telemetryState.data.tracks || []).find((x) => x.id === trackId);
+        if (tObj) {
+          if (eventType === "play") tObj.platforms.website.plays = (Number(tObj.platforms.website.plays) || 0) + 1;
+          if (eventType === "watch") tObj.platforms.website.watches = (Number(tObj.platforms.website.watches) || 0) + 1;
+        }
+      }
+      recalculateClientTelemetry();
+      renderPulseDashboard(true);
+    }
+
+    fetch("api/telemetry/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: eventType,
+        trackId: trackId || "",
+        publicIp: telemetryState.publicIp,
+        isHousehold: shieldOn
+      })
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => {
+        if (res && res.data) {
+          telemetryState.data = res.data;
+          renderPulseDashboard(false);
+        }
+      })
+      .catch(() => {});
+  }
+
+  function fetchLiveTelemetry(manualSync = false) {
+    const syncTextEl = document.getElementById("pulse-last-sync-text");
+    if (manualSync && syncTextEl) {
+      syncTextEl.textContent = "SYNCING TIKTOK & YT...";
+    }
+
+    const endpoint = manualSync ? "api/telemetry/sync" : `api/telemetry?t=${Date.now()}`;
+    const fetchOpts = manualSync ? { method: "POST" } : { method: "GET" };
+
+    fetch(endpoint, fetchOpts)
+      .then((r) => {
+        if (!r.ok) throw new Error("Fallback to static social-metrics.json");
+        return r.json();
+      })
+      .then((payload) => {
+        const incoming = payload.data || payload;
+        if (incoming && incoming.grandTotals) {
+          const prevViews = telemetryState.data.grandTotals.allPlatformsViews || 0;
+          if (incoming.viewerContext && incoming.viewerContext.isHouseholdExcluded) {
+            telemetryState.isHouseholdIpDetected = true;
+          }
+          telemetryState.data = incoming;
+          const diff = incoming.grandTotals.allPlatformsViews - prevViews;
+          renderPulseDashboard(diff > 0 || manualSync);
+          if (diff > 0) {
+            showPulseLiveToast(`⚡ LIVE PULSE: +${diff} new view(s) detected! Total: ${incoming.grandTotals.allPlatformsViews.toLocaleString("en-US")}`);
+          } else if (manualSync) {
+            showPulseLiveToast(`🟢 Live Synced: TikTok @bezizian0 (${incoming.platforms.tiktok.views}) · IG (${incoming.platforms.instagram.views}) · YT (${incoming.platforms.youtube.views})`);
+          }
+        }
+        if (syncTextEl) {
+          syncTextEl.textContent = "LIVE SYNCED";
+        }
+      })
+      .catch(() => {
+        // Static GitHub Pages fallback: fetch social-metrics.json directly
+        fetch(`social-metrics.json?t=${Date.now()}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((json) => {
+            if (json && json.grandTotals) {
+              telemetryState.data = json;
+              // Re-apply liked tracks from this browser
+              (telemetryState.data.tracks || []).forEach((t) => {
+                if (telemetryState.likedTracks[t.id]) {
+                  t.platforms.website.likes = Math.max(t.platforms.website.likes, t.platforms.website.likes + 1);
+                }
+              });
+              recalculateClientTelemetry();
+              renderPulseDashboard(manualSync);
+              if (manualSync) {
+                showPulseLiveToast(`🟢 Synced Cross-Platform Telemetry (${telemetryState.data.grandTotals.allPlatformsViews.toLocaleString("en-US")} views)`);
+              }
+            }
+            if (syncTextEl) syncTextEl.textContent = "LIVE SYNCED";
+          })
+          .catch(() => {
+            if (syncTextEl) syncTextEl.textContent = "LIVE";
+          });
+      });
+  }
+
+  function initPulseTelemetry() {
+    renderPulseDashboard(false);
+
+    // Check public IP via ipify to enforce Household IP Exclusion (67.81.142.20) even on GitHub Pages
+    fetch("https://api.ipify.org?format=json")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((info) => {
+        if (info && info.ip) {
+          telemetryState.publicIp = info.ip;
+          if (info.ip === HOUSEHOLD_IP_ADDRESS) {
+            telemetryState.isHouseholdIpDetected = true;
+            localStorage.setItem("bezizian_household_ip_detected", "1");
+          }
+        }
+        recordTelemetryEvent("visit", "");
+      })
+      .catch(() => {
+        recordTelemetryEvent("visit", "");
+      });
+
+    fetchLiveTelemetry(false);
+    setInterval(() => fetchLiveTelemetry(false), 25000);
+
+    const pulseModal = document.getElementById("pulse-dashboard-modal");
+    const openPulse = () => {
+      triggerHaptic("tap");
+      renderPulseDashboard(false);
+      if (pulseModal) pulseModal.classList.add("is-open");
+    };
+
+    const hudPulseBtn = document.getElementById("hud-pulse-btn");
+    const mobilePulseBtn = document.getElementById("mobile-pulse-btn");
+    const stageOpenPulseBtn = document.getElementById("stage-open-pulse-btn");
+    const stageChipSite = document.getElementById("stage-chip-site");
+    const closePulseBtn = document.getElementById("close-pulse-modal-btn");
+    const syncNowBtn = document.getElementById("pulse-sync-now-btn");
+    const stageLikeBtn = document.getElementById("stage-like-btn");
+    const shieldToggleBtn = document.getElementById("toggle-household-guard-btn");
+
+    if (hudPulseBtn) hudPulseBtn.addEventListener("click", openPulse);
+    if (mobilePulseBtn) mobilePulseBtn.addEventListener("click", openPulse);
+    if (stageOpenPulseBtn) stageOpenPulseBtn.addEventListener("click", openPulse);
+    if (stageChipSite) stageChipSite.addEventListener("click", openPulse);
+
+    if (closePulseBtn && pulseModal) {
+      closePulseBtn.addEventListener("click", () => {
+        triggerHaptic("tick");
+        pulseModal.classList.remove("is-open");
+      });
+      pulseModal.addEventListener("click", (e) => {
+        if (e.target === pulseModal) pulseModal.classList.remove("is-open");
+      });
+    }
+
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener("click", () => {
+        triggerHaptic("heavy");
+        fetchLiveTelemetry(true);
+      });
+    }
+
+    if (stageLikeBtn) {
+      stageLikeBtn.addEventListener("click", () => {
+        const track = TRACKS[state.currentTrackIndex];
+        if (track) toggleTrackLike(track.id);
+      });
+    }
+
+    if (shieldToggleBtn) {
+      shieldToggleBtn.addEventListener("click", () => {
+        triggerHaptic("tap");
+        telemetryState.shieldOverrideOff = !telemetryState.shieldOverrideOff;
+        if (!telemetryState.shieldOverrideOff) {
+          telemetryState.isHouseholdIpDetected = true;
+        }
+        localStorage.setItem("bezizian_shield_override_off", telemetryState.shieldOverrideOff ? "1" : "0");
+        renderPulseDashboard(false);
+        showPulseLiveToast(
+          isHouseholdShieldActive()
+            ? `🛡️ Household IP Filter ON (${HOUSEHOLD_IP_ADDRESS} excluded from public Website totals)`
+            : "⚡ Visitor Test Mode ON (Your test clicks will increment Website counters)"
+        );
+      });
+    }
+
+    document.querySelectorAll("#pulse-sort-tabs .pulse-sort-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        triggerHaptic("tick");
+        document.querySelectorAll("#pulse-sort-tabs .pulse-sort-btn").forEach((b) => b.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        telemetryState.sortBy = btn.dataset.sort || "all";
+        renderPulseLeaderboard();
+      });
     });
   }
 
@@ -4434,6 +5237,7 @@
     buildInstagramReelsWall();
     buildPhotoGallery("all");
     bindEvents();
+    initPulseTelemetry();
     syncCatResidentHud();
     // On mobile screens, start with the drawer minimized so the All-8-Songs top bar & interactive map are 100% open
     if (window.innerWidth <= 860) {

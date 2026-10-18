@@ -1,0 +1,490 @@
+{
+  "updatedAt": "2026-10-18T14:55:18.512357+00:00",
+  "updatedUnix": 1792335318,
+  "householdGuard": {
+    "excludedIp": "67.81.142.20",
+    "policy": "Owner & Household visits/plays from 67.81.142.20 are strictly excluded from public Website counters."
+  },
+  "grandTotals": {
+    "allPlatformsViews": 5765,
+    "allPlatformsLikes": 307,
+    "socialOnlyViews": 5206,
+    "socialOnlyLikes": 207,
+    "websiteOnlyViews": 559,
+    "websiteOnlyLikes": 100,
+    "websiteUniqueVisitors": 142
+  },
+  "platforms": {
+    "instagram": {
+      "name": "Instagram Reels",
+      "handle": "@bezizian",
+      "url": "https://www.instagram.com/bezizian/",
+      "views": 4087,
+      "likes": 179,
+      "reelsCount": 8
+    },
+    "tiktok": {
+      "name": "TikTok",
+      "handle": "@bezizian0",
+      "url": "https://www.tiktok.com/@bezizian0",
+      "views": 583,
+      "likes": 4,
+      "shares": 4,
+      "videosCount": 9,
+      "liveScraped": true
+    },
+    "youtube": {
+      "name": "YouTube",
+      "handle": "@bezizian",
+      "url": "https://www.youtube.com/@bezizian",
+      "views": 270,
+      "likes": 4,
+      "videosCount": 15,
+      "liveScraped": true
+    },
+    "fb_threads": {
+      "name": "Facebook & Threads",
+      "handle": "@bezizian",
+      "url": "https://www.threads.com/@bezizian",
+      "views": 266,
+      "likes": 20,
+      "postsCount": 9
+    },
+    "website": {
+      "uniqueVisitors": 142,
+      "totalPageViews": 318,
+      "totalTrackPlays": 354,
+      "totalVideoWatches": 205,
+      "totalLikes": 100,
+      "polaroidSnaps": 47,
+      "householdFilteredEvents": 19,
+      "excludedHouseholdIp": "67.81.142.20"
+    }
+  },
+  "tracks": [
+    {
+      "id": "loud-enough",
+      "num": "01",
+      "title": "Loud Enough",
+      "subtitle": "Act I · The Brass Lockdown",
+      "releaseDate": "2026-10-09",
+      "thumb": "images/overworld/gallery_01_loud_brass.jpg",
+      "siteExclusive": false,
+      "totals": {
+        "views": 288,
+        "likes": 26,
+        "socialViews": 233,
+        "socialLikes": 17,
+        "siteViews": 55,
+        "siteLikes": 9
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 177,
+          "likes": 14,
+          "url": "https://www.instagram.com/bezizian/reel/DeSmTDnMGjc/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 33,
+          "likes": 1,
+          "shares": 0,
+          "videoCount": 1,
+          "url": "https://www.tiktok.com/@bezizian0/video/7694795988753534239"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 5,
+          "likes": 0,
+          "videoCount": 2,
+          "url": "https://www.youtube.com/shorts/QJSPz4I3E44"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 18,
+          "likes": 2,
+          "url": "https://www.threads.com/@bezizian/post/DeS_IugCQ3s"
+        },
+        "website": {
+          "plays": 34,
+          "watches": 21,
+          "views": 55,
+          "likes": 9
+        }
+      },
+      "popularityRank": 5
+    },
+    {
+      "id": "ta-da",
+      "num": "02",
+      "title": "Ta-Da (Nobody Clapped)",
+      "subtitle": "Act II · The Marina Heist (3 Cuts)",
+      "releaseDate": "2026-10-10",
+      "thumb": "images/overworld/gallery_02_tada_marina.jpg",
+      "siteExclusive": false,
+      "totals": {
+        "views": 3079,
+        "likes": 114,
+        "socialViews": 2962,
+        "socialLikes": 95,
+        "siteViews": 117,
+        "siteLikes": 19
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 2654,
+          "likes": 89,
+          "url": "https://www.instagram.com/bezizian/reel/DeTyEBpRcI-/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 186,
+          "likes": 0,
+          "shares": 3,
+          "videoCount": 3,
+          "url": "https://www.tiktok.com/@bezizian0/video/7695254185373191454"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 58,
+          "likes": 1,
+          "videoCount": 6,
+          "url": "https://www.youtube.com/shorts/Ll1uTUT4KHk"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 64,
+          "likes": 5,
+          "url": "https://www.threads.com/@bezizian/post/DeVvTcyCZno"
+        },
+        "website": {
+          "plays": 68,
+          "watches": 49,
+          "views": 117,
+          "likes": 19
+        }
+      },
+      "popularityRank": 1
+    },
+    {
+      "id": "one-trip",
+      "num": "03",
+      "title": "One Trip (Episode 1)",
+      "subtitle": "Series Ep. 1 · Ten Bags, Fifth Floor",
+      "releaseDate": "2026-10-11",
+      "thumb": "images/overworld/gallery_03_onetrip_courtyard.jpg",
+      "siteExclusive": false,
+      "totals": {
+        "views": 297,
+        "likes": 25,
+        "socialViews": 228,
+        "socialLikes": 14,
+        "siteViews": 69,
+        "siteLikes": 11
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 156,
+          "likes": 12,
+          "url": "https://www.instagram.com/reel/DeXhOvDMLMd/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 29,
+          "likes": 0,
+          "shares": 0,
+          "videoCount": 1,
+          "url": "https://www.tiktok.com/@bezizian0/video/7695524421246717214"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 21,
+          "likes": 0,
+          "videoCount": 2,
+          "url": "https://www.youtube.com/shorts/pp5uCQ8E1_M"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 22,
+          "likes": 2,
+          "url": "https://www.threads.com/@bezizian/post/DeXhAjIiV6j"
+        },
+        "website": {
+          "plays": 41,
+          "watches": 28,
+          "views": 69,
+          "likes": 11
+        }
+      },
+      "popularityRank": 4
+    },
+    {
+      "id": "wheres-the-permit",
+      "num": "04",
+      "title": "Where's the Permit?! (Episode 2)",
+      "subtitle": "Series Ep. 2 · Inspector Miles vs. Duda",
+      "releaseDate": "2026-10-12",
+      "thumb": "images/overworld/gallery_04_permit_apartment.jpg",
+      "siteExclusive": false,
+      "totals": {
+        "views": 1175,
+        "likes": 70,
+        "socialViews": 1029,
+        "socialLikes": 46,
+        "siteViews": 146,
+        "siteLikes": 24
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 791,
+          "likes": 38,
+          "url": "https://www.instagram.com/bezizian/reel/DeY1_P7vdMa/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 98,
+          "likes": 0,
+          "shares": 1,
+          "videoCount": 1,
+          "url": "https://www.tiktok.com/@bezizian0/video/7695703837176286494"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 46,
+          "likes": 2,
+          "videoCount": 2,
+          "url": "https://www.youtube.com/shorts/G7VozZH-RFY"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 94,
+          "likes": 6,
+          "url": "https://www.facebook.com/reel/1621505093035571"
+        },
+        "website": {
+          "plays": 82,
+          "watches": 64,
+          "views": 146,
+          "likes": 24
+        }
+      },
+      "popularityRank": 2
+    },
+    {
+      "id": "the-rules-we-make",
+      "num": "05",
+      "title": "The Rules We Make (Episode 3)",
+      "subtitle": "Series Ep. 3 · Midnight Crosswalk Duet",
+      "releaseDate": "2026-10-14",
+      "thumb": "images/overworld/gallery_05_rules_crosswalk.jpg",
+      "siteExclusive": false,
+      "totals": {
+        "views": 514,
+        "likes": 39,
+        "socialViews": 414,
+        "socialLikes": 23,
+        "siteViews": 100,
+        "siteLikes": 16
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 124,
+          "likes": 15,
+          "url": "https://www.instagram.com/bezizian/reel/DefcYMqBr8g/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 109,
+          "likes": 2,
+          "shares": 0,
+          "videoCount": 1,
+          "url": "https://www.tiktok.com/@bezizian0/video/7696653421906038047"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 113,
+          "likes": 1,
+          "videoCount": 2,
+          "url": "https://www.youtube.com/shorts/FAK-AYLhbvo"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 68,
+          "likes": 5,
+          "url": "https://www.facebook.com/reel/1659781308824208"
+        },
+        "website": {
+          "plays": 57,
+          "watches": 43,
+          "views": 100,
+          "likes": 16
+        }
+      },
+      "popularityRank": 3
+    },
+    {
+      "id": "our-empty-playground",
+      "num": "06",
+      "title": "Our Empty Playground",
+      "subtitle": "Act VI · Rooftop Sanctuary (Site Exclusive)",
+      "releaseDate": "2026-10-15",
+      "thumb": "images/overworld/gallery_06_playground_rooftop.jpg",
+      "siteExclusive": true,
+      "totals": {
+        "views": 29,
+        "likes": 8,
+        "socialViews": 0,
+        "socialLikes": 0,
+        "siteViews": 29,
+        "siteLikes": 8
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "url": "https://www.instagram.com/bezizian/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 0,
+          "likes": 0,
+          "shares": 0,
+          "videoCount": 0,
+          "url": "https://www.tiktok.com/@bezizian0"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "videoCount": 0,
+          "url": "https://www.youtube.com/@bezizian"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "url": "https://www.threads.com/@bezizian"
+        },
+        "website": {
+          "plays": 29,
+          "watches": 0,
+          "views": 29,
+          "likes": 8
+        }
+      },
+      "popularityRank": 6
+    },
+    {
+      "id": "violation-pending",
+      "num": "07",
+      "title": "Violation Pending (155 BPM)",
+      "subtitle": "Bonus Dubplate · Jersey Club Cut",
+      "releaseDate": "2026-10-12",
+      "thumb": "images/miles_inspector.png",
+      "siteExclusive": true,
+      "totals": {
+        "views": 24,
+        "likes": 7,
+        "socialViews": 0,
+        "socialLikes": 0,
+        "siteViews": 24,
+        "siteLikes": 7
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "url": "https://www.instagram.com/bezizian/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 0,
+          "likes": 0,
+          "shares": 0,
+          "videoCount": 0,
+          "url": "https://www.tiktok.com/@bezizian0"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "videoCount": 0,
+          "url": "https://www.youtube.com/@bezizian"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "url": "https://www.threads.com/@bezizian"
+        },
+        "website": {
+          "plays": 24,
+          "watches": 0,
+          "views": 24,
+          "likes": 7
+        }
+      },
+      "popularityRank": 7
+    },
+    {
+      "id": "burn-the-tape",
+      "num": "08",
+      "title": "Burn the Tape (Rap-Rock)",
+      "subtitle": "Alt Master · Heavy Brass & Guitars",
+      "releaseDate": "2026-10-12",
+      "thumb": "images/duda_heroine.png",
+      "siteExclusive": true,
+      "totals": {
+        "views": 19,
+        "likes": 6,
+        "socialViews": 0,
+        "socialLikes": 0,
+        "siteViews": 19,
+        "siteLikes": 6
+      },
+      "platforms": {
+        "instagram": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "url": "https://www.instagram.com/bezizian/"
+        },
+        "tiktok": {
+          "handle": "@bezizian0",
+          "views": 0,
+          "likes": 0,
+          "shares": 0,
+          "videoCount": 0,
+          "url": "https://www.tiktok.com/@bezizian0"
+        },
+        "youtube": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "videoCount": 0,
+          "url": "https://www.youtube.com/@bezizian"
+        },
+        "fb_threads": {
+          "handle": "@bezizian",
+          "views": 0,
+          "likes": 0,
+          "url": "https://www.threads.com/@bezizian"
+        },
+        "website": {
+          "plays": 19,
+          "watches": 0,
+          "views": 19,
+          "likes": 6
+        }
+      },
+      "popularityRank": 8
+    }
+  ]
+}
