@@ -51,7 +51,8 @@
     galleryFilter: "all",
     filteredGallery: [],
     lightboxIndex: 0,
-    fsCinemaOpen: false
+    fsCinemaOpen: false,
+    polaroidShots: []
   };
 
   // Virtual World Dimensions & Camera State
@@ -1184,6 +1185,75 @@
     } catch (_) {}
   }
 
+  // Multi-Sensory Tactile Micro-Haptic Engine (Mobile Vibration + Desktop/iOS Sub-Bass & Mechanical Micro-Click)
+  let hapticCtx = null;
+  function triggerHaptic(level = "tap", targetEl = null) {
+    try {
+      if (navigator && typeof navigator.vibrate === "function") {
+        if (level === "shutter") navigator.vibrate([14, 24, 18]);
+        else if (level === "heavy") navigator.vibrate([10, 14, 6]);
+        else if (level === "tick") navigator.vibrate(4);
+        else navigator.vibrate(7);
+      }
+    } catch (_) {}
+
+    if (targetEl && targetEl.classList) {
+      targetEl.classList.add("is-haptic-pop");
+      setTimeout(() => {
+        targetEl.classList.remove("is-haptic-pop");
+      }, 75);
+    }
+
+    if (level === "shutter") {
+      document.body.classList.add("is-shutter-jolting");
+      setTimeout(() => {
+        document.body.classList.remove("is-shutter-jolting");
+      }, 170);
+    }
+
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      hapticCtx = audioCtx || hapticCtx || new AudioContextClass();
+      if (hapticCtx.state === "suspended") {
+        hapticCtx.resume().catch(() => {});
+      }
+      const now = hapticCtx.currentTime;
+
+      // 1. Sub-bass physical body thump (65Hz -> 36Hz, 12ms)
+      const subOsc = hapticCtx.createOscillator();
+      const subGain = hapticCtx.createGain();
+      subOsc.type = "sine";
+      const startFreq = level === "shutter" ? 115 : level === "heavy" ? 92 : level === "tick" ? 130 : 76;
+      const peakGain = level === "shutter" ? 0.055 : level === "heavy" ? 0.042 : level === "tick" ? 0.014 : 0.028;
+      const dur = level === "shutter" ? 0.022 : level === "tick" ? 0.008 : 0.013;
+
+      subOsc.frequency.setValueAtTime(startFreq, now);
+      subOsc.frequency.exponentialRampToValueAtTime(34, now + dur);
+      subGain.gain.setValueAtTime(peakGain, now);
+      subGain.gain.exponentialRampToValueAtTime(0.0008, now + dur);
+      subOsc.connect(subGain);
+      subGain.connect(hapticCtx.destination);
+      subOsc.start(now);
+      subOsc.stop(now + dur + 0.003);
+
+      // 2. Crisp mechanical micro-switch tick (1.7kHz -> 620Hz, 5ms)
+      if (level !== "tick") {
+        const clickOsc = hapticCtx.createOscillator();
+        const clickGain = hapticCtx.createGain();
+        clickOsc.type = "triangle";
+        clickOsc.frequency.setValueAtTime(level === "shutter" ? 2100 : 1650, now);
+        clickOsc.frequency.exponentialRampToValueAtTime(520, now + 0.006);
+        clickGain.gain.setValueAtTime(level === "shutter" ? 0.024 : 0.012, now);
+        clickGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.006);
+        clickOsc.connect(clickGain);
+        clickGain.connect(hapticCtx.destination);
+        clickOsc.start(now);
+        clickOsc.stop(now + 0.008);
+      }
+    } catch (_) {}
+  }
+
   function ensureAudioContext() {
     if (audioCtx) {
       if (audioCtx.state === "suspended") {
@@ -1407,7 +1477,7 @@
         unmappedList.appendChild(uCard);
       }
 
-      // Chronological Top Quick-Jumper Button (01 .. 08)
+      // Chronological Top Quick-Jumper Button (01 .. 08) with Mini Cover Art & Magnetic Hover Reveal
       const qBtn = document.createElement("button");
       qBtn.type = "button";
       qBtn.className =
@@ -1416,8 +1486,15 @@
         (track.unmapped ? " is-unmapped" : "");
       qBtn.dataset.index = String(idx);
       const prefix = track.unmapped ? `📡${track.num}` : track.num;
-      qBtn.innerHTML = `<span>${prefix}</span><span class="quick-title">${track.title.split(" (")[0]}</span>`;
+      const thumbSrc = track.posterImage || track.portraitImage;
+      qBtn.innerHTML = `<img class="quick-thumb" src="${thumbSrc}" alt="" loading="lazy" /><span>${prefix}</span><span class="quick-title">${track.title.split(" (")[0]}</span>`;
+      qBtn.addEventListener("pointerenter", () => {
+        if (window.innerWidth > 860 && idx !== state.currentTrackIndex) {
+          triggerHaptic("tick");
+        }
+      });
       qBtn.addEventListener("click", () => {
+        triggerHaptic("heavy", qBtn);
         const isMobile = window.innerWidth <= 860;
         const drawer = document.getElementById("stage-drawer");
         if (isMobile) {
@@ -1660,6 +1737,9 @@
     // Toggle between 9:16 Video Clip and Unmapped Audio Premiere Placeholder
     const placeholderEl = document.getElementById("unmapped-clip-placeholder");
     const unmappedBgArt = document.getElementById("unmapped-bg-art");
+    const dubplateCenterArt = document.getElementById("dubplate-center-art");
+    const unmappedLyricSinger = document.getElementById("unmapped-lyric-singer");
+    const unmappedLyricDesc = document.getElementById("i18n-unmapped-card-desc");
     const reelFsBtn = document.getElementById("reel-floating-fs-btn");
     const headerFsBtn = document.getElementById("header-fullscreen-btn");
     const cinemaFsBtn = document.getElementById("cinema-fullscreen-btn");
@@ -1671,7 +1751,11 @@
       if (headerFsBtn) headerFsBtn.style.display = "none";
       if (cinemaFsBtn) cinemaFsBtn.style.display = "none";
       if (placeholderEl) placeholderEl.style.display = "flex";
-      if (unmappedBgArt) unmappedBgArt.src = track.posterImage || track.portraitImage;
+      const artSrc = track.posterImage || track.portraitImage;
+      if (unmappedBgArt) unmappedBgArt.src = artSrc;
+      if (dubplateCenterArt) dubplateCenterArt.src = artSrc;
+      if (unmappedLyricSinger) unmappedLyricSinger.textContent = "BEZIZIAN STUDIO HOOK";
+      if (unmappedLyricDesc) unmappedLyricDesc.textContent = `"${track.hookQuote}"`;
     } else {
       drawerReelVideo.style.display = "block";
       if (reelFsBtn) reelFsBtn.style.display = "inline-flex";
@@ -1901,11 +1985,19 @@
   function updatePlayControlsUI() {
     const btn = document.getElementById("play-pause-btn");
     const statusLabel = document.getElementById("dock-status-label");
+    const turntableEl = document.getElementById("dubplate-turntable");
+    const dubplatePill = document.getElementById("dubplate-play-pill");
     const dict = I18N[state.lang] || I18N.en;
 
     if (btn) btn.textContent = state.isPlaying ? "⏸" : "▶";
     if (statusLabel) {
       statusLabel.textContent = state.isPlaying ? dict.nowPlaying : dict.paused;
+    }
+    if (turntableEl) {
+      turntableEl.classList.toggle("is-spinning", state.isPlaying);
+    }
+    if (dubplatePill) {
+      dubplatePill.textContent = state.isPlaying ? "⏸ SPINNING · TAP TO PAUSE" : "▶ TAP DUBPLATE";
     }
 
     markerDomNodes.forEach((m) => {
@@ -1969,6 +2061,10 @@
 
       if (activeLine) {
         document.getElementById("live-lyric-ticker").textContent = activeLine.text;
+        const unmappedSingerEl = document.getElementById("unmapped-lyric-singer");
+        const unmappedDescEl = document.getElementById("i18n-unmapped-card-desc");
+        if (unmappedSingerEl) unmappedSingerEl.textContent = activeLine.name;
+        if (unmappedDescEl) unmappedDescEl.textContent = `"${activeLine.text}"`;
         if (activeLine.flash && state.lastFlashedLyricIndex !== foundIdx) {
           state.lastFlashedLyricIndex = foundIdx;
           triggerPerfectFlash();
@@ -1998,6 +2094,7 @@
   // BEZIZIAN STUDIO INTERACTIVE TOYS (BARK, PERFECT FLASH, PERMIT STAMP, RAIN)
   // ============================================================================
   function triggerSeaLionBark() {
+    triggerHaptic("heavy");
     const keys = ["bark1", "bark2", "bark3"];
     const key = keys[state.barkCounter % keys.length];
     state.barkCounter++;
@@ -2016,40 +2113,222 @@
     }
   }
 
+  function captureLiveSnapshotDataUrl(track) {
+    try {
+      const snapCanvas = document.createElement("canvas");
+      snapCanvas.width = 480;
+      snapCanvas.height = 340;
+      const sctx = snapCanvas.getContext("2d");
+
+      // Prefer live 9:16 video frame if playing & loaded, otherwise capture the live Overworld City Canvas!
+      if (
+        !track.unmapped &&
+        drawerReelVideo &&
+        drawerReelVideo.readyState >= 2 &&
+        drawerReelVideo.videoWidth > 0
+      ) {
+        // Draw blurred background fill + centered crisp frame
+        sctx.drawImage(canvas, 0, 0, snapCanvas.width, snapCanvas.height);
+        sctx.fillStyle = "rgba(11, 11, 15, 0.48)";
+        sctx.fillRect(0, 0, snapCanvas.width, snapCanvas.height);
+        const vw = drawerReelVideo.videoWidth;
+        const vh = drawerReelVideo.videoHeight;
+        const scale = Math.max(snapCanvas.width / vw, snapCanvas.height / vh);
+        const dw = vw * scale;
+        const dh = vh * scale;
+        sctx.drawImage(
+          drawerReelVideo,
+          (snapCanvas.width - dw) * 0.5,
+          (snapCanvas.height - dh) * 0.35,
+          dw,
+          dh
+        );
+      } else if (canvas && canvas.width > 0) {
+        sctx.drawImage(canvas, 0, 0, snapCanvas.width, snapCanvas.height);
+      }
+      return snapCanvas.toDataURL("image/jpeg", 0.9);
+    } catch (_) {
+      return track.posterImage || track.portraitImage;
+    }
+  }
+
+  function downloadPolaroidCard(shot) {
+    triggerHaptic("heavy");
+    const dlCanvas = document.createElement("canvas");
+    dlCanvas.width = 720;
+    dlCanvas.height = 880;
+    const dctx = dlCanvas.getContext("2d");
+
+    // Warm Instant-Film Polaroid Paper Frame
+    dctx.fillStyle = "#F7F4EC";
+    dctx.fillRect(0, 0, dlCanvas.width, dlCanvas.height);
+
+    // Subtle film paper border
+    dctx.strokeStyle = "rgba(15, 16, 22, 0.14)";
+    dctx.lineWidth = 4;
+    dctx.strokeRect(10, 10, dlCanvas.width - 20, dlCanvas.height - 20);
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+      // Dark photo well
+      dctx.fillStyle = "#0B0B0F";
+      dctx.fillRect(44, 44, 632, 620);
+
+      const scale = Math.max(632 / img.width, 620 / img.height);
+      const iw = img.width * scale;
+      const ih = img.height * scale;
+      dctx.save();
+      dctx.beginPath();
+      dctx.rect(44, 44, 632, 620);
+      dctx.clip();
+      dctx.drawImage(img, 44 + (632 - iw) * 0.5, 44 + (620 - ih) * 0.5, iw, ih);
+      dctx.restore();
+
+      // PERFECT! Stamp Badge
+      dctx.save();
+      dctx.translate(580, 92);
+      dctx.rotate(-0.12);
+      dctx.fillStyle = "#FF5A1F";
+      dctx.fillRect(-78, -22, 156, 44);
+      dctx.fillStyle = "#0B0B0F";
+      dctx.font = "800 22px 'JetBrains Mono', monospace";
+      dctx.textAlign = "center";
+      dctx.textBaseline = "middle";
+      dctx.fillText("PERFECT!", 0, 1);
+      dctx.restore();
+
+      // Caption Typography
+      dctx.fillStyle = "#0B0B0F";
+      dctx.font = "800 30px 'Syne', sans-serif";
+      dctx.fillText(`${shot.num} · ${shot.title}`, 48, 724);
+
+      dctx.fillStyle = "#FF5A1F";
+      dctx.font = "700 19px 'JetBrains Mono', monospace";
+      dctx.fillText(`TIMECODE ${shot.timecode}  ·  ${shot.nycStamp}`, 48, 764);
+
+      dctx.fillStyle = "#4B5563";
+      dctx.font = "600 17px 'Plus Jakarta Sans', sans-serif";
+      const lyricShort = shot.lyric.length > 58 ? shot.lyric.slice(0, 58) + "..." : shot.lyric;
+      dctx.fillText(`"${lyricShort}"`, 48, 804);
+
+      dctx.fillStyle = "#111827";
+      dctx.font = "700 15px 'JetBrains Mono', monospace";
+      dctx.fillText("BEZIZIAN OVERWORLD · @BEZIZIAN OFFICIAL INSTANT FILM", 48, 844);
+
+      const a = document.createElement("a");
+      a.href = dlCanvas.toDataURL("image/png");
+      a.download = `bezizian_polaroid_${shot.num}_${shot.id}.png`;
+      a.click();
+    };
+    img.src = shot.src;
+  }
+
+  function openPolaroidInLightbox(shot) {
+    triggerHaptic("tap");
+    document.getElementById("lightbox-sub").textContent = `📸 INSTANT POLAROID · ${shot.timecode} · ${shot.nycStamp}`;
+    document.getElementById("lightbox-title").textContent = `${shot.num} · ${shot.title} — "${shot.lyric}"`;
+    document.getElementById("lightbox-img").src = shot.src;
+    document.getElementById("lightbox-counter").textContent = "PERFECT! SNAPSHOT";
+    document.getElementById("photo-lightbox-modal").classList.add("is-open");
+  }
+
+  function renderPolaroidStack(markNewestFresh = false) {
+    const tray = document.getElementById("polaroid-tray");
+    if (!tray) return;
+    if (!state.polaroidShots.length) {
+      tray.innerHTML = "";
+      return;
+    }
+
+    const fanAngles = [-6.5, 2.2, 7.5];
+    const stackEl = document.createElement("div");
+    stackEl.className = "polaroid-fan-stack";
+
+    state.polaroidShots.forEach((shot, i) => {
+      const isNewest = i === state.polaroidShots.length - 1;
+      const card = document.createElement("div");
+      card.className = "polaroid-card" + (isNewest && markNewestFresh ? " is-fresh" : "");
+      const angle = fanAngles[i % fanAngles.length];
+      card.style.setProperty("--card-rot", `${angle}deg`);
+      card.style.zIndex = String(i + 1);
+
+      const saveLabel = state.lang === "uk" ? "⬇ Зберегти" : "⬇ Save PNG";
+      const zoomLabel = state.lang === "uk" ? "🔍 Фото" : "🔍 View";
+
+      card.innerHTML = `
+        <button class="polaroid-close-x" type="button" title="Dismiss Polaroid" data-polaroid-close="${shot.id}">✕</button>
+        <div class="polaroid-img-wrap" title="Click to inspect snapshot in full screen">
+          <img src="${shot.src}" alt="${shot.title}" />
+          <span class="polaroid-perfect-stamp">PERFECT!</span>
+        </div>
+        <div class="polaroid-caption">
+          <span>${shot.num} · ${shot.title.slice(0, 14)}</span>
+          <span>${shot.timecode}</span>
+        </div>
+        <div class="polaroid-card-actions">
+          <button class="polaroid-mini-btn" type="button" data-polaroid-view="${shot.id}">${zoomLabel}</button>
+          <button class="polaroid-mini-btn" type="button" data-polaroid-save="${shot.id}">${saveLabel}</button>
+        </div>
+      `;
+
+      card.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const closeBtn = e.target.closest("[data-polaroid-close]");
+        const saveBtn = e.target.closest("[data-polaroid-save]");
+        if (closeBtn) {
+          triggerHaptic("tick");
+          state.polaroidShots = state.polaroidShots.filter((s) => s.id !== shot.id);
+          renderPolaroidStack(false);
+          return;
+        }
+        if (saveBtn) {
+          downloadPolaroidCard(shot);
+          return;
+        }
+        openPolaroidInLightbox(shot);
+      });
+
+      stackEl.appendChild(card);
+    });
+
+    tray.innerHTML = "";
+    tray.appendChild(stackEl);
+  }
+
   function triggerPerfectFlash() {
     playSfx("shutter", 0.72);
+    triggerHaptic("shutter");
     const flashEl = document.getElementById("screen-flash-overlay");
     flashEl.classList.add("is-flashing");
     setTimeout(() => {
       flashEl.classList.remove("is-flashing");
-    }, 90);
+    }, 95);
 
     const track = TRACKS[state.currentTrackIndex];
-    const tray = document.getElementById("polaroid-tray");
-    if (!tray || !track) return;
+    if (!track) return;
 
-    tray.innerHTML = `
-      <div class="polaroid-card" title="Click to dismiss snapshot">
-        <div class="polaroid-img-wrap">
-          <img src="${track.posterImage || track.portraitImage}" alt="${track.title}" />
-          <span class="polaroid-perfect-stamp">PERFECT!</span>
-        </div>
-        <div class="polaroid-caption">
-          <span>${track.num} · ${track.title.slice(0, 16)}</span>
-          <span>${formatTime(mainAudio.currentTime)}</span>
-        </div>
-      </div>
-    `;
+    const liveDataUrl = captureLiveSnapshotDataUrl(track);
+    const activeLyricEl = document.getElementById("live-lyric-ticker");
+    const shot = {
+      id: Date.now() + Math.floor(Math.random() * 999),
+      num: track.num,
+      title: track.title.split(" (")[0],
+      src: liveDataUrl || track.posterImage || track.portraitImage,
+      timecode: formatTime(mainAudio.currentTime || 0),
+      lyric: activeLyricEl ? activeLyricEl.textContent : track.hookQuote,
+      nycStamp: `NYC ${nycEnv.liveTimeStr}`
+    };
 
-    const card = tray.querySelector(".polaroid-card");
-    if (card) {
-      card.addEventListener("click", () => {
-        tray.innerHTML = "";
-      });
+    state.polaroidShots.push(shot);
+    if (state.polaroidShots.length > 3) {
+      state.polaroidShots.shift();
     }
+    renderPolaroidStack(true);
   }
 
   function placePermitStamp(screenX, screenY) {
+    triggerHaptic("heavy");
     playSfx("stamp", 0.65);
     const list = STAMP_TEXTS[state.lang] || STAMP_TEXTS.en;
     const text = list[state.stampCounter % list.length];
@@ -3627,6 +3906,28 @@
   function bindEvents() {
     window.addEventListener("resize", resizeCanvas);
 
+    // Global Tactile Micro-Haptic Delegation for all interactive HUD & Sampler controls
+    document.addEventListener(
+      "pointerdown",
+      (e) => {
+        const btn = e.target.closest(
+          ".hud-pill-btn, .toy-btn, .unmapped-song-card, .transport-play-btn, .transport-icon-btn, .cat-act-btn, .cinema-action-btn, .mobile-quick-btn, .social-icon-btn, .nyc-opt-pill, .drawer-tab-btn, .song-sheet-btn, .vault-collapse-btn, .toybox-collapse-btn"
+        );
+        if (btn) {
+          const isHeavy = btn.matches(".transport-play-btn, .toy-btn, .unmapped-song-card, .song-sheet-btn.primary");
+          triggerHaptic(isHeavy ? "heavy" : "tap", btn);
+        }
+      },
+      { passive: true }
+    );
+
+    const dismissHintBar = () => {
+      const hintEl = document.getElementById("spatial-nav-hint");
+      if (hintEl && !hintEl.classList.contains("is-dismissed")) {
+        hintEl.classList.add("is-dismissed");
+      }
+    };
+
     // Map Pan & Drag
     viewportEl.addEventListener("pointerdown", (e) => {
       if (e.target.closest(".stage-marker")) return;
@@ -3648,7 +3949,10 @@
       if (!camera.isDragging) return;
       const dx = e.clientX - camera.dragStartX;
       const dy = e.clientY - camera.dragStartY;
-      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) camera.pointerMoved = true;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        camera.pointerMoved = true;
+        dismissHintBar();
+      }
       camera.dragStartX = e.clientX;
       camera.dragStartY = e.clientY;
 
@@ -3683,6 +3987,7 @@
       "wheel",
       (e) => {
         e.preventDefault();
+        dismissHintBar();
         const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
         camera.targetZoom *= zoomFactor;
         clampCameraTargets();
@@ -3791,6 +4096,43 @@
       });
     }
 
+    const dubplateTurntable = document.getElementById("dubplate-turntable");
+    if (dubplateTurntable) {
+      dubplateTurntable.addEventListener("click", () => {
+        triggerHaptic("heavy", dubplateTurntable);
+        togglePlayPause();
+      });
+    }
+
+    const unmappedSnapBtn = document.getElementById("unmapped-snap-btn");
+    if (unmappedSnapBtn) {
+      unmappedSnapBtn.addEventListener("click", () => {
+        triggerPerfectFlash();
+      });
+    }
+
+    // Collapsible Top-Left Studio Vault (#unmapped-vault-dock) & Bottom-Left FX Sampler Pad (#left-toybox-dock)
+    const vaultDock = document.getElementById("unmapped-vault-dock");
+    const vaultHeader = document.getElementById("vault-header-toggle");
+    const vaultCollapseBtn = document.getElementById("vault-collapse-btn");
+    if (vaultDock && vaultHeader) {
+      vaultHeader.addEventListener("click", () => {
+        const collapsed = vaultDock.classList.toggle("is-collapsed");
+        if (vaultCollapseBtn) vaultCollapseBtn.textContent = collapsed ? "+" : "−";
+      });
+    }
+
+    const toyboxDock = document.getElementById("left-toybox-dock");
+    const toyboxHeader = document.getElementById("toybox-header-toggle");
+    const toyboxCollapseBtn = document.getElementById("toybox-collapse-btn");
+    if (toyboxDock && toyboxHeader) {
+      toyboxHeader.addEventListener("click", () => {
+        const collapsed = toyboxDock.classList.toggle("is-collapsed");
+        document.body.classList.toggle("toybox-is-collapsed", collapsed);
+        if (toyboxCollapseBtn) toyboxCollapseBtn.textContent = collapsed ? "+" : "−";
+      });
+    }
+
     // Drawer Collapse / Reopen + Mobile Clip & Lyrics Toggle
     const drawer = document.getElementById("stage-drawer");
     document.getElementById("drawer-collapse-btn").addEventListener("click", (e) => {
@@ -3831,8 +4173,12 @@
       if (el) el.addEventListener("click", openPlaylistFn);
     });
 
-    // PERFECT! Snapshot & Gallery buttons in Watch Clip tab
+    // PERFECT! Snapshot & Gallery buttons in Watch Clip tab + Mobile Dock
     document.getElementById("cinema-snap-btn").addEventListener("click", triggerPerfectFlash);
+    const mobileSnapBtn = document.getElementById("mobile-snap-btn");
+    if (mobileSnapBtn) {
+      mobileSnapBtn.addEventListener("click", triggerPerfectFlash);
+    }
     document.getElementById("cinema-gallery-btn").addEventListener("click", () => {
       document.getElementById("gallery-modal").classList.add("is-open");
     });

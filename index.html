@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <link rel="stylesheet" href="styles.css?v=16" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -75,55 +75,65 @@
     <!-- Chronological Quick-Jump District Strip (01 .. 06) -->
     <nav class="district-quick-strip" id="district-quick-strip" aria-label="Chronological Song Stages"></nav>
 
-    <!-- Right Controls Cluster -->
+    <!-- Right Controls Cluster (3 Ergonomic Tactile Capsules) -->
     <div class="top-actions-cluster">
-      <a class="hud-pill-btn highlight-orange kinetic-btn" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener" style="text-decoration:none;">
-        <span>📸</span>
-        <span class="kinetic-link">
-          <span class="i18n-nav-reels">Instagram Reels ↗</span>
-          <span class="i18n-nav-reels">Instagram Reels ↗</span>
-        </span>
-      </a>
+      <!-- Capsule 1: Studio Media Hub -->
+      <div class="hud-capsule media-capsule" role="group" aria-label="Studio Media">
+        <a class="hud-pill-btn highlight-orange kinetic-btn" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener" style="text-decoration:none;">
+          <span>📸</span>
+          <span class="kinetic-link">
+            <span class="i18n-nav-reels">IG Reels ↗</span>
+            <span class="i18n-nav-reels">IG Reels ↗</span>
+          </span>
+        </a>
 
-      <button class="hud-pill-btn kinetic-btn" id="open-reels-btn" type="button">
-        <span>🎬</span>
-        <span>All Clips</span>
-      </button>
+        <button class="hud-pill-btn kinetic-btn" id="open-reels-btn" type="button" title="All Official Clips &amp; Reels Wall">
+          <span>🎬</span>
+          <span>All Clips</span>
+        </button>
 
-      <button class="hud-pill-btn kinetic-btn" id="open-gallery-btn" type="button">
-        <span>🖼</span>
-        <span class="kinetic-link">
-          <span class="i18n-nav-gallery">Photo Gallery</span>
-          <span class="i18n-nav-gallery">Photo Gallery</span>
-        </span>
-      </button>
+        <button class="hud-pill-btn kinetic-btn" id="open-gallery-btn" type="button" title="Curated Studio Photo Gallery">
+          <span>🖼</span>
+          <span class="kinetic-link">
+            <span class="i18n-nav-gallery">Gallery</span>
+            <span class="i18n-nav-gallery">Gallery</span>
+          </span>
+        </button>
 
-      <button class="hud-pill-btn kinetic-btn" id="open-sting-btn" type="button">
-        <span class="kinetic-link">
-          <span class="i18n-nav-sting">Brand Sting v7</span>
-          <span class="i18n-nav-sting">Brand Sting v7</span>
-        </span>
-      </button>
+        <button class="hud-pill-btn kinetic-btn" id="open-sting-btn" type="button" title="Watch Direction B Studio Ident Sting v7">
+          <span>⚡</span>
+          <span class="kinetic-link">
+            <span class="i18n-nav-sting">Sting v7</span>
+            <span class="i18n-nav-sting">Sting v7</span>
+          </span>
+        </button>
+      </div>
 
-      <button class="hud-pill-btn nyc-live-pill is-synced" id="nyc-env-btn" type="button" title="Live New York Time, Weather &amp; Season (Click to customize or preview Snow/Seasons)">
-        <span class="nyc-live-dot" id="nyc-live-dot"></span>
-        <span id="nyc-env-icon">🗽</span>
-        <span id="nyc-env-label">NYC LIVE · --:--</span>
-      </button>
+      <!-- Capsule 2: Live World & Resident Simulation -->
+      <div class="hud-capsule world-capsule" role="group" aria-label="Live World Simulation">
+        <button class="hud-pill-btn nyc-live-pill is-synced" id="nyc-env-btn" type="button" title="Live New York Time, Weather &amp; Season (Click to customize or preview Snow/Seasons)">
+          <span class="nyc-live-dot" id="nyc-live-dot"></span>
+          <span id="nyc-env-icon">🗽</span>
+          <span id="nyc-env-label">NYC LIVE · --:--</span>
+        </button>
 
-      <button class="hud-pill-btn cat-hud-pill" id="hud-cat-btn" type="button" title="Find &amp; interact with the Ginger Street Cat (Hotkey: K)">
-        <span>🐱</span>
-        <span id="hud-cat-label">Cat Cam</span>
-      </button>
+        <button class="hud-pill-btn cat-hud-pill" id="hud-cat-btn" type="button" title="Find &amp; interact with the Ginger Street Cat (Hotkey: K)">
+          <span>🐱</span>
+          <span id="hud-cat-label">Cat Cam</span>
+        </button>
+      </div>
 
-      <button class="hud-pill-btn" id="ambience-toggle-btn" type="button">
-        <span class="status-dot"></span>
-        <span id="i18n-ambience-label">AMBIENCE OFF</span>
-      </button>
+      <!-- Capsule 3: Street Ambience & Language -->
+      <div class="hud-capsule sys-capsule" role="group" aria-label="Audio &amp; Language">
+        <button class="hud-pill-btn" id="ambience-toggle-btn" type="button" title="Toggle Harbor &amp; Street Ambience">
+          <span class="status-dot"></span>
+          <span id="i18n-ambience-label">AMBIENCE</span>
+        </button>
 
-      <div class="lang-switch" role="group" aria-label="Language">
-        <button class="lang-btn is-active" id="lang-en-btn" type="button">EN</button>
-        <button class="lang-btn" id="lang-uk-btn" type="button">UK</button>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button class="lang-btn is-active" id="lang-en-btn" type="button">EN</button>
+          <button class="lang-btn" id="lang-uk-btn" type="button">UK</button>
+        </div>
       </div>
     </div>
   </header>
@@ -197,106 +207,109 @@
   </div>
 
   <!-- ========================================================================
-       LEFT FLOATING BEZIZIAN INTERACTIVE TOYBOX
+       LEFT FLOATING BEZIZIAN INTERACTIVE TACTILE FX PAD (2-COLUMN HARDWARE SAMPLER)
        ======================================================================== -->
-  <aside class="left-toybox-dock" aria-label="Bezizian Studio Sound &amp; Visual Toys">
-    <div class="toybox-card">
-      <div class="toybox-header">
-        <span>BEZIZIAN FX DECK</span>
-        <span>LIVE</span>
+  <aside class="left-toybox-dock" id="left-toybox-dock" aria-label="Bezizian Studio Sound &amp; Visual Toys">
+    <div class="toybox-card" id="toybox-card">
+      <div class="toybox-header" id="toybox-header-toggle" title="Click to minimize/expand FX Deck">
+        <div class="toybox-title-wrap">
+          <span class="toybox-led"></span>
+          <span>FX SAMPLER PAD</span>
+        </div>
+        <button class="dock-mini-toggle" id="toybox-collapse-btn" type="button" aria-label="Toggle FX Deck">−</button>
       </div>
 
-      <button class="toy-btn" id="toy-bark-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">🦭</span>
-          <span id="i18n-toy-bark">Sea Lion Bark</span>
-        </span>
-        <kbd class="toy-kbd">B</kbd>
-      </button>
+      <div class="toybox-body" id="toybox-body">
+        <div class="toybox-grid">
+          <button class="toy-btn" id="toy-bark-btn" type="button" title="Sea Lion Double Bark (Hotkey: B)">
+            <span class="toy-btn-left">
+              <span class="toy-icon">🦭</span>
+              <span id="i18n-toy-bark">Bark</span>
+            </span>
+            <kbd class="toy-kbd">B</kbd>
+          </button>
 
-      <button class="toy-btn" id="toy-cat-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">🐱</span>
-          <span id="i18n-toy-cat">Ginger Cat Cam</span>
-        </span>
-        <kbd class="toy-kbd">K</kbd>
-      </button>
+          <button class="toy-btn" id="toy-cat-btn" type="button" title="Follow Ginger Cat Resident (Hotkey: K)">
+            <span class="toy-btn-left">
+              <span class="toy-icon">🐱</span>
+              <span id="i18n-toy-cat">Cat Cam</span>
+            </span>
+            <kbd class="toy-kbd">K</kbd>
+          </button>
 
-      <button class="toy-btn" id="toy-flash-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">📸</span>
-          <span id="i18n-toy-flash">PERFECT! Flash</span>
-        </span>
-        <kbd class="toy-kbd">F</kbd>
-      </button>
+          <button class="toy-btn highlight-pad" id="toy-flash-btn" type="button" title="Snap Instant Polaroid Photo (Hotkey: F)">
+            <span class="toy-btn-left">
+              <span class="toy-icon">📸</span>
+              <span id="i18n-toy-flash">Polaroid</span>
+            </span>
+            <kbd class="toy-kbd">F</kbd>
+          </button>
 
-      <button class="toy-btn" id="toy-stamp-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">🔖</span>
-          <span id="i18n-toy-stamp">Permit Stamp</span>
-        </span>
-        <kbd class="toy-kbd">P</kbd>
-      </button>
+          <button class="toy-btn" id="toy-stamp-btn" type="button" title="Stamp Inspector Permit on Map (Hotkey: P)">
+            <span class="toy-btn-left">
+              <span class="toy-icon">🔖</span>
+              <span id="i18n-toy-stamp">Stamp</span>
+            </span>
+            <kbd class="toy-kbd">P</kbd>
+          </button>
 
-      <button class="toy-btn" id="toy-rain-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">🌧️</span>
-          <span id="i18n-toy-rain">Street Rain</span>
-        </span>
-        <kbd class="toy-kbd">R</kbd>
-      </button>
+          <button class="toy-btn" id="toy-rain-btn" type="button" title="Toggle NYC Street Rain (Hotkey: R)">
+            <span class="toy-btn-left">
+              <span class="toy-icon">🌧️</span>
+              <span id="i18n-toy-rain">Rain</span>
+            </span>
+            <kbd class="toy-kbd">R</kbd>
+          </button>
 
-      <button class="toy-btn" id="toy-snow-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">❄️</span>
-          <span id="i18n-toy-snow">NYC Snow</span>
-        </span>
-        <kbd class="toy-kbd">W</kbd>
-      </button>
+          <button class="toy-btn" id="toy-snow-btn" type="button" title="Toggle NYC Winter Snowfall (Hotkey: W)">
+            <span class="toy-btn-left">
+              <span class="toy-icon">❄️</span>
+              <span id="i18n-toy-snow">Snow</span>
+            </span>
+            <kbd class="toy-kbd">W</kbd>
+          </button>
+        </div>
 
-      <button class="toy-btn" id="toy-reset-btn" type="button">
-        <span class="toy-btn-left">
-          <span class="toy-icon">🧭</span>
-          <span id="i18n-toy-reset">Reset Camera</span>
-        </span>
-        <kbd class="toy-kbd">C</kbd>
-      </button>
+        <button class="toy-btn toy-reset-wide" id="toy-reset-btn" type="button" title="Reset Map Camera Overview (Hotkey: C)">
+          <span class="toy-btn-left">
+            <span class="toy-icon">🧭</span>
+            <span id="i18n-toy-reset">Reset Camera View</span>
+          </span>
+          <kbd class="toy-kbd">C</kbd>
+        </button>
+      </div>
     </div>
   </aside>
 
-  <!-- Polaroid Freeze-Frame Snapshot Tray -->
-  <div class="polaroid-tray" id="polaroid-tray"></div>
+  <!-- Tactile Instant-Film Polaroid Fan Stack -->
+  <div class="polaroid-tray" id="polaroid-tray" aria-live="polite"></div>
 
-  <!-- Floating Unmapped Signals Dock (3 New Songs · No Map Location Yet · Clip TBA) -->
+  <!-- Floating Unmapped Signals Dock (Collapsible Studio Vault + Compact @bezizian Bar) -->
   <aside class="unmapped-vault-dock" id="unmapped-vault-dock" aria-label="Unmapped Signals — 3 Upcoming Songs">
-    <div class="unmapped-vault-head">
+    <div class="unmapped-vault-head" id="vault-header-toggle" title="Click to minimize/expand Premiere Vault">
       <div class="unmapped-vault-title-row">
         <span class="unmapped-radar-dot"></span>
-        <span class="unmapped-vault-title" id="i18n-unmapped-dock-title">📡 UNMAPPED SIGNALS · 3 NEW SONGS</span>
+        <span class="unmapped-vault-title" id="i18n-unmapped-dock-title">📡 3 PREMIERE TRACKS · VAULT</span>
+        <button class="dock-mini-toggle" id="vault-collapse-btn" type="button" aria-label="Toggle Premiere Vault">−</button>
       </div>
-      <div class="unmapped-vault-sub" id="i18n-unmapped-dock-sub">SONGS READY · OFFICIAL CLIPS &amp; MAP LOCATIONS: TBA [???]</div>
+      <div class="unmapped-vault-sub" id="i18n-unmapped-dock-sub">MASTERED DUBPLATES · CLIPS &amp; MAP LOCATIONS: TBA</div>
     </div>
-    <div class="unmapped-vault-list" id="unmapped-vault-list"></div>
 
-    <!-- Official @bezizian Social Networks -->
-    <div class="official-socials-box">
-      <div class="official-socials-title">🌐 OFFICIAL @BEZIZIAN</div>
-      <div class="official-socials-grid">
-        <a class="social-pill-link yt" href="https://www.youtube.com/@bezizian" target="_blank" rel="noopener">
-          <span>▶️</span><span>YouTube</span>
-        </a>
-        <a class="social-pill-link ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener">
-          <span>📸</span><span>Instagram</span>
-        </a>
-        <a class="social-pill-link threads" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener">
-          <span>🌀</span><span>Threads</span>
-        </a>
-        <a class="social-pill-link fb" href="https://www.facebook.com/profile.php?id=61595280781729" target="_blank" rel="noopener">
-          <span>📘</span><span>Facebook</span>
-        </a>
-        <a class="social-pill-link tiktok" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener">
-          <span>🎵</span><span>TikTok</span>
-        </a>
+    <div class="unmapped-vault-body" id="unmapped-vault-body">
+      <div class="unmapped-vault-list" id="unmapped-vault-list"></div>
+
+      <!-- Compact Tactile @bezizian Social Dock -->
+      <div class="official-socials-box">
+        <div class="official-socials-bar">
+          <span class="official-socials-tag">@BEZIZIAN</span>
+          <div class="official-socials-icons">
+            <a class="social-icon-btn yt" href="https://www.youtube.com/@bezizian" target="_blank" rel="noopener" title="Official YouTube (@bezizian)">▶️<span>YT</span></a>
+            <a class="social-icon-btn ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener" title="Official Instagram Reels (@bezizian)">📸<span>IG</span></a>
+            <a class="social-icon-btn threads" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener" title="Official Threads (@bezizian)">🌀<span>TH</span></a>
+            <a class="social-icon-btn fb" href="https://www.facebook.com/profile.php?id=61595280781729" target="_blank" rel="noopener" title="Official Facebook">📘<span>FB</span></a>
+            <a class="social-icon-btn tiktok" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener" title="Official TikTok (@bezizian0)">🎵<span>TT</span></a>
+          </div>
+        </div>
       </div>
     </div>
   </aside>
@@ -304,11 +317,11 @@
   <!-- Spatial Navigation Hint -->
   <div class="spatial-nav-hint" id="spatial-nav-hint">
     <span class="hint-pulse-dot"></span>
-    <span id="i18n-hint-text">DRAG THE CITY FOR 5 CANON CLIPS · OR PLAY 3 NEW UNMAPPED SONGS (LOCATION: ???)</span>
+    <span id="i18n-hint-text">DRAG THE CITY FOR 5 CANON CLIPS · OR PLAY 3 NEW PREMIERE TRACKS</span>
   </div>
 
   <!-- ========================================================================
-       RIGHT INTERACTIVE STAGE DRAWER (WATCH CLIP, DUET LYRICS, DUDA CANON)
+       RIGHT INTERACTIVE STAGE DRAWER (WATCH CLIP, DUET LYRICS, STUDIO DUBPLATE)
        ======================================================================== -->
   <section class="stage-drawer" id="stage-drawer" aria-label="Active Song Stage Inspector">
     <!-- Top Stage Visual Header (Clicking opens Fullscreen Cinema) -->
@@ -367,7 +380,7 @@
 
     <!-- Drawer Scrollable Body -->
     <div class="drawer-body" id="drawer-body">
-      <!-- PANE 1: 9:16 VERTICAL INSTAGRAM CLIP PLAYER (DEFAULT ACTIVE) -->
+      <!-- PANE 1: 9:16 VERTICAL INSTAGRAM CLIP PLAYER / STUDIO DUBPLATE DECK -->
       <div class="tab-pane is-active" id="pane-video">
         <div class="reel-player-stage">
           <div class="clip-variants-bar" id="clip-variants-bar"></div>
@@ -378,20 +391,41 @@
               <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
             </button>
 
-            <!-- Shown when an Unmapped Upcoming Song (no clip yet) is selected -->
+            <!-- Shown when an Unmapped Upcoming Song (06..08) is selected: Interactive Vinyl Dubplate Deck + Live Lyric Ticker -->
             <div class="unmapped-clip-placeholder" id="unmapped-clip-placeholder" style="display:none;">
               <img class="unmapped-bg-art" id="unmapped-bg-art" src="images/overworld/stage_playground_spark.jpg" alt="Upcoming Song Artwork" />
-              <div class="unmapped-radar-sweep"></div>
+
+              <!-- Tactile Spinning Studio Dubplate Disc (Click to Play/Pause!) -->
+              <div class="dubplate-turntable" id="dubplate-turntable" title="Click vinyl dubplate to Play / Pause">
+                <div class="dubplate-vinyl-disc" id="dubplate-vinyl-disc">
+                  <div class="dubplate-grooves"></div>
+                  <img class="dubplate-center-art" id="dubplate-center-art" src="images/overworld/stage_playground_spark.jpg" alt="Dubplate label" />
+                  <div class="dubplate-spindle"></div>
+                </div>
+                <div class="dubplate-play-pill" id="dubplate-play-pill">▶ TAP DUBPLATE</div>
+              </div>
+
               <div class="unmapped-placeholder-content">
-                <div class="unmapped-stamp-badge" id="i18n-unmapped-card-stamp">🎬 CLIP IN PRODUCTION · LOCATION: ???</div>
-                <div class="unmapped-coords-chip">📍 MAP COORDS: [ ??.?? , ??.?? ] · UNASSIGNED</div>
-                <h3 class="unmapped-placeholder-title" id="i18n-unmapped-card-title">AUDIO PREMIERE — NO MAP LOCATION YET</h3>
-                <p class="unmapped-placeholder-desc" id="i18n-unmapped-card-desc">
-                  This track is already recorded and mastered, but its official music video and city district coordinates are still classified.
-                </p>
-                <button class="hud-pill-btn solid-orange" id="unmapped-open-lyrics-btn" type="button">
-                  <span id="i18n-unmapped-lyrics-btn">🎤 Open Synced Duet Lyrics</span>
-                </button>
+                <div class="unmapped-top-meta">
+                  <span class="unmapped-stamp-badge" id="i18n-unmapped-card-stamp">💿 STUDIO DUBPLATE PREMIERE</span>
+                  <span class="unmapped-coords-chip">📍 MAP STAGE: TBA</span>
+                </div>
+                <h3 class="unmapped-placeholder-title" id="i18n-unmapped-card-title">MASTER AUDIO + LIVE SYNCED LYRICS</h3>
+                <!-- Live 2-Line Synced Lyric Display right inside the Dubplate Card -->
+                <div class="unmapped-live-lyric-box" id="unmapped-live-lyric-box">
+                  <span class="unmapped-lyric-singer" id="unmapped-lyric-singer">BEZIZIAN STUDIO</span>
+                  <p class="unmapped-live-lyric-text" id="i18n-unmapped-card-desc">
+                    Press Play or tap the vinyl dubplate above to hear the full mastered track with synchronized duet lyrics.
+                  </p>
+                </div>
+                <div class="unmapped-action-row">
+                  <button class="hud-pill-btn solid-orange" id="unmapped-open-lyrics-btn" type="button">
+                    <span id="i18n-unmapped-lyrics-btn">🎤 Full Duet Lyrics</span>
+                  </button>
+                  <button class="hud-pill-btn" id="unmapped-snap-btn" type="button">
+                    <span>📸 Snap Polaroid</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -400,9 +434,11 @@
             <button class="hud-pill-btn solid-orange" id="cinema-fullscreen-btn" type="button">
               <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
             </button>
-            <button class="hud-pill-btn" id="cinema-snap-btn" type="button">📸 PERFECT!</button>
+            <button class="hud-pill-btn tactile-snap-cta" id="cinema-snap-btn" type="button" title="Take Instant Polaroid Snapshot with Shutter Flash (Hotkey: F)">
+              <span>📸 PERFECT! Snap</span>
+            </button>
             <button class="hud-pill-btn" id="cinema-gallery-btn" type="button">
-              <span id="i18n-open-gallery-btn">🖼 Open Photo Gallery</span>
+              <span id="i18n-open-gallery-btn">🖼 Gallery</span>
             </button>
           </div>
 
@@ -461,6 +497,9 @@
         </button>
         <button class="hud-pill-btn highlight-orange mobile-quick-btn" id="mobile-open-playlist-btn" type="button">
           <span>🎵</span><span id="i18n-mobile-songs-btn">All 8 Songs</span>
+        </button>
+        <button class="hud-pill-btn mobile-quick-btn" id="mobile-snap-btn" type="button" title="Take Instant Polaroid Snapshot">
+          <span>📸</span>
         </button>
       </div>
 
@@ -659,6 +698,6 @@
 
   <!-- Scripts -->
   <script src="tracks-data.js?v=10"></script>
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>

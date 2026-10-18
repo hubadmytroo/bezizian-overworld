@@ -3187,3 +3187,851 @@ body.tod-sunset .overworld-vignette {
     linear-gradient(180deg, rgba(18, 12, 28, 0.45) 0%, transparent 14%, transparent 84%, rgba(11, 10, 18, 0.68) 100%);
 }
 
+/* ============================================================================
+   ERGONOMIC 5-ZONE HUD REDESIGN & TACTILE HAPTIC PHYSICS (DESKTOP + MOBILE)
+   ============================================================================ */
+
+/* 0. Tactile Micro-Recoil & Mechanical Spring Button Physics */
+@keyframes viewportShutterJolt {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  25%  { transform: translate3d(-2px, 2px, 0) scale(1.004); }
+  55%  { transform: translate3d(2px, -1.5px, 0) scale(0.998); }
+  80%  { transform: translate3d(-1px, 0.5px, 0) scale(1.001); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+body.is-shutter-jolting #overworld-viewport {
+  animation: viewportShutterJolt 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.is-haptic-pop {
+  transform: scale(0.93) translateY(1.5px) !important;
+  transition: transform 0.05s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
+}
+
+.hud-pill-btn,
+.quick-stage-btn,
+.toy-btn,
+.unmapped-song-card,
+.transport-play-btn,
+.transport-icon-btn,
+.cat-act-btn,
+.cinema-action-btn,
+.mobile-quick-btn,
+.social-icon-btn {
+  transition:
+    transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+  will-change: transform;
+}
+
+.hud-pill-btn:active,
+.quick-stage-btn:active,
+.toy-btn:active,
+.unmapped-song-card:active,
+.transport-icon-btn:active,
+.cat-act-btn:active,
+.cinema-action-btn:active,
+.mobile-quick-btn:active,
+.social-icon-btn:active {
+  transform: scale(0.94) translateY(1px);
+}
+
+.transport-play-btn:active {
+  transform: scale(0.90);
+}
+
+/* 1. ARROW 3 — Segmented Top-Right HUD Capsules (.hud-capsule) */
+.top-actions-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(11, 12, 18, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.hud-capsule .hud-pill-btn {
+  padding: 6px 11px;
+  font-size: 11px;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.hud-capsule .hud-pill-btn:hover {
+  background: rgba(255, 90, 31, 0.16);
+  border-color: rgba(255, 90, 31, 0.55);
+  transform: translateY(-1px);
+}
+
+.hud-capsule .hud-pill-btn.primary-glow {
+  background: linear-gradient(135deg, rgba(255, 90, 31, 0.28), rgba(244, 162, 62, 0.18));
+  border-color: rgba(255, 90, 31, 0.65);
+}
+
+.hud-capsule .lang-pill-group {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 2. ARROW 2 — Top-Center Chronological Track Strip with Mini Cover Art & Magnetic Hover Reveal */
+.district-quick-strip {
+  top: 20px;
+  padding: 5px 8px;
+  gap: 5px;
+  background: rgba(11, 12, 18, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.quick-stage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.quick-stage-btn .quick-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.quick-stage-btn:hover .quick-thumb,
+.quick-stage-btn.is-active .quick-thumb {
+  transform: scale(1.08);
+  border-color: #0B0B0F;
+}
+
+.quick-stage-btn .quick-title {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11.5px;
+  transition: max-width 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, margin-left 0.2s ease;
+}
+
+.quick-stage-btn:hover .quick-title,
+.quick-stage-btn.is-active .quick-title {
+  max-width: 165px;
+  opacity: 1;
+  margin-left: 2px;
+}
+
+.quick-stage-btn.is-active {
+  background: linear-gradient(135deg, #FF5A1F 0%, #F4A23E 100%);
+  color: #0B0B0F;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(255, 90, 31, 0.45);
+}
+
+/* 3. ARROW 1 — Sleek Collapsible Top-Left Studio Vault (.unmapped-vault-dock) */
+.unmapped-vault-dock {
+  top: 84px;
+  left: 20px;
+  width: 238px;
+  padding: 10px 11px;
+  border-radius: 16px;
+  background: rgba(11, 12, 18, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 162, 62, 0.36);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: width 0.24s var(--ease-overworld), padding 0.24s ease, transform 0.24s ease;
+}
+
+.unmapped-vault-header {
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+.vault-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vault-collapse-btn,
+.toybox-collapse-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--bone-cream);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+}
+
+.vault-collapse-btn:hover,
+.toybox-collapse-btn:hover {
+  background: var(--hoop-orange);
+  border-color: var(--hoop-orange);
+  color: #0B0B0F;
+}
+
+.unmapped-vault-body {
+  margin-top: 9px;
+  overflow: hidden;
+  max-height: 360px;
+  opacity: 1;
+  transition: max-height 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, margin-top 0.2s ease;
+}
+
+.unmapped-vault-dock.is-collapsed {
+  width: 204px;
+  padding: 8px 10px;
+}
+
+.unmapped-vault-dock.is-collapsed .unmapped-vault-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+/* Compact 1-Row @BEZIZIAN Social Bar inside Studio Vault */
+.official-socials-bar {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.official-socials-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--brass-gold);
+  letter-spacing: 0.06em;
+}
+
+.official-socials-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.social-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 6.5px;
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--bone-cream);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-decoration: none;
+}
+
+.social-icon-btn:hover {
+  transform: translateY(-1.5px);
+  border-color: var(--hoop-orange);
+  background: rgba(255, 90, 31, 0.22);
+  color: #FFF;
+}
+
+.social-icon-btn.yt {
+  border-color: rgba(255, 50, 50, 0.55);
+  background: rgba(255, 40, 40, 0.18);
+}
+
+.social-icon-btn.ig {
+  border-color: rgba(255, 90, 31, 0.5);
+  background: rgba(255, 90, 31, 0.16);
+}
+
+/* 4. ARROW 4 — Bottom-Left 2-Column Tactile Hardware Sampler Pad (.left-toybox-dock) */
+.left-toybox-dock {
+  left: 20px;
+  bottom: 102px;
+  width: 208px;
+  padding: 9px 10px;
+  background: rgba(11, 12, 18, 0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  gap: 0;
+  transition: width 0.24s var(--ease-overworld), padding 0.24s ease;
+}
+
+.toybox-header {
+  padding: 2px 2px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toybox-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toybox-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FF5A1F;
+  box-shadow: 0 0 8px #FF5A1F;
+}
+
+.toybox-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 320px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, margin-top 0.2s ease;
+}
+
+.left-toybox-dock.is-collapsed {
+  width: 148px;
+  padding: 7px 10px;
+}
+
+.left-toybox-dock.is-collapsed .toybox-header {
+  padding-bottom: 0;
+  border-bottom-color: transparent;
+}
+
+.left-toybox-dock.is-collapsed .toybox-grid {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.toybox-grid .toy-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px 8px 7px;
+  min-height: 54px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.toybox-grid .toy-btn.toy-btn-wide {
+  grid-column: span 2;
+  flex-direction: row;
+  align-items: center;
+  min-height: 40px;
+  padding: 7px 10px;
+}
+
+.toybox-grid .toy-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 90, 31, 0.65);
+  background: linear-gradient(180deg, rgba(255, 90, 31, 0.22) 0%, rgba(255, 90, 31, 0.08) 100%);
+  box-shadow:
+    0 4px 12px rgba(255, 90, 31, 0.25),
+    0 3px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.toybox-grid .toy-btn:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.toybox-grid .toy-btn.is-active {
+  border-color: var(--hoop-orange);
+  background: linear-gradient(135deg, rgba(255, 90, 31, 0.34), rgba(244, 162, 62, 0.20));
+  box-shadow: 0 0 16px rgba(255, 90, 31, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.toybox-grid .toy-btn-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+}
+
+.toybox-grid .toy-btn-wide .toy-btn-left {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.toybox-grid .toy-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.toybox-grid .toy-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--bone-cream);
+}
+
+.toybox-grid .toy-kbd {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 8.5px;
+  padding: 1px 4px;
+  opacity: 0.75;
+}
+
+.toybox-grid .toy-btn-wide .toy-kbd {
+  position: static;
+}
+
+/* 5. Spatial Hint Bar moved to Bottom-Center so it NEVER collides with Polaroids! */
+.spatial-nav-hint {
+  left: 50%;
+  bottom: 98px;
+  transform: translateX(-50%);
+  background: rgba(11, 12, 18, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  font-size: 10px;
+  opacity: 0.78;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.spatial-nav-hint.is-dismissed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+}
+
+/* 6. INSTANT-FILM POLAROID FAN STACK & DARKROOM DEVELOPING ANIMATION */
+.polaroid-tray {
+  position: fixed;
+  left: 238px;
+  bottom: 104px;
+  z-index: 48;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+  transition: left 0.24s var(--ease-overworld);
+}
+
+body.toybox-is-collapsed .polaroid-tray {
+  left: 178px;
+}
+
+@keyframes polaroidEjectAndDevelop {
+  0% {
+    opacity: 0;
+    transform: translateY(34px) scale(0.82) rotate(0deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.03) rotate(var(--card-rot, -4deg));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(var(--card-rot, -4deg));
+  }
+}
+
+@keyframes filmChemicalDevelop {
+  0% {
+    filter: brightness(2.5) contrast(0.35) sepia(0.85) blur(4px);
+  }
+  45% {
+    filter: brightness(1.35) contrast(0.82) sepia(0.38) blur(1px);
+  }
+  100% {
+    filter: brightness(1) contrast(1.04) sepia(0) blur(0);
+  }
+}
+
+.polaroid-fan-stack {
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+.polaroid-card {
+  width: 158px;
+  background: #F7F4EC;
+  color: #0B0B0F;
+  padding: 7px 7px 9px;
+  border-radius: 7px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.82), 0 0 0 1px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
+  margin-left: -68px;
+  transform: rotate(var(--card-rot, -4deg));
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, margin 0.22s ease;
+}
+
+.polaroid-card:first-child {
+  margin-left: 0;
+}
+
+.polaroid-card.is-fresh {
+  animation: polaroidEjectAndDevelop 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.polaroid-card.is-fresh .polaroid-img-wrap img {
+  animation: filmChemicalDevelop 1.85s ease-out forwards;
+}
+
+.polaroid-card:hover {
+  z-index: 10 !important;
+  transform: translateY(-10px) scale(1.08) rotate(0deg) !important;
+  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.92), 0 0 22px rgba(255, 90, 31, 0.42);
+}
+
+.polaroid-img-wrap {
+  width: 100%;
+  height: 104px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background: #101218;
+}
+
+.polaroid-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.polaroid-close-x {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(11, 11, 15, 0.78);
+  color: #FFF;
+  font-size: 10px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.16s ease, background 0.16s ease;
+  z-index: 3;
+}
+
+.polaroid-card:hover .polaroid-close-x {
+  opacity: 1;
+}
+
+.polaroid-close-x:hover {
+  background: #FF5A1F;
+  color: #0B0B0F;
+}
+
+.polaroid-caption {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #15161B;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.polaroid-card-actions {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.polaroid-mini-btn {
+  flex: 1;
+  border: 1px solid rgba(11, 11, 15, 0.18);
+  background: rgba(11, 11, 15, 0.06);
+  color: #111217;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 3px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.polaroid-mini-btn:hover {
+  background: #FF5A1F;
+  border-color: #FF5A1F;
+  color: #0B0B0F;
+}
+
+/* 7. ARROW 5 — Spinning Studio Dubplate / Vinyl Turntable inside Right Stage Drawer */
+.unmapped-clip-placeholder {
+  justify-content: space-between;
+  padding: 14px 12px;
+}
+
+.unmapped-radar-sweep {
+  display: none;
+}
+
+.dubplate-turntable {
+  position: relative;
+  z-index: 3;
+  width: 148px;
+  height: 148px;
+  margin: 4px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+@keyframes spinDubplateVinyl {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.dubplate-vinyl-disc {
+  width: 142px;
+  height: 142px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #111 0%, #111 26%, #222 27%, #0c0d12 38%, #1d1f29 40%, #0b0c10 56%, #20232e 58%, #0a0b0e 100%);
+  border: 2px solid rgba(244, 162, 62, 0.55);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.85),
+    0 0 24px rgba(255, 90, 31, 0.22),
+    inset 0 0 18px rgba(255, 255, 255, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spinDubplateVinyl 5.5s linear infinite;
+  animation-play-state: paused;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.dubplate-turntable.is-spinning .dubplate-vinyl-disc {
+  animation-play-state: running;
+  border-color: #FF5A1F;
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.9),
+    0 0 32px rgba(255, 90, 31, 0.45);
+}
+
+.dubplate-grooves {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+}
+
+.dubplate-center-art {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #F4A23E;
+  position: relative;
+  z-index: 2;
+}
+
+.dubplate-spindle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0B0B0F;
+  border: 2px solid #F7F4EC;
+  z-index: 3;
+}
+
+.dubplate-tonearm {
+  position: absolute;
+  top: 6px;
+  right: 2px;
+  width: 18px;
+  height: 68px;
+  border-right: 3px solid #F4A23E;
+  border-bottom: 5px solid #FF5A1F;
+  border-radius: 0 0 8px 0;
+  transform-origin: top right;
+  transform: rotate(-18deg);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.dubplate-turntable.is-spinning .dubplate-tonearm {
+  transform: rotate(8deg);
+}
+
+.dubplate-play-pill {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  background: rgba(11, 12, 18, 0.92);
+  border: 1px solid rgba(255, 90, 31, 0.65);
+  color: var(--bone-cream);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75);
+}
+
+.dubplate-turntable.is-spinning .dubplate-play-pill {
+  background: var(--hoop-orange);
+  color: #0B0B0F;
+}
+
+.unmapped-top-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.unmapped-live-lyric-box {
+  width: 100%;
+  background: rgba(255, 90, 31, 0.12);
+  border: 1px solid rgba(255, 90, 31, 0.36);
+  border-radius: 9px;
+  padding: 6px 8px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFF3DF;
+  line-height: 1.3;
+  min-height: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.unmapped-lyric-singer {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--brass-gold);
+}
+
+.unmapped-live-lyric-text {
+  margin: 0;
+  font-size: 11px;
+  color: #FFF3DF;
+}
+
+.unmapped-action-row,
+.unmapped-placeholder-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.tactile-snap-cta {
+  border-color: rgba(244, 162, 62, 0.58) !important;
+  background: linear-gradient(135deg, rgba(244, 162, 62, 0.22), rgba(255, 90, 31, 0.16)) !important;
+}
+
+/* Mobile Responsive Polish for Polaroid Stack & Tactile Capsules */
+@media (max-width: 860px) {
+  .hud-capsule {
+    padding: 2px;
+    gap: 3px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .polaroid-tray {
+    left: 12px !important;
+    bottom: 142px !important;
+    z-index: 64;
+  }
+
+  .polaroid-card {
+    width: 136px;
+    margin-left: -58px;
+  }
+
+  .polaroid-close-x {
+    opacity: 1;
+  }
+}
+
+
+
