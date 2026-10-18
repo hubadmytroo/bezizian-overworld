@@ -139,6 +139,101 @@
   }
 
   // ============================================================================
+  // GINGER TABBY CAT FROM THE CLIP — PATROL ROUTE ALONG DMYTRO'S ARROWS
+  // ============================================================================
+  const GINGER_CAT_ROUTE = [
+    // 1. Inside ochre courtyard archway (Episode 2) -> out onto sidewalk
+    { x: 0.768, y: 0.525, pause: 45, bubble: "🐾" },
+    { x: 0.745, y: 0.575 },
+    { x: 0.708, y: 0.585 },
+    // 2. Sidewalk behind the dark-green 90s coupe
+    { x: 0.658, y: 0.548 },
+    { x: 0.595, y: 0.575 },
+    { x: 0.552, y: 0.625 },
+    // 3. Around crosswalk pole up to the corner cafe door (Arrow 1!)
+    { x: 0.495, y: 0.615 },
+    { x: 0.458, y: 0.565 },
+    { x: 0.468, y: 0.522, pause: 65, bubble: "MEOW ♪" },
+    // 4. Back down cafe sidewalk toward the green coupe (Arrow 2!)
+    { x: 0.458, y: 0.565 },
+    { x: 0.495, y: 0.615 },
+    { x: 0.535, y: 0.612, pause: 40, bubble: "🐟?" },
+    { x: 0.465, y: 0.618 },
+    // 5. Across the wet white zebra crosswalk (Episode 3 / One Trip)
+    { x: 0.395, y: 0.680 },
+    { x: 0.325, y: 0.728, pause: 45, bubble: "PURR..." },
+    { x: 0.260, y: 0.685 },
+    { x: 0.238, y: 0.595 },
+    // 6. Up the curved marina street under the festoon lights
+    { x: 0.275, y: 0.515 },
+    { x: 0.345, y: 0.455 },
+    { x: 0.358, y: 0.395 },
+    { x: 0.265, y: 0.325, pause: 40, bubble: "🐾" },
+    // 7. Along the brownstone street & up the stoop stairs (Arrow 3!)
+    { x: 0.358, y: 0.395 },
+    { x: 0.485, y: 0.340 },
+    { x: 0.412, y: 0.375 },
+    { x: 0.402, y: 0.345 },
+    { x: 0.432, y: 0.308, pause: 75, bubble: "MEOW! 🐱" },
+    // 8. Back down the stoop stairs & along the street curve to the archway
+    { x: 0.402, y: 0.345 },
+    { x: 0.412, y: 0.375 },
+    { x: 0.345, y: 0.455 },
+    { x: 0.425, y: 0.535 },
+    { x: 0.465, y: 0.618 },
+    { x: 0.552, y: 0.625 },
+    { x: 0.595, y: 0.575 },
+    { x: 0.658, y: 0.548 },
+    { x: 0.708, y: 0.585 },
+    { x: 0.745, y: 0.575 }
+  ];
+
+  const gingerCat = {
+    segIndex: 0,
+    wx: GINGER_CAT_ROUTE[0].x * WORLD.width,
+    wy: GINGER_CAT_ROUTE[0].y * WORLD.height,
+    facing: -1, // -1 = left, +1 = right
+    smoothFacing: -1,
+    walkPhase: 0,
+    pauseFrames: 0,
+    bubbleText: "",
+    bubbleTimer: 0,
+    hopOffset: 0,
+    hopVel: 0,
+    stepCounter: 0
+  };
+  const catPawPrints = [];
+
+  function triggerCatMeow() {
+    gingerCat.hopVel = -6.5;
+    const phrases = ["MEOW! 🐱", "PURRRR ♪", "GOT FISH? 🐟", "MEOW! ✨"];
+    gingerCat.bubbleText = phrases[Math.floor(Math.random() * phrases.length)];
+    gingerCat.bubbleTimer = 110;
+    spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#FF8C24", 90);
+    spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#F4A23E", 55);
+
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      const ctxAudio = audioCtx || new AudioContextClass();
+      if (ctxAudio.state === "suspended") ctxAudio.resume().catch(() => {});
+      const now = ctxAudio.currentTime;
+      const osc = ctxAudio.createOscillator();
+      const gain = ctxAudio.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.11);
+      osc.frequency.exponentialRampToValueAtTime(610, now + 0.34);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+      osc.connect(gain);
+      gain.connect(ctxAudio.destination);
+      osc.start(now);
+      osc.stop(now + 0.38);
+    } catch (_) {}
+  }
+
+  // ============================================================================
   // SOUND EFFECTS & WEB AUDIO ANALYZER
   // ============================================================================
   function playSfx(key, volume = 0.65) {
@@ -1085,6 +1180,9 @@
       ctx.restore();
     }
 
+    // Ginger Tabby Cat Patrol along Dmytro's route
+    updateAndDrawGingerCat(ctx);
+
     // Rising Golden & Hoop-Orange Sparks
     const sparkBoost = 1 + audioEnergy.brass * 2.4;
     sparks.forEach((sp) => {
@@ -1139,6 +1237,281 @@
     });
   }
 
+  function updateAndDrawGingerCat(ctx) {
+    const nextIdx = (gingerCat.segIndex + 1) % GINGER_CAT_ROUTE.length;
+    const targetPt = GINGER_CAT_ROUTE[nextIdx];
+    const tx = targetPt.x * WORLD.width;
+    const ty = targetPt.y * WORLD.height;
+
+    // Hop physics when clicked
+    if (gingerCat.hopOffset < 0 || gingerCat.hopVel !== 0) {
+      gingerCat.hopOffset += gingerCat.hopVel;
+      gingerCat.hopVel += 0.55;
+      if (gingerCat.hopOffset >= 0) {
+        gingerCat.hopOffset = 0;
+        gingerCat.hopVel = 0;
+      }
+    }
+
+    if (gingerCat.bubbleTimer > 0) {
+      gingerCat.bubbleTimer--;
+    }
+
+    const isPaused = gingerCat.pauseFrames > 0;
+    if (isPaused) {
+      gingerCat.pauseFrames--;
+      gingerCat.walkPhase *= 0.85;
+    } else {
+      const dx = tx - gingerCat.wx;
+      const dy = ty - gingerCat.wy;
+      const dist = Math.hypot(dx, dy);
+      const speed = 1.35 + audioEnergy.sub * 0.75;
+
+      if (Math.abs(dx) > 0.2) {
+        gingerCat.facing = dx >= 0 ? 1 : -1;
+      }
+      gingerCat.smoothFacing += (gingerCat.facing - gingerCat.smoothFacing) * 0.18;
+
+      if (dist <= speed) {
+        gingerCat.wx = tx;
+        gingerCat.wy = ty;
+        gingerCat.segIndex = nextIdx;
+        if (targetPt.pause) {
+          gingerCat.pauseFrames = targetPt.pause;
+          if (targetPt.bubble && gingerCat.bubbleTimer <= 0) {
+            gingerCat.bubbleText = targetPt.bubble;
+            gingerCat.bubbleTimer = targetPt.pause;
+          }
+        }
+      } else {
+        gingerCat.wx += (dx / dist) * speed;
+        gingerCat.wy += (dy / dist) * speed;
+        gingerCat.walkPhase += 0.24;
+        gingerCat.stepCounter++;
+
+        // Leave glowing wet pawprints along the route
+        if (gingerCat.stepCounter % 11 === 0) {
+          const side = (gingerCat.stepCounter % 22 === 0 ? 1 : -1) * 3.5;
+          catPawPrints.push({
+            wx: gingerCat.wx + (-dy / dist) * side,
+            wy: gingerCat.wy + (dx / dist) * side,
+            alpha: 0.72
+          });
+          if (catPawPrints.length > 28) catPawPrints.shift();
+        }
+        if (gingerCat.stepCounter % 34 === 0) {
+          spawnWorldRipple(gingerCat.wx, gingerCat.wy + 4, "rgba(255, 145, 45, 0.45)", 26);
+        }
+      }
+    }
+
+    // 1. Draw glowing pawprints behind the ginger cat
+    for (let i = catPawPrints.length - 1; i >= 0; i--) {
+      const p = catPawPrints[i];
+      p.alpha *= 0.992;
+      if (p.alpha < 0.04) {
+        catPawPrints.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.fillStyle = `rgba(255, 155, 55, ${p.alpha.toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(p.wx, p.wy, 2.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 2. Draw the Ginger Tabby Cat at (gingerCat.wx, gingerCat.wy)
+    ctx.save();
+    const bob = isPaused ? Math.sin(performance.now() * 0.005) * 0.6 : Math.abs(Math.sin(gingerCat.walkPhase)) * -2.2;
+    ctx.translate(gingerCat.wx, gingerCat.wy + gingerCat.hopOffset);
+
+    // Warm streetlamp aura under the cat so it stands out on the night street
+    const aura = ctx.createRadialGradient(0, 2, 2, 0, 2, 30);
+    aura.addColorStop(0, "rgba(255, 140, 36, 0.34)");
+    aura.addColorStop(1, "rgba(255, 140, 36, 0)");
+    ctx.fillStyle = aura;
+    ctx.beginPath();
+    ctx.ellipse(0, 3, 28, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ground shadow
+    ctx.fillStyle = "rgba(5, 6, 10, 0.68)";
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 14, 5.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(0, bob);
+    const flip = gingerCat.smoothFacing >= 0 ? 1 : -1;
+    ctx.scale(flip, 1);
+
+    const legSwing = isPaused ? 0 : Math.sin(gingerCat.walkPhase) * 4.5;
+    const legSwingOpp = -legSwing;
+
+    // Animated waving striped ginger tail
+    const tailWave = Math.sin(performance.now() * 0.007 + gingerCat.walkPhase * 0.5) * 5;
+    ctx.strokeStyle = "#D96216";
+    ctx.lineWidth = 4.2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(-10, -6);
+    ctx.quadraticCurveTo(-19, -15 + tailWave * 0.4, -16 + tailWave * 0.5, -23);
+    ctx.stroke();
+
+    // Tail tip (cream white)
+    ctx.strokeStyle = "#FFEAD0";
+    ctx.lineWidth = 3.4;
+    ctx.beginPath();
+    ctx.moveTo(-16 + tailWave * 0.4, -20);
+    ctx.lineTo(-16 + tailWave * 0.5, -23.5);
+    ctx.stroke();
+
+    // Back legs (darker ginger + white paws)
+    const drawLeg = (xOff, swing, color) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3.4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(xOff, -3);
+      ctx.lineTo(xOff + swing * 0.65, 4);
+      ctx.stroke();
+      // White sock paw
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(xOff + swing * 0.65 + 0.8, 4.3, 2.3, 1.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    drawLeg(-7, legSwingOpp, "#C4510C");
+    drawLeg(6, legSwingOpp, "#C4510C");
+
+    // Plump Ginger Tabby Body
+    ctx.fillStyle = "#F27D24";
+    ctx.beginPath();
+    ctx.ellipse(-1, -6.5, 11.5, 6.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cream-white chest & belly fur
+    ctx.fillStyle = "#FFEBD2";
+    ctx.beginPath();
+    ctx.ellipse(6.5, -5.2, 5.2, 4.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark ginger tabby stripes across the back
+    ctx.strokeStyle = "#9E3B06";
+    ctx.lineWidth = 1.8;
+    [-6, -2.5, 1].forEach((sx) => {
+      ctx.beginPath();
+      ctx.moveTo(sx, -12.5);
+      ctx.quadraticCurveTo(sx - 1, -8.5, sx + 0.5, -5.5);
+      ctx.stroke();
+    });
+
+    // Front legs (bright ginger + white socks)
+    drawLeg(-5.5, legSwing, "#F27D24");
+    drawLeg(7.2, legSwing, "#F27D24");
+
+    // Ginger Head
+    ctx.fillStyle = "#F5882E";
+    ctx.beginPath();
+    ctx.arc(10.5, -11.5, 6.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White muzzle cheeks
+    ctx.fillStyle = "#FFF4E4";
+    ctx.beginPath();
+    ctx.ellipse(12.8, -9.2, 3.8, 2.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pointed Ears (outer ginger + inner pink)
+    const drawEar = (ex, ey, tilt) => {
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate(tilt);
+      ctx.fillStyle = "#D96216";
+      ctx.beginPath();
+      ctx.moveTo(-2.8, 0);
+      ctx.lineTo(0, -6.2);
+      ctx.lineTo(2.8, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#FDA4AF";
+      ctx.beginPath();
+      ctx.moveTo(-1.4, -0.4);
+      ctx.lineTo(0, -4.4);
+      ctx.lineTo(1.4, -0.4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    drawEar(7.8, -16.2, -0.18);
+    drawEar(13.0, -16.2, 0.15);
+
+    // Emerald-green eyes (blink occasionally)
+    const isBlinking = Math.sin(performance.now() * 0.003) > 0.96;
+    if (isBlinking) {
+      ctx.strokeStyle = "#1E1B18";
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(10.5, -11.8);
+      ctx.lineTo(14.5, -11.8);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = "#34D399";
+      ctx.beginPath();
+      ctx.arc(12.6, -11.8, 1.65, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#090A0F";
+      ctx.beginPath();
+      ctx.ellipse(12.9, -11.8, 0.65, 1.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Pink nose
+    ctx.fillStyle = "#FB7185";
+    ctx.beginPath();
+    ctx.arc(15.8, -9.8, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White whiskers
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.lineWidth = 0.85;
+    ctx.beginPath();
+    ctx.moveTo(14.5, -9.2);
+    ctx.lineTo(19.5, -10.2);
+    ctx.moveTo(14.5, -8.5);
+    ctx.lineTo(19.2, -8.2);
+    ctx.stroke();
+
+    ctx.restore(); // undo flip & bob
+
+    // Speech bubble when paused at arrow stops or clicked
+    if (gingerCat.bubbleTimer > 0 && gingerCat.bubbleText) {
+      ctx.save();
+      ctx.font = "700 9.5px 'JetBrains Mono', monospace";
+      const textW = ctx.measureText(gingerCat.bubbleText).width;
+      const bw = textW + 12;
+      const bh = 16;
+      const bx = -bw * 0.5;
+      const by = -36;
+      ctx.fillStyle = "rgba(11, 11, 15, 0.9)";
+      ctx.strokeStyle = "#FF8C24";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#FFEAD0";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(gingerCat.bubbleText, 0, by + bh * 0.5 + 0.5);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
   // ============================================================================
   // EVENT LISTENERS
   // ============================================================================
@@ -1182,8 +1555,13 @@
     });
 
     window.addEventListener("pointerup", (e) => {
-      if (camera.isDragging && !camera.pointerMoved && state.stampMode) {
-        placePermitStamp(e.clientX, e.clientY);
+      if (camera.isDragging && !camera.pointerMoved) {
+        const catScreen = worldToScreen(gingerCat.wx, gingerCat.wy - 8);
+        if (Math.hypot(e.clientX - catScreen.x, e.clientY - catScreen.y) < 42) {
+          triggerCatMeow();
+        } else if (state.stampMode) {
+          placePermitStamp(e.clientX, e.clientY);
+        }
       }
       camera.isDragging = false;
       viewportEl.classList.remove("is-dragging");
