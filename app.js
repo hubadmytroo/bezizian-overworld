@@ -112,6 +112,13 @@
   };
   mapImage.src = "images/overworld/overworld_city_map.jpg";
 
+  const mapDayImage = new Image();
+  let mapDayImageLoaded = false;
+  mapDayImage.onload = function () {
+    mapDayImageLoaded = true;
+  };
+  mapDayImage.src = "images/overworld/overworld_city_map_day.jpg";
+
   const ripples = [];
   const sparks = [];
   const rainDrops = [];
@@ -146,14 +153,16 @@
     weatherOverride: "auto", // "auto" | "clear" | "rain" | "snow" | "storm" | "fog"
     seasonOverride: "auto",  // "auto" | "winter" | "spring" | "summer" | "autumn"
     liveTimeStr: "--:--",
-    liveHourFloat: 22.0,
-    liveTod: "night",
+    liveHourFloat: 10.0,
+    liveTod: "day",
     liveSeason: "autumn",
     liveWeather: "clear",
     liveTempC: null,
     liveTempF: null,
     liveWindKmh: 12,
-    liveWeatherDesc: "CLEAR",
+    liveWeatherDesc: "SUNNY",
+    isDaytimeSunUp: null,
+    daylightBlend: 1.0,
     stormFlashAlpha: 0,
     popoverOpen: false
   };
@@ -272,16 +281,16 @@
       const hr12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
       nycEnv.liveTimeStr = `${String(hr12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${ampm}`;
 
-      // Determine Time of Day in New York
+      // Determine Time of Day in New York (combining NYC clock + Open-Meteo is_day when available)
       const h = nycEnv.liveHourFloat;
-      if (h >= 5.5 && h < 8.25) {
+      if (h >= 5.75 && h < 7.5) {
         nycEnv.liveTod = "dawn";
-      } else if (h >= 8.25 && h < 16.75) {
+      } else if (h >= 7.5 && h < 17.5) {
         nycEnv.liveTod = "day";
-      } else if (h >= 16.75 && h < 19.75) {
+      } else if (h >= 17.5 && h < 19.75) {
         nycEnv.liveTod = "sunset";
       } else {
-        nycEnv.liveTod = "night";
+        nycEnv.liveTod = nycEnv.isDaytimeSunUp === 1 ? "day" : "night";
       }
 
       // Determine Season in New York
@@ -312,6 +321,9 @@
         nycEnv.liveTempC = tempC;
         nycEnv.liveTempF = Math.round((tempC * 9) / 5 + 32);
         nycEnv.liveWindKmh = Math.round(c.wind_speed_10m || 10);
+        if (typeof c.is_day === "number") {
+          nycEnv.isDaytimeSunUp = c.is_day;
+        }
         const code = Number(c.weather_code || 0);
 
         if ([71, 73, 75, 77, 85, 86].includes(code)) {
@@ -328,11 +340,12 @@
           nycEnv.liveWeatherDesc = "HARBOR FOG";
         } else if ([2, 3].includes(code)) {
           nycEnv.liveWeather = "clear";
-          nycEnv.liveWeatherDesc = "CLOUDY";
+          nycEnv.liveWeatherDesc = c.is_day === 1 ? "PARTLY CLOUDY" : "CLOUDY";
         } else {
           nycEnv.liveWeather = "clear";
-          nycEnv.liveWeatherDesc = "CLEAR";
+          nycEnv.liveWeatherDesc = c.is_day === 1 ? "SUNNY" : "CLEAR";
         }
+        updateNycClockAndSeason();
       }
     } catch (_) {
       // Fallback if offline
@@ -352,6 +365,12 @@
       nycEnv.todOverride === "auto" &&
       nycEnv.weatherOverride === "auto" &&
       nycEnv.seasonOverride === "auto";
+
+    // Sync body class so viewport & vignette match New York's active time of day
+    document.body.classList.toggle("tod-day", tod === "day");
+    document.body.classList.toggle("tod-dawn", tod === "dawn");
+    document.body.classList.toggle("tod-sunset", tod === "sunset");
+    document.body.classList.toggle("tod-night", tod === "night");
 
     // Keep state.rainActive synced for backwards compatibility
     state.rainActive = weather === "rain" || weather === "storm";
@@ -391,15 +410,25 @@
 
     if (envIcon) envIcon.textContent = weatherIcons[weather] || "🗽";
     const tempPart = nycEnv.liveTempC !== null ? `${nycEnv.liveTempC}°C` : "";
+    const skyTag =
+      weather === "clear"
+        ? tod === "day"
+          ? "SUNNY"
+          : tod === "dawn"
+          ? "SUNRISE"
+          : tod === "sunset"
+          ? "SUNSET"
+          : "CLEAR NIGHT"
+        : weather.toUpperCase();
     const modePrefix = isAuto ? "NYC" : "NYC*";
     if (envLabel) {
-      envLabel.textContent = `${modePrefix} ${nycEnv.liveTimeStr}${tempPart ? " · " + tempPart : ""} · ${seasonShort[season] || "AUTUMN"}`;
+      envLabel.textContent = `${modePrefix} ${nycEnv.liveTimeStr}${tempPart ? " · " + tempPart : ""} · ${skyTag} · ${seasonShort[season] || "AUTUMN"}`;
     }
 
     if (telemetryEl) {
       const statusMode = isAuto ? "LIVE MANHATTAN SYNC" : "MANUAL PREVIEW OVERRIDE";
       const tStr = nycEnv.liveTempC !== null ? `${nycEnv.liveTempC}°C (${nycEnv.liveTempF}°F)` : "SYNCED";
-      telemetryEl.textContent = `${statusMode} · ${nycEnv.liveTimeStr} · ${tStr} · ${weather.toUpperCase()} · ${season.toUpperCase()}`;
+      telemetryEl.textContent = `${statusMode} · ${nycEnv.liveTimeStr} · ${tStr} · ${skyTag} · ${season.toUpperCase()}`;
     }
 
     // Highlight active pills in popover
@@ -421,31 +450,96 @@
     const season = getEffectiveSeason();
     const t = performance.now() * 0.001;
 
-    // 1. TIME OF DAY LIGHTING & SKY GRADING OVER CITY DIORAMA
+    // 1. TIME OF DAY LIGHTING, ANIMATED SUN & VOLUMETRIC SUNBEAMS OVER CITY DIORAMA
     ctx.save();
     if (tod === "day") {
-      // Lift nocturnal shadows into crisp New York daylight
-      ctx.globalCompositeOperation = "screen";
-      const dayGrad = ctx.createLinearGradient(0, 0, WORLD.width, WORLD.height);
-      dayGrad.addColorStop(0, "rgba(120, 180, 250, 0.30)");
-      dayGrad.addColorStop(0.5, "rgba(255, 232, 185, 0.22)");
-      dayGrad.addColorStop(1, "rgba(95, 155, 225, 0.24)");
-      ctx.fillStyle = dayGrad;
-      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+      if (weather === "clear") {
+        // Warm golden New York morning/afternoon sunlight wash
+        ctx.globalCompositeOperation = "screen";
+        const sunWash = ctx.createRadialGradient(
+          WORLD.width * 0.14,
+          WORLD.height * 0.08,
+          20,
+          WORLD.width * 0.42,
+          WORLD.height * 0.38,
+          WORLD.width * 0.92
+        );
+        sunWash.addColorStop(0, "rgba(255, 245, 200, 0.34)");
+        sunWash.addColorStop(0.35, "rgba(255, 224, 150, 0.14)");
+        sunWash.addColorStop(1, "rgba(255, 210, 120, 0)");
+        ctx.fillStyle = sunWash;
+        ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
-      // Diagonal warm sunbeams streaming from top-left across rooftops & marina
-      const beamGrad = ctx.createLinearGradient(0, 0, WORLD.width * 0.85, WORLD.height * 0.85);
-      beamGrad.addColorStop(0, "rgba(255, 240, 190, 0.22)");
-      beamGrad.addColorStop(0.6, "rgba(255, 210, 130, 0.08)");
-      beamGrad.addColorStop(1, "rgba(255, 200, 110, 0)");
-      ctx.fillStyle = beamGrad;
-      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+        // Volumetric Diagonal Sunbeams (God Rays) streaming across the harbor, street & rooftops
+        const sunX = WORLD.width * 0.11;
+        const sunY = WORLD.height * 0.06;
+        const rayAngles = [
+          { a1: 0.22, a2: 0.36, alpha: 0.14 + Math.sin(t * 0.7) * 0.03 },
+          { a1: 0.42, a2: 0.58, alpha: 0.16 + Math.cos(t * 0.5) * 0.03 },
+          { a1: 0.65, a2: 0.80, alpha: 0.13 + Math.sin(t * 0.9) * 0.03 },
+          { a1: 0.88, a2: 1.02, alpha: 0.11 + Math.cos(t * 0.6) * 0.02 }
+        ];
+        rayAngles.forEach((ray) => {
+          const len = WORLD.width * 1.15;
+          const rg = ctx.createLinearGradient(
+            sunX,
+            sunY,
+            sunX + Math.cos((ray.a1 + ray.a2) * 0.5) * len,
+            sunY + Math.sin((ray.a1 + ray.a2) * 0.5) * len
+          );
+          rg.addColorStop(0, `rgba(255, 246, 205, ${ray.alpha.toFixed(3)})`);
+          rg.addColorStop(0.55, `rgba(255, 225, 145, ${(ray.alpha * 0.45).toFixed(3)})`);
+          rg.addColorStop(1, "rgba(255, 215, 130, 0)");
+          ctx.fillStyle = rg;
+          ctx.beginPath();
+          ctx.moveTo(sunX, sunY);
+          ctx.lineTo(sunX + Math.cos(ray.a1) * len, sunY + Math.sin(ray.a1) * len);
+          ctx.lineTo(sunX + Math.cos(ray.a2) * len, sunY + Math.sin(ray.a2) * len);
+          ctx.closePath();
+          ctx.fill();
+        });
+
+        // Radiant Animated Sun Disk in the upper-left harbor sky
+        const diskGlow = ctx.createRadialGradient(sunX, sunY, 4, sunX, sunY, 95);
+        diskGlow.addColorStop(0, "rgba(255, 255, 235, 0.95)");
+        diskGlow.addColorStop(0.25, "rgba(255, 232, 145, 0.65)");
+        diskGlow.addColorStop(0.6, "rgba(255, 195, 85, 0.22)");
+        diskGlow.addColorStop(1, "rgba(255, 180, 60, 0)");
+        ctx.fillStyle = diskGlow;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 95, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sparkling Daytime Sunlight Glints dancing on the turquoise Marina water!
+        ctx.globalCompositeOperation = "source-over";
+        for (let i = 0; i < 18; i++) {
+          const gx = (0.025 + ((i * 37) % 19) * 0.01) * WORLD.width + Math.sin(t * 1.4 + i) * 6;
+          const gy = (0.28 + ((i * 53) % 27) * 0.01) * WORLD.height + Math.cos(t * 1.1 + i) * 3;
+          const glintPulse = Math.max(0, Math.sin(t * 3.2 + i * 1.7));
+          if (glintPulse > 0.25) {
+            const r = 1.8 + glintPulse * 2.6;
+            ctx.strokeStyle = `rgba(255, 252, 225, ${(glintPulse * 0.85).toFixed(2)})`;
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(gx - r * 2.2, gy);
+            ctx.lineTo(gx + r * 2.2, gy);
+            ctx.moveTo(gx, gy - r * 1.4);
+            ctx.lineTo(gx, gy + r * 1.4);
+            ctx.stroke();
+          }
+        }
+      } else {
+        // Overcast / rainy / snowy daytime sky tint
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgba(75, 98, 128, 0.18)";
+        ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+      }
     } else if (tod === "dawn") {
       // Rose-gold & lavender NYC sunrise glow
       ctx.globalCompositeOperation = "screen";
       const dawnGrad = ctx.createLinearGradient(WORLD.width, 0, 0, WORLD.height);
-      dawnGrad.addColorStop(0, "rgba(255, 135, 115, 0.28)");
-      dawnGrad.addColorStop(0.45, "rgba(235, 150, 185, 0.18)");
+      dawnGrad.addColorStop(0, "rgba(255, 135, 115, 0.34)");
+      dawnGrad.addColorStop(0.45, "rgba(235, 150, 185, 0.20)");
       dawnGrad.addColorStop(1, "rgba(95, 110, 210, 0.14)");
       ctx.fillStyle = dawnGrad;
       ctx.fillRect(0, 0, WORLD.width, WORLD.height);
@@ -453,8 +547,8 @@
       // Rich Golden-Hour Sunset (copper-orange & magenta dusk)
       ctx.globalCompositeOperation = "screen";
       const sunGrad = ctx.createLinearGradient(0, 0, WORLD.width, WORLD.height);
-      sunGrad.addColorStop(0, "rgba(255, 94, 32, 0.28)");
-      sunGrad.addColorStop(0.5, "rgba(245, 145, 55, 0.20)");
+      sunGrad.addColorStop(0, "rgba(255, 105, 38, 0.36)");
+      sunGrad.addColorStop(0.5, "rgba(245, 145, 55, 0.22)");
       sunGrad.addColorStop(1, "rgba(175, 48, 115, 0.18)");
       ctx.fillStyle = sunGrad;
       ctx.fillRect(0, 0, WORLD.width, WORLD.height);
@@ -707,31 +801,39 @@
     {
       x: 0.762,
       y: 0.542,
-      pose: "look",
-      pause: 110,
-      bubble: "🐾 Courtyard Arch",
-      statusEn: "Exploring the Ochre Courtyard Arch",
-      statusUk: "Гуляє під аркою двору"
+      pose: "sniff",
+      pause: 240,
+      bubble: "🐾 *sniff-sniff*",
+      statusEn: "Sniffing the cobblestones under the Ochre Courtyard Arch",
+      statusUk: "Обнюхує бруківку під аркою двору"
     },
     { x: 0.742, y: 0.582 },
     {
       x: 0.712,
       y: 0.595,
       pose: "lie",
-      pause: 260,
+      pause: 1320,
       bubble: "PURR... 💤",
-      statusEn: "💤 Curled up & lying down under the warm archway lantern",
-      statusUk: "💤 Лежить калачиком і муркоче під ліхтарем арки"
+      statusEn: "💤 Curled up & sleeping peacefully by the archway",
+      statusUk: "💤 Довго лежить калачиком і муркоче біля арки"
     },
     // 2. Sidewalk strictly between the cafe window wall and the parked 90s green coupe
     {
       x: 0.682,
       y: 0.574,
-      statusEn: "🐾 Strolling past the parked 90s green coupe",
-      statusUk: "🐾 Неспішно йде по тротуару повз зелене купе"
+      statusEn: "🐾 Slowly strolling past the parked 90s green coupe",
+      statusUk: "🐾 Повільно йде по тротуару повз зелене купе"
     },
     { x: 0.648, y: 0.562 },
-    { x: 0.592, y: 0.602 },
+    {
+      x: 0.592,
+      y: 0.602,
+      pose: "groom",
+      pause: 860,
+      bubble: "🧼 *lick-lick* 🐾",
+      statusEn: "🧼 Sitting & licking its fur clean on the sidewalk",
+      statusUk: "🧼 Сидить і ретельно вилизує шерсть на тротуарі"
+    },
     { x: 0.548, y: 0.632 },
     { x: 0.498, y: 0.635 },
     // 3. Warm Corner Cafe entrance — sits down to groom & wash behind its ear!
@@ -739,33 +841,33 @@
       x: 0.488,
       y: 0.598,
       pose: "groom",
-      pause: 250,
-      bubble: "🧼 *lick-lick* 🐾",
-      statusEn: "🧼 Sitting & washing its face with a paw by the Corner Café",
-      statusUk: "🧼 Сидить і вмивається лапкою біля дверей кафе"
+      pause: 960,
+      bubble: "🧼 *lick-lick-lick* 🐾",
+      statusEn: "🧼 Sitting & washing its face, chest, and back by the Corner Café",
+      statusUk: "🧼 Сидить і старанно вмивається лапкою та вилизує грудку біля кафе"
     },
     { x: 0.465, y: 0.614 },
     { x: 0.448, y: 0.572 },
     {
       x: 0.445,
       y: 0.538,
-      pose: "look",
-      pause: 115,
-      bubble: "MEOW ♪",
-      statusEn: "Listening to jazz-brass outside the steamed café window",
-      statusUk: "Слухає музику під теплим вікном кафе"
+      pose: "lie",
+      pause: 1180,
+      bubble: "PURRRR... ☀️💤",
+      statusEn: "💤 Loafing & resting outside the warm Corner Café window",
+      statusUk: "💤 Лежить і гріється під вікном кутового кафе"
     },
     { x: 0.448, y: 0.572 },
     // 4. Across the center of the wet white zebra crosswalk (clear of lamppost!)
     {
       x: 0.455,
       y: 0.618,
-      speedMult: 1.22,
-      statusEn: "🐾 Trotting across the wet white zebra crosswalk",
-      statusUk: "🐾 Переходить дорогу по пішохідній зебрі"
+      speedMult: 1.12,
+      statusEn: "🐾 Crossing the white zebra crosswalk",
+      statusUk: "🐾 Переходить вулицю по пішохідній зебрі"
     },
-    { x: 0.398, y: 0.648, speedMult: 1.22 },
-    { x: 0.348, y: 0.678, speedMult: 1.22 },
+    { x: 0.398, y: 0.648, speedMult: 1.12 },
+    { x: 0.348, y: 0.678, speedMult: 1.12 },
     { x: 0.308, y: 0.696 },
     { x: 0.262, y: 0.668 },
     // 5. Marina Harbor Promenade — sits down to groom & sniff the ocean breeze!
@@ -773,49 +875,57 @@
       x: 0.218,
       y: 0.612,
       pose: "groom",
-      pause: 240,
+      pause: 920,
       bubble: "🧼 Harbor grooming 🐟",
-      statusEn: "🧼 Sitting & grooming on the Marina Promenade by the yachts",
-      statusUk: "🧼 Сидить і чистить шерсть на набережній біля яхт"
+      statusEn: "🧼 Sitting & licking its paws and fur on the Marina Promenade",
+      statusUk: "🧼 Сидить і вилизує лапки та спинку на набережній біля яхт"
     },
     {
       x: 0.235,
       y: 0.555,
-      statusEn: "🐾 Walking along the Marina under the warm festoon bulbs",
-      statusUk: "🐾 Прогулюється набережною під гірляндами"
+      statusEn: "🐾 Unhurriedly walking along the Marina harbor",
+      statusUk: "🐾 Неспішно прогулюється набережною"
     },
     { x: 0.275, y: 0.505 },
-    { x: 0.325, y: 0.465 },
+    {
+      x: 0.325,
+      y: 0.465,
+      pose: "sniff",
+      pause: 220,
+      bubble: "🐾 *sniff* 🐟",
+      statusEn: "Sniffing the harbor breeze along the promenade",
+      statusUk: "Принюхується до морського бризу на набережній"
+    },
     { x: 0.365, y: 0.432 },
     { x: 0.395, y: 0.412 },
     // 6. Up the Brownstone Stoop Stairs (exact stone steps!) -> lies down on top landing!
     {
       x: 0.402,
       y: 0.358,
-      speedMult: 0.88,
-      statusEn: "🐾 Climbing up the Brownstone stoop stone stairs",
-      statusUk: "🐾 Піднімається кам'яними сходами браунстоуну"
+      speedMult: 0.82,
+      statusEn: "🐾 Stepping carefully up the Brownstone stoop stairs",
+      statusUk: "🐾 Повільно піднімається кам'яними сходами браунстоуну"
     },
-    { x: 0.418, y: 0.332, speedMult: 0.88 },
+    { x: 0.418, y: 0.332, speedMult: 0.82 },
     {
       x: 0.432,
       y: 0.308,
       pose: "lie",
-      pause: 270,
-      bubble: "💤 Cozy Stoop Nap",
-      statusEn: "💤 Lying down on the top Brownstone stoop landing",
-      statusUk: "💤 Лежить і відпочиває на верхній сходинці ганку"
+      pause: 1480,
+      bubble: "💤 Long Stoop Nap",
+      statusEn: "💤 Taking a long cozy catnap on the top Brownstone stoop",
+      statusUk: "💤 Довго спить калачиком на верхній сходинці ганку"
     },
     // 7. Back down the stoop stairs & along the sidewalk to the cafe and archway
-    { x: 0.418, y: 0.332, speedMult: 0.92 },
-    { x: 0.402, y: 0.358, speedMult: 0.92 },
+    { x: 0.418, y: 0.332, speedMult: 0.85 },
+    { x: 0.402, y: 0.358, speedMult: 0.85 },
     { x: 0.395, y: 0.412 },
     { x: 0.365, y: 0.432 },
     {
       x: 0.412,
       y: 0.498,
-      statusEn: "🐾 Strolling back down the street toward the café",
-      statusUk: "🐾 Повертається вздовж вулиці до кафе"
+      statusEn: "🐾 Strolling lazily back down the sidewalk",
+      statusUk: "🐾 Ліниво повертається вздовж тротуару"
     },
     { x: 0.448, y: 0.572 },
     { x: 0.465, y: 0.614 },
@@ -825,10 +935,10 @@
       x: 0.592,
       y: 0.602,
       pose: "groom",
-      pause: 210,
-      bubble: "🧼 Purrrr... 🐾",
-      statusEn: "🧼 Sitting & grooming its white paws on the sidewalk",
-      statusUk: "🧼 Сидить і чистить білі лапки на тротуарі"
+      pause: 880,
+      bubble: "🧼 *lick-lick* 🐾",
+      statusEn: "🧼 Sitting & licking its chest and white paws on the sidewalk",
+      statusUk: "🧼 Сидить і вилизує грудку та білі лапки на тротуарі"
     },
     { x: 0.648, y: 0.562 },
     { x: 0.682, y: 0.574 },
@@ -837,23 +947,27 @@
   ];
 
   const gingerCat = {
-    segIndex: 0,
-    wx: GINGER_CAT_ROUTE[0].x * WORLD.width,
-    wy: GINGER_CAT_ROUTE[0].y * WORLD.height,
+    segIndex: 2, // Start right along the visible central sidewalk near the café & green coupe!
+    wx: GINGER_CAT_ROUTE[2].x * WORLD.width,
+    wy: GINGER_CAT_ROUTE[2].y * WORLD.height,
     facing: -1, // -1 = left, +1 = right
     smoothFacing: -1,
     smoothSlope: 0,
+    currentSpeed: 0,
     walkPhase: 0,
-    pose: "walk", // "walk" | "groom" | "lie" | "look"
+    pose: "walk", // "walk" | "groom" | "lie" | "stretch" | "sniff" | "look"
     pauseFrames: 0,
+    totalPause: 0,
+    groomTimer: 0,
+    spontaneousWalkTimer: 320,
     bubbleText: "",
     bubbleTimer: 0,
     hopOffset: 0,
     hopVel: 0,
     stepCounter: 0,
     followCam: false,
-    statusEn: "🐾 Strolling along the sidewalk...",
-    statusUk: "🐾 Прогулюється тротуаром...",
+    statusEn: "🐾 Slowly strolling along the sidewalk...",
+    statusUk: "🐾 Повільно прогулюється тротуаром...",
     hearts: []
   };
   const catPawPrints = [];
@@ -951,27 +1065,32 @@
   function setCatPoseManual(pose) {
     if (pose === "walk") {
       gingerCat.pauseFrames = 0;
+      gingerCat.totalPause = 0;
       gingerCat.pose = "walk";
-      gingerCat.bubbleText = "🐾 ON PATROL!";
+      gingerCat.spontaneousWalkTimer = 380;
+      gingerCat.bubbleText = "🐾 Slow stroll...";
       gingerCat.bubbleTimer = 95;
-      gingerCat.statusEn = "🐾 Strolling along the neighborhood sidewalk";
-      gingerCat.statusUk = "🐾 Прогулюється тротуарами міста";
+      gingerCat.statusEn = "🐾 Slowly strolling along the neighborhood sidewalk";
+      gingerCat.statusUk = "🐾 Неспішно прогулюється тротуарами міста";
       playCatSound("meow");
     } else if (pose === "groom") {
       gingerCat.pose = "groom";
-      gingerCat.pauseFrames = 380;
-      gingerCat.bubbleText = "🧼 *lick-lick* 🐾";
-      gingerCat.bubbleTimer = 180;
-      gingerCat.statusEn = "🧼 Sitting & washing behind its ear with a white paw";
-      gingerCat.statusUk = "🧼 Сидить і старанно вмивається білою лапкою";
+      gingerCat.pauseFrames = 960;
+      gingerCat.totalPause = 960;
+      gingerCat.groomTimer = 0;
+      gingerCat.bubbleText = "🧼 *lick-lick-lick* 🐾";
+      gingerCat.bubbleTimer = 210;
+      gingerCat.statusEn = "🧼 Sitting & licking its paws, chest, and back fur";
+      gingerCat.statusUk = "🧼 Сидить і старанно вилизує лапки, грудку та спинку";
       playCatSound("purr");
     } else if (pose === "lie") {
       gingerCat.pose = "lie";
-      gingerCat.pauseFrames = 420;
-      gingerCat.bubbleText = "PURR... 💤";
-      gingerCat.bubbleTimer = 200;
-      gingerCat.statusEn = "💤 Curled up on the warm stones & purring";
-      gingerCat.statusUk = "💤 Лежить калачиком на теплому камінні й муркоче";
+      gingerCat.pauseFrames = 1500;
+      gingerCat.totalPause = 1500;
+      gingerCat.bubbleText = "PURRRR... 💤";
+      gingerCat.bubbleTimer = 240;
+      gingerCat.statusEn = "💤 Curled up for a long cozy nap & purring";
+      gingerCat.statusUk = "💤 Довго лежить калачиком на теплому камінні й муркоче";
       playCatSound("purr");
     }
     syncCatResidentHud();
@@ -2042,10 +2161,25 @@
     ctx.scale(camera.zoom, camera.zoom);
     ctx.translate(-camera.x, -camera.y);
 
-    if (mapImageLoaded) {
+    const activeTod = getEffectiveTod();
+    const targetDayBlend =
+      activeTod === "day" ? 1.0 : activeTod === "dawn" ? 0.80 : activeTod === "sunset" ? 0.62 : 0.0;
+    nycEnv.daylightBlend += (targetDayBlend - nycEnv.daylightBlend) * 0.08;
+
+    if (mapDayImageLoaded && nycEnv.daylightBlend >= 0.98) {
+      ctx.drawImage(mapDayImage, 0, 0, WORLD.width, WORLD.height);
+    } else if (mapImageLoaded) {
       ctx.drawImage(mapImage, 0, 0, WORLD.width, WORLD.height);
+      if (mapDayImageLoaded && nycEnv.daylightBlend > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = nycEnv.daylightBlend;
+        ctx.drawImage(mapDayImage, 0, 0, WORLD.width, WORLD.height);
+        ctx.restore();
+      }
+    } else if (mapDayImageLoaded) {
+      ctx.drawImage(mapDayImage, 0, 0, WORLD.width, WORLD.height);
     } else {
-      ctx.fillStyle = "#10131C";
+      ctx.fillStyle = activeTod === "day" ? "#2E5B88" : "#10131C";
       ctx.fillRect(0, 0, WORLD.width, WORLD.height);
     }
 
@@ -2172,10 +2306,48 @@
     const isPaused = gingerCat.pauseFrames > 0;
     if (isPaused) {
       gingerCat.pauseFrames--;
+      gingerCat.currentSpeed *= 0.82;
       gingerCat.walkPhase *= 0.85;
       gingerCat.smoothSlope *= 0.88;
+
+      if (gingerCat.pose === "groom") {
+        gingerCat.groomTimer++;
+        // Periodically spawn a tiny grooming sparkle or purr note
+        if (gingerCat.groomTimer % 110 === 0 && gingerCat.hearts.length < 4) {
+          gingerCat.hearts.push({
+            ox: (Math.random() - 0.5) * 16,
+            oy: -18,
+            vy: -0.38,
+            alpha: 0.9,
+            symbol: "✨"
+          });
+        }
+      } else if (gingerCat.pose === "lie") {
+        // Float gentle sleeping 'z' bubbles while deeply curled up
+        if (gingerCat.pauseFrames % 95 === 0 && gingerCat.pauseFrames > 140 && gingerCat.hearts.length < 4) {
+          gingerCat.hearts.push({
+            ox: 10 * (gingerCat.smoothFacing >= 0 ? 1 : -1),
+            oy: -14,
+            vy: -0.32,
+            alpha: 0.88,
+            symbol: "💤"
+          });
+        }
+        // Real cats do a big front-paw arch-back stretch right before getting up from a long nap!
+        if (gingerCat.pauseFrames === 110 && gingerCat.totalPause >= 600) {
+          gingerCat.pose = "stretch";
+          gingerCat.bubbleText = "🐾 *big stretch & yawn*";
+          gingerCat.bubbleTimer = 105;
+          gingerCat.statusEn = "🐾 Doing a big feline stretch after a long nap";
+          gingerCat.statusUk = "🐾 Солодко потягується після довгого сну";
+          syncCatResidentHud();
+        }
+      }
+
       if (gingerCat.pauseFrames === 0) {
         gingerCat.pose = "walk";
+        gingerCat.totalPause = 0;
+        gingerCat.spontaneousWalkTimer = 340 + Math.floor(Math.random() * 220);
         syncCatResidentHud();
       }
     } else {
@@ -2184,55 +2356,100 @@
       const dy = ty - gingerCat.wy;
       const dist = Math.hypot(dx, dy);
 
-      // Realistic, unhurried feline walking speed (~0.62 px/frame, slowing down smoothly before sitting/lying stops)
+      // Slow, unhurried, realistic feline strolling speed (~0.23 px/frame with smooth inertia)
       const mult = targetPt.speedMult || 1.0;
-      const slowDown = targetPt.pause && dist < 24 ? Math.max(0.45, dist / 24) : 1.0;
-      const speed = (0.62 + audioEnergy.sub * 0.22) * mult * slowDown;
+      const approachSlow = targetPt.pause && dist < 26 ? Math.max(0.35, dist / 26) : 1.0;
+      const targetSpeed = (0.23 + audioEnergy.sub * 0.06) * mult * approachSlow;
+      gingerCat.currentSpeed += (targetSpeed - gingerCat.currentSpeed) * 0.09;
+      const speed = Math.max(0.08, gingerCat.currentSpeed);
 
-      if (Math.abs(dx) > 0.15) {
+      if (Math.abs(dx) > 0.12) {
         gingerCat.facing = dx >= 0 ? 1 : -1;
       }
-      gingerCat.smoothFacing += (gingerCat.facing - gingerCat.smoothFacing) * 0.16;
+      gingerCat.smoothFacing += (gingerCat.facing - gingerCat.smoothFacing) * 0.12;
 
       // Subtle body tilt along stairs & isometric slopes
-      const rawSlope = Math.max(-0.38, Math.min(0.38, (dy / Math.max(1, Math.abs(dx))) * 0.45));
-      gingerCat.smoothSlope += (rawSlope - gingerCat.smoothSlope) * 0.14;
+      const rawSlope = Math.max(-0.36, Math.min(0.36, (dy / Math.max(1, Math.abs(dx))) * 0.42));
+      gingerCat.smoothSlope += (rawSlope - gingerCat.smoothSlope) * 0.12;
 
-      if (dist <= speed) {
-        gingerCat.wx = tx;
-        gingerCat.wy = ty;
-        gingerCat.segIndex = nextIdx;
-        if (targetPt.statusEn) gingerCat.statusEn = targetPt.statusEn;
-        if (targetPt.statusUk) gingerCat.statusUk = targetPt.statusUk;
+      // Spontaneous autonomous cat behavior mid-sidewalk (sniffing, licking fur, or sunbathing)
+      if (gingerCat.spontaneousWalkTimer > 0) {
+        gingerCat.spontaneousWalkTimer--;
+      } else if (dist > 22 && (!targetPt.speedMult || targetPt.speedMult <= 1.0)) {
+        const roll = Math.random();
+        const isSunnyDay = getEffectiveTod() === "day" && getEffectiveWeather() === "clear";
+        if (roll < 0.44) {
+          gingerCat.pose = "groom";
+          gingerCat.pauseFrames = 720 + Math.floor(Math.random() * 240);
+          gingerCat.totalPause = gingerCat.pauseFrames;
+          gingerCat.groomTimer = 0;
+          gingerCat.bubbleText = "🧼 *lick-lick* 🐾";
+          gingerCat.bubbleTimer = 170;
+          gingerCat.statusEn = "🧼 Stopped on the sidewalk to lick its fur & wash its paw";
+          gingerCat.statusUk = "🧼 Зупинився на тротуарі, щоб вилизати шерсть і лапку";
+          syncCatResidentHud();
+        } else if (roll < 0.76) {
+          gingerCat.pose = "sniff";
+          gingerCat.pauseFrames = 210 + Math.floor(Math.random() * 90);
+          gingerCat.totalPause = gingerCat.pauseFrames;
+          gingerCat.bubbleText = "🐾 *sniff-sniff*";
+          gingerCat.bubbleTimer = 120;
+          gingerCat.statusEn = "🐾 Pausing to sniff the cobblestones & look around";
+          gingerCat.statusUk = "🐾 Зупинився обнюхати бруківку й роззирнутися";
+          syncCatResidentHud();
+        } else if (isSunnyDay) {
+          gingerCat.pose = "lie";
+          gingerCat.pauseFrames = 1140 + Math.floor(Math.random() * 300);
+          gingerCat.totalPause = gingerCat.pauseFrames;
+          gingerCat.bubbleText = "☀️ Sunbathing... 💤";
+          gingerCat.bubbleTimer = 190;
+          gingerCat.statusEn = "☀️ Lying down in a warm New York sunbeam";
+          gingerCat.statusUk = "☀️ Влігся погрітися під теплим нью-йоркським сонцем";
+          syncCatResidentHud();
+        } else {
+          gingerCat.spontaneousWalkTimer = 320 + Math.floor(Math.random() * 200);
+        }
+      }
 
-        if (targetPt.pause) {
-          gingerCat.pauseFrames = targetPt.pause;
-          gingerCat.pose = targetPt.pose || "look";
-          if (targetPt.bubble && gingerCat.bubbleTimer <= 0) {
-            gingerCat.bubbleText = targetPt.bubble;
-            gingerCat.bubbleTimer = Math.min(180, targetPt.pause);
+      if (!gingerCat.pauseFrames) {
+        if (dist <= speed) {
+          gingerCat.wx = tx;
+          gingerCat.wy = ty;
+          gingerCat.segIndex = nextIdx;
+          if (targetPt.statusEn) gingerCat.statusEn = targetPt.statusEn;
+          if (targetPt.statusUk) gingerCat.statusUk = targetPt.statusUk;
+
+          if (targetPt.pause) {
+            gingerCat.pauseFrames = targetPt.pause;
+            gingerCat.totalPause = targetPt.pause;
+            gingerCat.pose = targetPt.pose || "sniff";
+            gingerCat.groomTimer = 0;
+            if (targetPt.bubble && gingerCat.bubbleTimer <= 0) {
+              gingerCat.bubbleText = targetPt.bubble;
+              gingerCat.bubbleTimer = Math.min(220, targetPt.pause);
+            }
           }
-        }
-        syncCatResidentHud();
-      } else {
-        gingerCat.wx += (dx / dist) * speed;
-        gingerCat.wy += (dy / dist) * speed;
-        // Natural feline stride cadence matched to actual ground speed
-        gingerCat.walkPhase += speed * 0.23;
-        gingerCat.stepCounter++;
+          syncCatResidentHud();
+        } else {
+          gingerCat.wx += (dx / dist) * speed;
+          gingerCat.wy += (dy / dist) * speed;
+          // Calm, natural 4-legged feline stride cadence matched to ground speed
+          gingerCat.walkPhase += speed * 0.22;
+          gingerCat.stepCounter++;
 
-        // Leave subtle glowing pawprints along the wet stone sidewalk
-        if (gingerCat.stepCounter % 18 === 0) {
-          const side = (gingerCat.stepCounter % 36 === 0 ? 1 : -1) * 3.2;
-          catPawPrints.push({
-            wx: gingerCat.wx + (-dy / dist) * side,
-            wy: gingerCat.wy + (dx / dist) * side,
-            alpha: 0.65
-          });
-          if (catPawPrints.length > 26) catPawPrints.shift();
-        }
-        if (gingerCat.stepCounter % 55 === 0) {
-          spawnWorldRipple(gingerCat.wx, gingerCat.wy + 4, "rgba(255, 145, 45, 0.35)", 22);
+          // Leave subtle pawprints along the sidewalk
+          if (gingerCat.stepCounter % 34 === 0) {
+            const side = (gingerCat.stepCounter % 68 === 0 ? 1 : -1) * 3.0;
+            catPawPrints.push({
+              wx: gingerCat.wx + (-dy / dist) * side,
+              wy: gingerCat.wy + (dx / dist) * side,
+              alpha: 0.58
+            });
+            if (catPawPrints.length > 26) catPawPrints.shift();
+          }
+          if (gingerCat.stepCounter % 110 === 0) {
+            spawnWorldRipple(gingerCat.wx, gingerCat.wy + 4, "rgba(255, 145, 45, 0.28)", 20);
+          }
         }
       }
     }
@@ -2247,7 +2464,7 @@
     // 1. Draw glowing pawprints behind the ginger cat
     for (let i = catPawPrints.length - 1; i >= 0; i--) {
       const p = catPawPrints[i];
-      p.alpha *= 0.993;
+      p.alpha *= 0.994;
       if (p.alpha < 0.04) {
         catPawPrints.splice(i, 1);
         continue;
@@ -2255,7 +2472,7 @@
       ctx.save();
       ctx.fillStyle = `rgba(255, 155, 55, ${p.alpha.toFixed(3)})`;
       ctx.beginPath();
-      ctx.arc(p.wx, p.wy, 2.1, 0, Math.PI * 2);
+      ctx.arc(p.wx, p.wy, 2.0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -2263,10 +2480,10 @@
     // 2. Draw any flying fish treats tossed to the cat!
     for (let i = catFishTreats.length - 1; i >= 0; i--) {
       const ft = catFishTreats[i];
-      ft.progress += 0.045;
+      ft.progress += 0.042;
       if (ft.progress >= 1) {
         catFishTreats.splice(i, 1);
-        gingerCat.hopVel = -4.5;
+        gingerCat.hopVel = -4.2;
         spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#38BDF8", 45);
         continue;
       }
@@ -2293,19 +2510,27 @@
     ctx.save();
     ctx.translate(gingerCat.wx, gingerCat.wy + gingerCat.hopOffset);
 
-    // Warm streetlamp aura under the cat
-    const aura = ctx.createRadialGradient(0, 2, 2, 0, 2, 30);
-    aura.addColorStop(0, gingerCat.followCam ? "rgba(255, 145, 40, 0.50)" : "rgba(255, 140, 36, 0.34)");
+    // Warm aura under the cat (subtle in daylight, warmer at night)
+    const isDay = getEffectiveTod() === "day";
+    const aura = ctx.createRadialGradient(0, 2, 2, 0, 2, 28);
+    aura.addColorStop(
+      0,
+      gingerCat.followCam
+        ? "rgba(255, 145, 40, 0.45)"
+        : isDay
+        ? "rgba(255, 195, 85, 0.22)"
+        : "rgba(255, 140, 36, 0.34)"
+    );
     aura.addColorStop(1, "rgba(255, 140, 36, 0)");
     ctx.fillStyle = aura;
     ctx.beginPath();
-    ctx.ellipse(0, 3, 28, 15, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 3, 26, 14, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Ground shadow
-    ctx.fillStyle = "rgba(5, 6, 10, 0.70)";
+    ctx.fillStyle = isDay ? "rgba(18, 24, 34, 0.48)" : "rgba(5, 6, 10, 0.68)";
     ctx.beginPath();
-    ctx.ellipse(0, 5, gingerCat.pose === "lie" ? 15.5 : 13.5, 5.2, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 4.8, gingerCat.pose === "lie" ? 15.8 : 13.5, 5.0, 0, 0, Math.PI * 2);
     ctx.fill();
 
     const flip = gingerCat.smoothFacing >= 0 ? 1 : -1;
@@ -2337,10 +2562,15 @@
 
     if (gingerCat.pose === "lie" && isPaused) {
       // ======================================================================
-      // POSE A: LYING DOWN CURLED / LOAFING ON THE WARM STONES ("кое где лежал")
+      // POSE A: LONG LYING DOWN — SPHINX LOAF + DEEP CURLED SLEEP ("лежал дольше")
       // ======================================================================
-      const breath = 1 + Math.sin(t * 3.2) * 0.045;
-      const tailTwitch = Math.sin(t * 2.4) * 2.8;
+      const breath = 1 + Math.sin(t * 2.4) * 0.042;
+      const tailTwitch = Math.sin(t * 1.7) * 2.4;
+      // Alternate between sphinx loaf (head up, slow blinking) and deep curled sleep (head on paws)
+      const isDeepSleep =
+        gingerCat.totalPause > 300 &&
+        gingerCat.pauseFrames < gingerCat.totalPause - 160 &&
+        gingerCat.pauseFrames > 160;
 
       // Curled striped tail resting along the cobblestones behind/around body
       ctx.strokeStyle = "#D96216";
@@ -2348,27 +2578,33 @@
       ctx.lineCap = "round";
       ctx.beginPath();
       ctx.moveTo(-11, -1);
-      ctx.quadraticCurveTo(-19, -3 + tailTwitch * 0.4, -15, 3.5 + tailTwitch * 0.5);
+      ctx.quadraticCurveTo(-19, -2.5 + tailTwitch * 0.35, -14.5, 3.8 + tailTwitch * 0.45);
       ctx.stroke();
       ctx.strokeStyle = "#FFEAD0";
       ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.moveTo(-16.2, 1.8 + tailTwitch * 0.4);
-      ctx.lineTo(-14.5, 3.8 + tailTwitch * 0.5);
+      ctx.moveTo(-16.0, 2.0 + tailTwitch * 0.35);
+      ctx.lineTo(-14.3, 3.9 + tailTwitch * 0.45);
       ctx.stroke();
 
-      // Cozy low-slung curled ginger body (breathing gently)
+      // Cozy low-slung curled ginger body (slow rhythmic breathing)
       ctx.save();
       ctx.scale(1, breath);
       ctx.fillStyle = "#F27D24";
       ctx.beginPath();
-      ctx.ellipse(-1.5, -3.2, 12.5, 6.2, 0, 0, Math.PI * 2);
+      ctx.ellipse(-1.5, -3.2, 12.8, 6.3, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Cream belly edge
+      // Folded hind haunch contour
+      ctx.fillStyle = "#E06919";
+      ctx.beginPath();
+      ctx.ellipse(-6.5, -2.2, 5.5, 4.5, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cream belly & chest edge
       ctx.fillStyle = "#FFEBD2";
       ctx.beginPath();
-      ctx.ellipse(4.5, -1.2, 6.5, 3.2, 0, 0, Math.PI * 2);
+      ctx.ellipse(4.8, -1.4, 6.5, 3.3, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Dark ginger tabby stripes on curled back
@@ -2376,7 +2612,7 @@
       ctx.lineWidth = 1.8;
       [-6.5, -2.5, 1.5].forEach((sx) => {
         ctx.beginPath();
-        ctx.moveTo(sx, -8.8);
+        ctx.moveTo(sx, -8.9);
         ctx.quadraticCurveTo(sx - 1, -5.2, sx + 0.5, -2.2);
         ctx.stroke();
       });
@@ -2385,13 +2621,18 @@
       // Tucked white front paws in front of chest
       ctx.fillStyle = "#FFF4E4";
       ctx.beginPath();
-      ctx.ellipse(9.2, 2.8, 3.2, 1.8, 0, 0, Math.PI * 2);
-      ctx.ellipse(12.2, 3.2, 2.8, 1.6, 0, 0, Math.PI * 2);
+      ctx.ellipse(9.4, 2.9, 3.3, 1.8, 0, 0, Math.PI * 2);
+      ctx.ellipse(12.4, 3.2, 2.9, 1.6, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Resting Ginger Head lowered onto front paws
+      // Head position: lowered onto paws in deep sleep, or held softly upright in sphinx loaf
+      const headY = isDeepSleep ? -4.8 + Math.sin(t * 2.4) * 0.35 : -8.2 + Math.sin(t * 2.0) * 0.3;
+      const headTilt = isDeepSleep ? 0.16 : 0.02;
+      const earFlick = Math.sin(t * 5.5) > 0.92 ? 0.14 : 0;
+
       ctx.save();
-      ctx.translate(9.8, -5.8 + Math.sin(t * 3.2) * 0.4);
+      ctx.translate(9.8, headY);
+      ctx.rotate(headTilt);
       ctx.fillStyle = "#F5882E";
       ctx.beginPath();
       ctx.arc(0, 0, 6.6, 0, Math.PI * 2);
@@ -2404,14 +2645,26 @@
       ctx.fill();
 
       drawEar(-2.5, -4.6, -0.22);
-      drawEar(2.5, -4.6, 0.18);
+      drawEar(2.5, -4.6, 0.18 + earFlick);
 
-      // Contented sleeping crescent eye
-      ctx.strokeStyle = "#1E1B18";
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.arc(2.0, -0.2, 1.8, 0.15 * Math.PI, 0.85 * Math.PI);
-      ctx.stroke();
+      // Eyes: closed crescent in deep sleep, or slow-blinking emerald eyes in loaf mode
+      const slowBlink = isDeepSleep || Math.sin(t * 1.4) > 0.35;
+      if (slowBlink) {
+        ctx.strokeStyle = "#1E1B18";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(2.0, -0.2, 1.8, 0.15 * Math.PI, 0.85 * Math.PI);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = "#34D399";
+        ctx.beginPath();
+        ctx.arc(2.0, -0.2, 1.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#090A0F";
+        ctx.beginPath();
+        ctx.ellipse(2.2, -0.2, 0.55, 1.15, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // Pink nose & whiskers
       ctx.fillStyle = "#FB7185";
@@ -2427,12 +2680,90 @@
       ctx.lineTo(8.5, 3.0);
       ctx.stroke();
       ctx.restore();
+    } else if (gingerCat.pose === "stretch" && isPaused) {
+      // ======================================================================
+      // POSE A2: BIG FELINE WAKE-UP STRETCH & YAWN (front paws extended, back arched)
+      // ======================================================================
+      const stretchWave = Math.sin(((110 - gingerCat.pauseFrames) / 110) * Math.PI);
+
+      // Hind legs planted upright while back arches high
+      ctx.strokeStyle = "#D96216";
+      ctx.lineWidth = 3.4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-8.5, -7.5 - stretchWave * 2.5);
+      ctx.lineTo(-9.5, 4.0);
+      ctx.stroke();
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(-9.0, 4.2, 2.2, 1.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tail held high and curled with a happy quiver
+      ctx.strokeStyle = "#D96216";
+      ctx.lineWidth = 4.0;
+      ctx.beginPath();
+      ctx.moveTo(-10.5, -8.5 - stretchWave * 2.5);
+      ctx.quadraticCurveTo(-17, -18, -12 + Math.sin(t * 14) * 1.2, -24);
+      ctx.stroke();
+
+      // Arched ginger body sloping down toward extended front shoulders
+      ctx.fillStyle = "#F27D24";
+      ctx.beginPath();
+      ctx.ellipse(-1.5, -6.2 - stretchWave * 1.8, 11.5, 5.8, 0.22 * stretchWave, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Extended front legs reaching far forward on the cobblestones!
+      ctx.strokeStyle = "#F27D24";
+      ctx.lineWidth = 3.4;
+      ctx.beginPath();
+      ctx.moveTo(5.5, -3.2);
+      ctx.lineTo(15.5 + stretchWave * 2.5, 3.8);
+      ctx.stroke();
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(16.5 + stretchWave * 2.5, 4.1, 2.8, 1.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Head lowered between shoulders with a cute pink yawning mouth!
+      ctx.save();
+      ctx.translate(9.2, -7.2 + stretchWave * 1.2);
+      ctx.rotate(-0.12);
+      ctx.fillStyle = "#F5882E";
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(2.4, 2.0, 3.6, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      drawEar(-2.6, -4.5, -0.28);
+      drawEar(2.2, -4.5, 0.08);
+
+      // Closed eyes & open pink yawn
+      ctx.strokeStyle = "#1E1B18";
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(0.4, -0.4);
+      ctx.lineTo(3.8, -0.2);
+      ctx.stroke();
+      if (stretchWave > 0.35) {
+        ctx.fillStyle = "#FB7185";
+        ctx.beginPath();
+        ctx.ellipse(3.6, 2.7, 2.1 * stretchWave, 1.6 * stretchWave, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     } else if (gingerCat.pose === "groom" && isPaused) {
       // ======================================================================
-      // POSE B: SITTING & GROOMING / WASHING WITH PAW ("сел чиститься")
+      // POSE B: 3-STAGE SELF-GROOMING & LICKING ("что б он чистился вылизывался")
+      // Sub-mode 0: Licking raised front white paw & rubbing behind ear
+      // Sub-mode 1: Bowing head to lick fluffy chest & shoulder fur
+      // Sub-mode 2: Turning head back to lick striped back/flank fur
       // ======================================================================
-      const lickCycle = Math.sin(t * 7.2); // rhythmic paw-licking & ear-washing cycle
-      const tailCurl = Math.sin(t * 3.0) * 2.5;
+      const groomSub = Math.floor(gingerCat.groomTimer / 210) % 3;
+      const lickFast = Math.sin(t * 9.5); // realistic rapid feline tongue/head licking rhythm
+      const tailCurl = Math.sin(t * 2.4) * 2.2;
 
       // Tail curled neatly behind sitting haunches
       ctx.strokeStyle = "#D96216";
@@ -2449,16 +2780,16 @@
       ctx.lineTo(-14, -9.5 + tailCurl * 0.6);
       ctx.stroke();
 
-      // Sitting upright ginger torso (angled up)
+      // Sitting upright ginger torso
       ctx.fillStyle = "#F27D24";
       ctx.beginPath();
-      ctx.ellipse(-1.5, -5.5, 7.8, 10.2, 0.32, 0, Math.PI * 2);
+      ctx.ellipse(-1.5, -5.5, 7.8, 10.2, 0.30, 0, Math.PI * 2);
       ctx.fill();
 
       // Fluffy cream chest patch
       ctx.fillStyle = "#FFEBD2";
       ctx.beginPath();
-      ctx.ellipse(3.2, -7.2, 4.2, 6.2, 0.15, 0, Math.PI * 2);
+      ctx.ellipse(3.2, -7.2, 4.4, 6.4, 0.15, 0, Math.PI * 2);
       ctx.fill();
 
       // Dark ginger stripes on sitting back
@@ -2483,75 +2814,163 @@
       ctx.ellipse(4.4, 4.3, 2.5, 1.5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Ginger Head tilted slightly down/sideways into the grooming paw!
-      ctx.save();
-      ctx.translate(4.8, -15.2 + lickCycle * 0.9);
-      ctx.rotate(0.12 + lickCycle * 0.08);
+      if (groomSub === 0) {
+        // SUB-MODE 0: Licking raised front white paw with pink tongue & washing over ear
+        const isRubbingEar = Math.sin(t * 2.2) > 0.25;
+        ctx.save();
+        ctx.translate(4.8, -15.0 + lickFast * 0.75);
+        ctx.rotate(0.14 + (isRubbingEar ? 0.12 : 0.04) * lickFast);
 
-      ctx.fillStyle = "#F5882E";
-      ctx.beginPath();
-      ctx.arc(0, 0, 6.6, 0, Math.PI * 2);
-      ctx.fill();
+        ctx.fillStyle = "#F5882E";
+        ctx.beginPath();
+        ctx.arc(0, 0, 6.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.ellipse(2.5, 2.0, 3.6, 2.5, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-      ctx.fillStyle = "#FFF4E4";
-      ctx.beginPath();
-      ctx.ellipse(2.5, 2.0, 3.6, 2.5, 0, 0, Math.PI * 2);
-      ctx.fill();
+        drawEar(-2.6, -4.6, -0.2);
+        drawEar(2.4, -4.6, 0.25 + lickFast * 0.09);
 
-      drawEar(-2.6, -4.6, -0.2);
-      drawEar(2.4, -4.6, 0.22 + lickCycle * 0.08);
+        // Closed happy eye
+        ctx.strokeStyle = "#1E1B18";
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(0.5, -0.4);
+        ctx.lineTo(4.0, -0.2);
+        ctx.stroke();
 
-      // Happy closed eye while washing face
-      ctx.strokeStyle = "#1E1B18";
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.moveTo(0.5, -0.4);
-      ctx.lineTo(4.0, -0.2);
-      ctx.stroke();
-
-      // Little pink tongue licking the raised white paw!
-      if (lickCycle > -0.2) {
+        // Pink tongue actively licking the raised white paw!
+        if (lickFast > -0.15) {
+          ctx.fillStyle = "#FB7185";
+          ctx.beginPath();
+          ctx.ellipse(5.4, 2.6 - lickFast * 1.1, 1.9, 1.2, -0.35, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.fillStyle = "#FB7185";
         ctx.beginPath();
-        ctx.ellipse(5.2, 2.8 - lickCycle * 0.8, 1.7, 1.1, -0.3, 0, Math.PI * 2);
+        ctx.arc(5.2, 1.2, 1.15, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+
+        // Raised Front White Paw held to mouth for licking or sweeping over ear
+        const pawX = isRubbingEar ? 7.8 + Math.cos(t * 8.5) * 1.6 : 9.4 + lickFast * 0.6;
+        const pawY = isRubbingEar ? -14.2 + Math.sin(t * 8.5) * 2.6 : -11.8 + lickFast * 0.9;
+        ctx.strokeStyle = "#F27D24";
+        ctx.lineWidth = 3.4;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(3.5, -7.5);
+        ctx.quadraticCurveTo(8.5, -8.5, pawX, pawY);
+        ctx.stroke();
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.arc(pawX, pawY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (groomSub === 1) {
+        // SUB-MODE 1: Bowing head down to lick fluffy cream chest & shoulder fur!
+        const chestStroke = Math.sin(t * 8.8);
+        // Second front leg also planted
+        ctx.strokeStyle = "#E06919";
+        ctx.lineWidth = 3.3;
+        ctx.beginPath();
+        ctx.moveTo(4.2, -3.5);
+        ctx.lineTo(5.6, 3.8);
+        ctx.stroke();
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.ellipse(6.1, 4.1, 2.3, 1.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(4.5, -12.6 + chestStroke * 1.35);
+        ctx.rotate(0.46 + chestStroke * 0.14); // Bowed down toward chest
+
+        ctx.fillStyle = "#F5882E";
+        ctx.beginPath();
+        ctx.arc(0, 0, 6.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.ellipse(2.2, 2.2, 3.5, 2.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawEar(-2.4, -4.5, -0.15);
+        drawEar(2.4, -4.5, 0.25);
+
+        ctx.strokeStyle = "#1E1B18";
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(0.4, -0.2);
+        ctx.lineTo(3.8, 0.1);
+        ctx.stroke();
+
+        // Pink tongue licking down into the cream chest fur
+        if (chestStroke > -0.2) {
+          ctx.fillStyle = "#FB7185";
+          ctx.beginPath();
+          ctx.ellipse(3.6, 4.2 + chestStroke * 0.9, 1.6, 2.1, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      } else {
+        // SUB-MODE 2: Turning head back over shoulder to lick striped back/flank fur!
+        const flankLick = Math.sin(t * 8.6);
+        // Slightly lifted hind paw while grooming flank
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.ellipse(-2.5, 1.2 + flankLick * 0.4, 2.6, 1.5, -0.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(2.0, -14.2 + flankLick * 0.9);
+        ctx.scale(-1, 1); // Head turned backward toward its own striped back!
+        ctx.rotate(0.28 + flankLick * 0.12);
+
+        ctx.fillStyle = "#F5882E";
+        ctx.beginPath();
+        ctx.arc(0, 0, 6.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.ellipse(2.3, 2.0, 3.5, 2.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawEar(-2.5, -4.5, -0.22);
+        drawEar(2.3, -4.5, 0.20);
+
+        ctx.strokeStyle = "#1E1B18";
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(0.5, -0.3);
+        ctx.lineTo(3.8, -0.1);
+        ctx.stroke();
+
+        // Pink tongue licking its striped back fur
+        if (flankLick > -0.2) {
+          ctx.fillStyle = "#FB7185";
+          ctx.beginPath();
+          ctx.ellipse(4.8, 3.4 + flankLick * 0.8, 1.8, 1.3, 0.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
       }
-
-      // Pink nose
-      ctx.fillStyle = "#FB7185";
-      ctx.beginPath();
-      ctx.arc(5.2, 1.2, 1.15, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Raised Front Paw rubbing cheek & ear in a circle!
-      const pawX = 8.8 + Math.cos(t * 7.2) * 1.4;
-      const pawY = -12.2 + Math.sin(t * 7.2) * 2.2;
-      ctx.strokeStyle = "#F27D24";
-      ctx.lineWidth = 3.4;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(3.5, -7.5);
-      ctx.quadraticCurveTo(8.5, -8.5, pawX, pawY);
-      ctx.stroke();
-      ctx.fillStyle = "#FFF4E4";
-      ctx.beginPath();
-      ctx.arc(pawX, pawY, 2.4, 0, Math.PI * 2);
-      ctx.fill();
     } else {
       // ======================================================================
-      // POSE C: LIFELIKE 4-LEGGED FELINE WALK / TROT / LOOK
+      // POSE C: SLOW, GRACEFUL 4-LEGGED FELINE WALK & CURIOUS SNIFFING
       // ======================================================================
       const wp = gingerCat.walkPhase;
-      const bodyBob = isPaused ? Math.sin(t * 3.5) * 0.45 : Math.sin(wp * 2) * -1.1;
+      const isSniffing = isPaused && gingerCat.pose === "sniff";
+      const bodyBob = isPaused ? Math.sin(t * 2.6) * 0.35 : Math.sin(wp * 2) * -0.85;
       ctx.translate(0, bodyBob);
       ctx.rotate(gingerCat.smoothSlope * flip);
 
-      // 4-leg diagonal feline gait with true paw lift-off arc!
+      // 4-leg diagonal feline gait with calm, natural paw lift-off arc
       const drawWalkLeg = (hipX, phaseOffset, legColor, isBack) => {
         const ph = wp + phaseOffset;
-        const strideX = isPaused ? 0 : Math.sin(ph) * 4.4;
-        const liftY = isPaused ? 0 : Math.max(0, -Math.cos(ph)) * 2.5;
+        const strideX = isPaused ? 0 : Math.sin(ph) * 4.0;
+        const liftY = isPaused ? 0 : Math.max(0, -Math.cos(ph)) * 2.2;
         const kneeX = hipX + strideX * 0.35 + (isBack ? -1.2 : 1.0);
         const kneeY = -0.2 - liftY * 0.5;
         const footX = hipX + strideX;
@@ -2578,8 +2997,8 @@
       drawWalkLeg(-7.2, Math.PI, "#B84709", true);
       drawWalkLeg(5.8, 0, "#CC5612", false);
 
-      // Sinuous S-curve striped ginger tail held high
-      const tailSway = Math.sin(t * 4.2 + wp * 0.4) * 4.2;
+      // Sinuous S-curve striped ginger tail swaying gently
+      const tailSway = Math.sin(t * 2.6 + wp * 0.35) * 3.8;
       ctx.strokeStyle = "#D96216";
       ctx.lineWidth = 4.1;
       ctx.lineCap = "round";
@@ -2622,10 +3041,12 @@
       drawWalkLeg(-5.5, 0, "#E06919", true);
       drawWalkLeg(7.2, Math.PI, "#F27D24", false);
 
-      // Ginger Head (with subtle head bob)
+      // Ginger Head (lowers to sniff cobblestones when in "sniff" pose, or nods softly while walking)
       ctx.save();
-      const headNod = isPaused ? Math.sin(t * 2.5) * 0.6 : Math.cos(wp) * 0.65;
-      ctx.translate(10.6, -11.6 + headNod);
+      const sniffDip = isSniffing ? 3.2 + Math.sin(t * 9.0) * 0.65 : 0;
+      const headNod = isPaused ? Math.sin(t * 2.2) * 0.45 : Math.cos(wp) * 0.5;
+      ctx.translate(10.6 + (isSniffing ? 1.2 : 0), -11.6 + headNod + sniffDip);
+      if (isSniffing) ctx.rotate(0.26);
 
       ctx.fillStyle = "#F5882E";
       ctx.beginPath();
@@ -2639,10 +3060,10 @@
       ctx.fill();
 
       drawEar(-2.7, -4.6, -0.18);
-      drawEar(2.4, -4.6, 0.15);
+      drawEar(2.4, -4.6, 0.15 + (isSniffing ? Math.sin(t * 8) * 0.08 : 0));
 
       // Emerald-green eyes (blink occasionally)
-      const isBlinking = Math.sin(t * 3.1) > 0.96;
+      const isBlinking = Math.sin(t * 2.7) > 0.94;
       if (isBlinking) {
         ctx.strokeStyle = "#1E1B18";
         ctx.lineWidth = 1.3;
@@ -2661,19 +3082,20 @@
         ctx.fill();
       }
 
-      // Pink nose & white whiskers
+      // Pink nose (twitches when sniffing!) & white whiskers
+      const noseTwitch = isSniffing ? Math.sin(t * 14) * 0.35 : 0;
       ctx.fillStyle = "#FB7185";
       ctx.beginPath();
-      ctx.arc(5.2, 1.7, 1.2, 0, Math.PI * 2);
+      ctx.arc(5.2, 1.7 + noseTwitch, 1.2, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
       ctx.lineWidth = 0.85;
       ctx.beginPath();
       ctx.moveTo(4.0, 2.3);
-      ctx.lineTo(9.0, 1.3);
+      ctx.lineTo(9.0, 1.3 + noseTwitch);
       ctx.moveTo(4.0, 3.0);
-      ctx.lineTo(8.7, 3.3);
+      ctx.lineTo(8.7, 3.3 + noseTwitch);
       ctx.stroke();
       ctx.restore();
     }

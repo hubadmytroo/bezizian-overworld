@@ -3154,5 +3154,36 @@ html, body {
   }
 }
 
+/* ============================================================================
+   NEW YORK DAYTIME / DAWN / SUNSET VIEWPORT & VIGNETTE ATMOSPHERE
+   ============================================================================ */
+body.tod-day #overworld-viewport {
+  background: radial-gradient(circle at 32% 28%, #4F88BF 0%, #2E5B88 58%, #1D3E63 100%);
+}
 
+body.tod-dawn #overworld-viewport {
+  background: radial-gradient(circle at 68% 25%, #6E4B78 0%, #34436E 58%, #1B2540 100%);
+}
+
+body.tod-sunset #overworld-viewport {
+  background: radial-gradient(circle at 28% 25%, #824034 0%, #43294D 58%, #1A1428 100%);
+}
+
+body.tod-day .overworld-vignette {
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255, 236, 175, 0.22) 0%, transparent 52%, rgba(16, 36, 58, 0.24) 100%),
+    linear-gradient(180deg, rgba(16, 32, 52, 0.28) 0%, transparent 12%, transparent 86%, rgba(12, 24, 42, 0.42) 100%);
+}
+
+body.tod-dawn .overworld-vignette {
+  background:
+    radial-gradient(circle at 75% 18%, rgba(255, 170, 145, 0.18) 0%, transparent 55%, rgba(15, 20, 38, 0.45) 100%),
+    linear-gradient(180deg, rgba(14, 18, 34, 0.42) 0%, transparent 14%, transparent 84%, rgba(10, 14, 26, 0.62) 100%);
+}
+
+body.tod-sunset .overworld-vignette {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(255, 140, 66, 0.20) 0%, transparent 55%, rgba(18, 12, 28, 0.50) 100%),
+    linear-gradient(180deg, rgba(18, 12, 28, 0.45) 0%, transparent 14%, transparent 84%, rgba(11, 10, 18, 0.68) 100%);
+}
 
