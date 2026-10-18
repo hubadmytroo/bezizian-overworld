@@ -1510,6 +1510,469 @@
     }
 
     ctx.restore();
+
+    // Draw Interactive Balcony Show (Grandpa stretching / Sea Lion clapping / Both together)
+    updateAndDrawBalconyShow(ctx);
+  }
+
+  // ============================================================================
+  // FLOOR 5 BALCONY DOORS: GRANDPA STRETCHING, SEA LION, OR BOTH TOGETHER
+  // ============================================================================
+  const BALCONY_POS = {
+    wx: 0.854 * WORLD.width,  // 2050
+    wy: 0.312 * WORLD.height  // 449 (center of balcony doorway & railing)
+  };
+
+  const balconyShow = {
+    phase: "opening", // "closed", "opening", "active", "closing"
+    openProgress: 0.15, // 0 = closed shutters, 1 = wide open doors
+    stepOutProgress: 0, // 0 = inside room, 1 = standing at railing
+    mode: 2, // 0 = Grandpa stretching, 1 = Sea Lion clapping, 2 = Both together! (Start with Both so user sees right away, then cycle 0 -> 1 -> 2)
+    timer: 0,
+    activeDuration: 340, // ~5.6 seconds open
+    closedDuration: 160, // ~2.6 seconds closed between appearances
+    bubbleText: "👴🦭 GOOD EVENING!",
+    sfxPlayedForCycle: false
+  };
+
+  function triggerBalconyShow(forceNextMode = true) {
+    if (forceNextMode) {
+      balconyShow.mode = (balconyShow.mode + 1) % 3;
+    }
+    balconyShow.phase = "opening";
+    balconyShow.timer = 0;
+    const labels = [
+      "👴 AAAHH... STRETCH! 🥱",
+      "🦭 ARF! ARF! 🐟",
+      "👴🦭 FISH TIME ON FLOOR 5!"
+    ];
+    balconyShow.bubbleText = labels[balconyShow.mode];
+    if (balconyShow.mode === 1 || balconyShow.mode === 2) {
+      playSfx("bark1", 0.55);
+    } else {
+      playSfx("horn", 0.25);
+    }
+    spawnWorldRipple(BALCONY_POS.wx, BALCONY_POS.wy + 16, "#F4A23E", 95);
+  }
+
+  function updateAndDrawBalconyShow(ctx) {
+    // Advance state machine
+    if (balconyShow.phase === "closed") {
+      balconyShow.openProgress = Math.max(0, balconyShow.openProgress - 0.04);
+      balconyShow.stepOutProgress = 0;
+      balconyShow.timer++;
+      if (balconyShow.timer >= balconyShow.closedDuration) {
+        balconyShow.mode = (balconyShow.mode + 1) % 3;
+        const labels = [
+          "👴 AAAHH... STRETCH! 🥱",
+          "🦭 ARF! ARF! 🐟",
+          "👴🦭 FLOOR 5 BALCONY CREW!"
+        ];
+        balconyShow.bubbleText = labels[balconyShow.mode];
+        balconyShow.phase = "opening";
+        balconyShow.timer = 0;
+      }
+    } else if (balconyShow.phase === "opening") {
+      balconyShow.openProgress = Math.min(1, balconyShow.openProgress + 0.032);
+      if (balconyShow.openProgress > 0.45) {
+        balconyShow.stepOutProgress = Math.min(1, balconyShow.stepOutProgress + 0.04);
+      }
+      if (balconyShow.openProgress >= 1 && balconyShow.stepOutProgress >= 1) {
+        balconyShow.phase = "active";
+        balconyShow.timer = 0;
+      }
+    } else if (balconyShow.phase === "active") {
+      balconyShow.timer++;
+      if (balconyShow.timer === 30 && (balconyShow.mode === 1 || balconyShow.mode === 2)) {
+        spawnWorldRipple(BALCONY_POS.wx, BALCONY_POS.wy + 18, "#FF5A1F", 70);
+      }
+      if (balconyShow.timer >= balconyShow.activeDuration) {
+        balconyShow.phase = "closing";
+        balconyShow.timer = 0;
+      }
+    } else if (balconyShow.phase === "closing") {
+      balconyShow.stepOutProgress = Math.max(0, balconyShow.stepOutProgress - 0.045);
+      if (balconyShow.stepOutProgress < 0.45) {
+        balconyShow.openProgress = Math.max(0, balconyShow.openProgress - 0.035);
+      }
+      if (balconyShow.openProgress <= 0 && balconyShow.stepOutProgress <= 0) {
+        balconyShow.phase = "closed";
+        balconyShow.timer = 0;
+      }
+    }
+
+    const openP = balconyShow.openProgress;
+    const stepP = balconyShow.stepOutProgress;
+    const t = performance.now() * 0.001;
+
+    ctx.save();
+    ctx.translate(BALCONY_POS.wx, BALCONY_POS.wy);
+
+    // Isometric skew matching the building facade (slope dy/dx = +0.255)
+    const slope = 0.255;
+    const doorW = 68;
+    const doorH = 98;
+    const halfW = doorW * 0.5;
+
+    // Helper to skew Y by X along the facade
+    ctx.save();
+    ctx.transform(1, slope, 0, 1, 0, 0);
+
+    // 1. Warm Tungsten Apartment Interior (visible as doors open)
+    if (openP > 0.01) {
+      const roomGrad = ctx.createLinearGradient(0, -doorH * 0.72, 0, doorH * 0.28);
+      roomGrad.addColorStop(0, `rgba(255, 195, 95, ${(0.92 * openP).toFixed(3)})`);
+      roomGrad.addColorStop(0.55, `rgba(235, 125, 38, ${(0.88 * openP).toFixed(3)})`);
+      roomGrad.addColorStop(1, `rgba(90, 38, 12, ${(0.92 * openP).toFixed(3)})`);
+      ctx.fillStyle = roomGrad;
+      ctx.beginPath();
+      ctx.rect(-halfW, -doorH * 0.72, doorW, doorH);
+      ctx.fill();
+
+      // Warm light spilling out onto the balcony floor & night air
+      const spillGrad = ctx.createRadialGradient(0, 6, 4, 0, 14, 72);
+      spillGrad.addColorStop(0, `rgba(255, 175, 65, ${(0.46 * openP).toFixed(3)})`);
+      spillGrad.addColorStop(1, "rgba(255, 140, 30, 0)");
+      ctx.fillStyle = spillGrad;
+      ctx.beginPath();
+      ctx.arc(0, 10, 72, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 2. Left & Right Turquoise Louvered Balcony Doors swinging outward
+    const drawShutterDoor = (isLeft) => {
+      const sign = isLeft ? -1 : 1;
+      const hingeX = sign * halfW;
+      // As openP goes 0 -> 1, the door swings outward: its horizontal width foreshortens and angles out
+      const closedPanelW = halfW;
+      const swingAngle = openP * 1.28; // up to ~73 degrees open
+      const projX = -sign * Math.cos(swingAngle) * closedPanelW;
+      const projY = Math.sin(swingAngle) * 14; // outward perspective drop
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(hingeX, -doorH * 0.72);
+      ctx.lineTo(hingeX + projX, -doorH * 0.72 + projY);
+      ctx.lineTo(hingeX + projX, doorH * 0.28 + projY);
+      ctx.lineTo(hingeX, doorH * 0.28);
+      ctx.closePath();
+
+      ctx.fillStyle = openP > 0.2 ? "#1D7874" : "#155958";
+      ctx.fill();
+      ctx.strokeStyle = "#0B2E2E";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Louver slats on the turquoise shutter
+      ctx.strokeStyle = "rgba(9, 36, 36, 0.75)";
+      ctx.lineWidth = 1.1;
+      for (let sy = -doorH * 0.62; sy < doorH * 0.22; sy += 7.5) {
+        ctx.beginPath();
+        ctx.moveTo(hingeX + projX * 0.12, sy + projY * 0.12);
+        ctx.lineTo(hingeX + projX * 0.88, sy + projY * 0.88);
+        ctx.stroke();
+      }
+
+      // Brass door handle
+      ctx.fillStyle = "#F4A23E";
+      ctx.beginPath();
+      ctx.arc(hingeX + projX * 0.82, -doorH * 0.18 + projY * 0.82, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    drawShutterDoor(true);
+    drawShutterDoor(false);
+    ctx.restore(); // undo wall skew for character drawing so characters stand upright
+
+    // 3. Draw Characters emerging onto the balcony (behind the railing!)
+    if (stepP > 0.02) {
+      ctx.save();
+      // Clip below the balcony slab so characters emerge cleanly from the doorway
+      const emergeY = (1 - stepP) * 14;
+      const scale = 0.78 + stepP * 0.22;
+      ctx.translate(0, emergeY);
+      ctx.scale(scale, scale);
+
+      const showGrandpa = balconyShow.mode === 0 || balconyShow.mode === 2;
+      const showSeaLion = balconyShow.mode === 1 || balconyShow.mode === 2;
+
+      // --- GRANDPA WALT (Stretching arms overhead & looking out) ---
+      if (showGrandpa) {
+        const gx = balconyShow.mode === 2 ? -15 : 0;
+        const gy = -8;
+        const stretchCycle = Math.sin(t * 2.8); // smooth stretching cycle (-1..+1)
+        const bodyArch = Math.max(0, stretchCycle) * -2.5;
+
+        ctx.save();
+        ctx.translate(gx, gy + bodyArch);
+
+        // Warm knitted cardigan / vest torso
+        ctx.fillStyle = "#8C4A27";
+        ctx.beginPath();
+        ctx.roundRect(-10, -24, 20, 26, 6);
+        ctx.fill();
+
+        // Cream shirt collar & suspenders/buttons
+        ctx.fillStyle = "#FFF3DF";
+        ctx.beginPath();
+        ctx.moveTo(-4, -24);
+        ctx.lineTo(4, -24);
+        ctx.lineTo(0, -15);
+        ctx.closePath();
+        ctx.fill();
+
+        // Stretching Arms! (Raise high above head when stretchCycle > 0, relax down when < 0)
+        const armLift = (stretchCycle + 1) * 0.5; // 0 = down, 1 = stretched high overhead!
+        const drawGrandpaArm = (side) => {
+          ctx.save();
+          ctx.translate(side * 9.5, -20);
+          const angle = side * (-0.35 - armLift * 2.15);
+          ctx.rotate(angle);
+          // Sleeve
+          ctx.strokeStyle = "#A85C32";
+          ctx.lineWidth = 4.6;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(0, 14);
+          ctx.stroke();
+          // Hand
+          ctx.fillStyle = "#F4C29F";
+          ctx.beginPath();
+          ctx.arc(0, 15.5, 2.6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        };
+        drawGrandpaArm(-1);
+        drawGrandpaArm(1);
+
+        // Grandpa's Head
+        ctx.fillStyle = "#F4C29F";
+        ctx.beginPath();
+        ctx.arc(0, -32.5, 7.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Fluffy silver-white side hair & balding crown
+        ctx.fillStyle = "#E5E7EB";
+        ctx.beginPath();
+        ctx.arc(-6.8, -33.5, 3.2, 0, Math.PI * 2);
+        ctx.arc(6.8, -33.5, 3.2, 0, Math.PI * 2);
+        ctx.arc(0, -38.8, 4.5, Math.PI, 0);
+        ctx.fill();
+
+        // Round gold-rimmed glasses
+        ctx.strokeStyle = "#F4A23E";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(-2.8, -33, 2.3, 0, Math.PI * 2);
+        ctx.arc(2.8, -33, 2.3, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Eyes (squinting happily during big stretch)
+        ctx.fillStyle = "#1F2937";
+        ctx.beginPath();
+        ctx.arc(-2.8, -33, 0.9, 0, Math.PI * 2);
+        ctx.arc(2.8, -33, 0.9, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Iconic thick white walrus mustache!
+        ctx.fillStyle = "#F3F4F6";
+        ctx.beginPath();
+        ctx.ellipse(-2.5, -28.8, 3.8, 1.8, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(2.5, -28.8, 3.8, 1.8, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // --- BELIEVER THE CALIFORNIA SEA LION (Clapping flippers & barking!) ---
+      if (showSeaLion) {
+        const sx = balconyShow.mode === 2 ? 15 : 0;
+        const sy = -4;
+        const clapCycle = Math.sin(t * 9.5); // fast enthusiastic flipper claps!
+        const headBob = Math.abs(Math.sin(t * 4.8)) * -2.8;
+
+        ctx.save();
+        ctx.translate(sx, sy);
+
+        // Sleek glossy dark-chestnut Sea Lion body & neck
+        ctx.fillStyle = "#4A2C18";
+        ctx.beginPath();
+        ctx.ellipse(0, -14, 10.5, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Lighter tan belly/chest patch
+        ctx.fillStyle = "#7C4D2B";
+        ctx.beginPath();
+        ctx.ellipse(0, -12, 6.5, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Clapping Front Flippers!
+        const clapSpread = 3.5 + (clapCycle + 1) * 4.5; // claps together in center!
+        const drawFlipper = (side) => {
+          ctx.save();
+          ctx.translate(side * clapSpread, -14);
+          ctx.rotate(side * (0.25 - clapCycle * 0.35));
+          ctx.fillStyle = "#2E1A0C";
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 3.5, 8.5, side * -0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        };
+        drawFlipper(-1);
+        drawFlipper(1);
+
+        // Clap spark lines when flippers meet
+        if (clapCycle < -0.55) {
+          ctx.strokeStyle = "#F4A23E";
+          ctx.lineWidth = 1.4;
+          [-5, 0, 5].forEach((dy) => {
+            ctx.beginPath();
+            ctx.moveTo(-9, -14 + dy);
+            ctx.lineTo(-13, -14 + dy * 1.4);
+            ctx.moveTo(9, -14 + dy);
+            ctx.lineTo(13, -14 + dy * 1.4);
+            ctx.stroke();
+          });
+        }
+
+        // Sea Lion Head & Snout (tilted proudly up)
+        ctx.save();
+        ctx.translate(0, -29 + headBob);
+        ctx.fillStyle = "#5A351D";
+        ctx.beginPath();
+        ctx.arc(0, 0, 7.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tan muzzle snout
+        ctx.fillStyle = "#9C6B43";
+        ctx.beginPath();
+        ctx.ellipse(0, 2.2, 4.8, 3.3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shiny black nose
+        ctx.fillStyle = "#0B0B0F";
+        ctx.beginPath();
+        ctx.ellipse(0, 0.6, 2.0, 1.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Big expressive dark eyes with white catchlights
+        ctx.fillStyle = "#0B0B0F";
+        ctx.beginPath();
+        ctx.arc(-3.2, -2.0, 1.6, 0, Math.PI * 2);
+        ctx.arc(3.2, -2.0, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(-3.6, -2.4, 0.6, 0, Math.PI * 2);
+        ctx.arc(2.8, -2.4, 0.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Whiskers
+        ctx.strokeStyle = "rgba(255, 245, 230, 0.85)";
+        ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(-3.5, 2.2);
+        ctx.lineTo(-9.5, 1.2);
+        ctx.moveTo(-3.5, 3.0);
+        ctx.lineTo(-9.2, 3.5);
+        ctx.moveTo(3.5, 2.2);
+        ctx.lineTo(9.5, 1.2);
+        ctx.moveTo(3.5, 3.0);
+        ctx.lineTo(9.2, 3.5);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    // 4. Foreground Wrought-Iron Balcony Railing & Terracotta Flower Box (drawn IN FRONT of characters' legs!)
+    ctx.save();
+    ctx.transform(1, slope, 0, 1, 0, 0);
+    const railW = 92;
+    const railHalf = railW * 0.5;
+    const railTopY = -6;
+    const railBotY = 26;
+
+    // Dark wrought-iron vertical balusters
+    ctx.strokeStyle = "#121116";
+    ctx.lineWidth = 2.0;
+    for (let rx = -railHalf; rx <= railHalf; rx += 6.5) {
+      ctx.beginPath();
+      ctx.moveTo(rx, railTopY);
+      ctx.lineTo(rx, railBotY);
+      ctx.stroke();
+    }
+
+    // Top & bottom iron rails with warm streetlamp rim highlight
+    ctx.strokeStyle = "#19171E";
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(-railHalf - 2, railTopY);
+    ctx.lineTo(railHalf + 2, railTopY);
+    ctx.moveTo(-railHalf - 2, railBotY);
+    ctx.lineTo(railHalf + 2, railBotY);
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(255, 175, 75, 0.55)";
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(-railHalf, railTopY - 1);
+    ctx.lineTo(railHalf, railTopY - 1);
+    ctx.stroke();
+
+    // Terracotta Flower Box mounted on the railing center
+    ctx.fillStyle = "#8C3B20";
+    ctx.strokeStyle = "#4A1C0D";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(-18, railTopY + 2, 36, 10, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // Little warm flowers/foliage in the flower box
+    ctx.fillStyle = "#2E6F40";
+    [-12, -5, 2, 9, 14].forEach((fx) => {
+      ctx.beginPath();
+      ctx.arc(fx, railTopY + 1.5, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.fillStyle = "#FF7A2F";
+    [-9, 0, 10].forEach((fx) => {
+      ctx.beginPath();
+      ctx.arc(fx, railTopY + 1.0, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // 5. Floating Caption Pill above the Balcony while doors are open
+    if (stepP > 0.65 && balconyShow.bubbleText) {
+      ctx.save();
+      ctx.font = "700 9.5px 'JetBrains Mono', monospace";
+      const tw = ctx.measureText(balconyShow.bubbleText).width;
+      const bw = tw + 14;
+      const bh = 17;
+      const bx = -bw * 0.5;
+      const by = -68;
+      ctx.fillStyle = "rgba(11, 11, 15, 0.90)";
+      ctx.strokeStyle = "#F4A23E";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#FFF3DF";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(balconyShow.bubbleText, 0, by + bh * 0.5 + 0.5);
+      ctx.restore();
+    }
+
+    ctx.restore();
   }
 
   // ============================================================================
@@ -1557,8 +2020,11 @@
     window.addEventListener("pointerup", (e) => {
       if (camera.isDragging && !camera.pointerMoved) {
         const catScreen = worldToScreen(gingerCat.wx, gingerCat.wy - 8);
+        const balconyScreen = worldToScreen(BALCONY_POS.wx, BALCONY_POS.wy - 15);
         if (Math.hypot(e.clientX - catScreen.x, e.clientY - catScreen.y) < 42) {
           triggerCatMeow();
+        } else if (Math.hypot(e.clientX - balconyScreen.x, e.clientY - balconyScreen.y) < 58) {
+          triggerBalconyShow(true);
         } else if (state.stampMode) {
           placePermitStamp(e.clientX, e.clientY);
         }
