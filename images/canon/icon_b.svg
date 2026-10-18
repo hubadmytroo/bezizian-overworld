@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="BEZIZIAN icon">
+  <title>BEZIZIAN icon</title>
+  <rect id="bg" width="400" height="400" fill="#0B0B0F"/>
+  <circle cx="200" cy="200" r="165" fill="none" stroke="#F2F2F0" stroke-width="24"/>
+  <rect x="144" y="140" width="48" height="120" rx="24" fill="#FF5A1F"/>
+  <rect x="208" y="140" width="48" height="120" rx="24" fill="#FF5A1F"/>
+  <g stroke="#F2F2F0" stroke-width="14" stroke-linecap="round" fill="none">
+    <path d="M126,174 L70,159 M124,200 L65,200 M126,226 L70,241"/>
+    <path d="M274,174 L330,159 M276,200 L335,200 M274,226 L330,241"/>
+  </g>
+</svg>

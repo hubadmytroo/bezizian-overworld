@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BEZIZIAN OVERWORLD — Interactive Spatial Music &amp; Clips</title>
+  <meta name="description" content="Explore the nocturnal city of Duda Bezizian, Inspector Miles, and the Sea Lion. Watch all official Instagram Reels in chronological order and listen to Our Empty Playground (The Spark)." />
+  <meta name="author" content="Dmytro — BEZIZIAN Studio (@bezizian)" />
+  <meta name="copyright" content="Copyright © 2026 Dmytro / BEZIZIAN Studio. All Rights Reserved." />
+  <meta name="robots" content="index, follow, noai, noimageai" />
+  <link rel="license" href="LICENSE" />
+  <link rel="icon" type="image/svg+xml" href="images/canon/icon_b.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=6" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "BEZIZIAN OVERWORLD",
+    "creator": {
+      "@type": "Person",
+      "name": "Dmytro",
+      "sameAs": [
+        "https://www.instagram.com/bezizian/reels/",
+        "https://www.threads.com/@bezizian",
+        "https://www.facebook.com/profile.php?id=61595280781729",
+        "https://www.tiktok.com/@bezizian0",
+        "https://github.com/hubadmytroo"
+      ]
+    },
+    "copyrightHolder": {
+      "@type": "Organization",
+      "name": "BEZIZIAN Studio (Dmytro)"
+    },
+    "copyrightYear": 2026,
+    "license": "All Rights Reserved"
+  }
+  </script>
+</head>
+<body>
+  <!-- Camera Shutter Freeze-Frame Flash Overlay -->
+  <div id="screen-flash-overlay"></div>
+
+  <!-- ========================================================================
+       SPATIAL OVERWORLD CANVAS & INTERACTIVE MARKER STAGE
+       ======================================================================== -->
+  <main id="overworld-viewport" aria-label="Bezizian Nocturne Overworld Map">
+    <canvas id="overworld-canvas"></canvas>
+    <div class="overworld-vignette"></div>
+    <div id="map-markers-layer"></div>
+    <div id="stamp-layer"></div>
+  </main>
+
+  <!-- ========================================================================
+       TOP OVERWORLD HUD NAVIGATION BAR
+       ======================================================================== -->
+  <header class="top-hud-bar">
+    <!-- Direction B Master Brand Lockup ("The Grille") -->
+    <div class="brand-lockup" id="brand-logo-btn" title="Click for Sea Lion greeting &amp; camera reset">
+      <div class="brand-grille-badge" aria-hidden="true">
+        <span class="nostril-pill"></span>
+        <span class="nostril-pill"></span>
+      </div>
+      <div class="brand-wordmark-group">
+        <div class="brand-wordmark">
+          BEZ<span class="orange-i"></span>Z<span class="orange-i"></span>AN
+        </div>
+        <div class="brand-sub" id="i18n-brand-sub">NOCTURNE OVERWORLD</div>
+      </div>
+    </div>
+
+    <!-- Chronological Quick-Jump District Strip (01 .. 06) -->
+    <nav class="district-quick-strip" id="district-quick-strip" aria-label="Chronological Song Stages"></nav>
+
+    <!-- Right Controls Cluster -->
+    <div class="top-actions-cluster">
+      <button class="hud-pill-btn highlight-orange kinetic-btn" id="open-reels-btn" type="button">
+        <span>🎬</span>
+        <span class="kinetic-link">
+          <span class="i18n-nav-reels">Instagram Reels</span>
+          <span class="i18n-nav-reels">Instagram Reels</span>
+        </span>
+      </button>
+
+      <button class="hud-pill-btn kinetic-btn" id="open-gallery-btn" type="button">
+        <span>🖼</span>
+        <span class="kinetic-link">
+          <span class="i18n-nav-gallery">Photo Gallery</span>
+          <span class="i18n-nav-gallery">Photo Gallery</span>
+        </span>
+      </button>
+
+      <button class="hud-pill-btn kinetic-btn" id="open-sting-btn" type="button">
+        <span class="kinetic-link">
+          <span class="i18n-nav-sting">Brand Sting v7</span>
+          <span class="i18n-nav-sting">Brand Sting v7</span>
+        </span>
+      </button>
+
+      <button class="hud-pill-btn" id="ambience-toggle-btn" type="button">
+        <span class="status-dot"></span>
+        <span id="i18n-ambience-label">AMBIENCE OFF</span>
+      </button>
+
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button class="lang-btn is-active" id="lang-en-btn" type="button">EN</button>
+        <button class="lang-btn" id="lang-uk-btn" type="button">UK</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       LEFT FLOATING BEZIZIAN INTERACTIVE TOYBOX
+       ======================================================================== -->
+  <aside class="left-toybox-dock" aria-label="Bezizian Studio Sound &amp; Visual Toys">
+    <div class="toybox-card">
+      <div class="toybox-header">
+        <span>BEZIZIAN FX DECK</span>
+        <span>LIVE</span>
+      </div>
+
+      <button class="toy-btn" id="toy-bark-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">🦭</span>
+          <span id="i18n-toy-bark">Sea Lion Bark</span>
+        </span>
+        <kbd class="toy-kbd">B</kbd>
+      </button>
+
+      <button class="toy-btn" id="toy-flash-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">📸</span>
+          <span id="i18n-toy-flash">PERFECT! Flash</span>
+        </span>
+        <kbd class="toy-kbd">F</kbd>
+      </button>
+
+      <button class="toy-btn" id="toy-stamp-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">🔖</span>
+          <span id="i18n-toy-stamp">Permit Stamp</span>
+        </span>
+        <kbd class="toy-kbd">P</kbd>
+      </button>
+
+      <button class="toy-btn is-active" id="toy-rain-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">🌧️</span>
+          <span id="i18n-toy-rain">Street Rain</span>
+        </span>
+        <kbd class="toy-kbd">R</kbd>
+      </button>
+
+      <button class="toy-btn" id="toy-reset-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">🧭</span>
+          <span id="i18n-toy-reset">Reset Camera</span>
+        </span>
+        <kbd class="toy-kbd">C</kbd>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Polaroid Freeze-Frame Snapshot Tray -->
+  <div class="polaroid-tray" id="polaroid-tray"></div>
+
+  <!-- Floating Unmapped Signals Dock (3 New Songs · No Map Location Yet · Clip TBA) -->
+  <aside class="unmapped-vault-dock" id="unmapped-vault-dock" aria-label="Unmapped Signals — 3 Upcoming Songs">
+    <div class="unmapped-vault-head">
+      <div class="unmapped-vault-title-row">
+        <span class="unmapped-radar-dot"></span>
+        <span class="unmapped-vault-title" id="i18n-unmapped-dock-title">📡 UNMAPPED SIGNALS · 3 NEW SONGS</span>
+      </div>
+      <div class="unmapped-vault-sub" id="i18n-unmapped-dock-sub">SONGS READY · OFFICIAL CLIPS &amp; MAP LOCATIONS: TBA [???]</div>
+    </div>
+    <div class="unmapped-vault-list" id="unmapped-vault-list"></div>
+
+    <!-- Official @bezizian Social Networks -->
+    <div class="official-socials-box">
+      <div class="official-socials-title">🌐 OFFICIAL @BEZIZIAN</div>
+      <div class="official-socials-grid">
+        <a class="social-pill-link ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener">
+          <span>📸</span><span>Instagram</span>
+        </a>
+        <a class="social-pill-link threads" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener">
+          <span>🌀</span><span>Threads</span>
+        </a>
+        <a class="social-pill-link fb" href="https://www.facebook.com/profile.php?id=61595280781729" target="_blank" rel="noopener">
+          <span>📘</span><span>Facebook</span>
+        </a>
+        <a class="social-pill-link tiktok" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener">
+          <span>🎵</span><span>TikTok</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Spatial Navigation Hint -->
+  <div class="spatial-nav-hint" id="spatial-nav-hint">
+    <span class="hint-pulse-dot"></span>
+    <span id="i18n-hint-text">DRAG THE CITY FOR 5 CANON CLIPS · OR PLAY 3 NEW UNMAPPED SONGS (LOCATION: ???)</span>
+  </div>
+
+  <!-- ========================================================================
+       RIGHT INTERACTIVE STAGE DRAWER (WATCH CLIP, DUET LYRICS, DUDA CANON)
+       ======================================================================== -->
+  <section class="stage-drawer" id="stage-drawer" aria-label="Active Song Stage Inspector">
+    <!-- Top Stage Visual Header (Clicking opens Fullscreen Cinema) -->
+    <div class="stage-visual-box" id="stage-header-box" title="Click to open Fullscreen Cinema Clip">
+      <img class="stage-backdrop-img" id="stage-backdrop-img" src="images/overworld/stage_elevator_loud.jpg" alt="Stage backdrop" />
+
+      <div class="stage-kinetic-overlay">
+        <div class="stage-top-badges">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span class="badge-pill" id="stage-badge-primary">#1 · OCT 9 · IG REEL</span>
+            <span class="badge-pill secondary" id="stage-badge-specs">132 BPM · D Minor</span>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="header-fullscreen-btn" id="header-fullscreen-btn" type="button">
+              <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
+            </button>
+            <button class="drawer-close-btn" id="drawer-collapse-btn" type="button" title="Minimize drawer to view full map">✕</button>
+          </div>
+        </div>
+
+        <div class="stage-title-block">
+          <div>
+            <div class="stage-track-num" id="stage-district-label">01 · ELEVATOR 4B BRASS SHAFT</div>
+            <h1 class="stage-track-title" id="stage-track-title">Loud Enough</h1>
+            <div class="stage-track-sub" id="stage-track-sub">Release #1 (Oct 9) · 4B Elevator Brass-Phonk Band</div>
+          </div>
+          <div class="stage-portrait-coin" title="Stage Cover Frame">
+            <img id="stage-portrait-img" src="images/reels/reel_01_loud_enough.jpg" alt="Stage cover" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duet Vocal Radar + Mode Tabs (Watch Clip is Tab 1 by default!) -->
+    <div class="stage-controls-strip">
+      <div class="singer-radar-group" aria-label="Live Vocal Radar">
+        <div class="singer-chip" id="chip-singer-duda">
+          <img src="images/reels/reel_02_tada_marina.jpg" alt="Duda" />
+          <span>DUDA</span>
+        </div>
+        <div class="singer-chip" id="chip-singer-miles">
+          <img src="images/reels/reel_04_permit_dip.jpg" alt="Miles" />
+          <span>MILES</span>
+        </div>
+        <div class="singer-chip" id="chip-singer-gang">
+          <img src="images/reels/reel_01_loud_enough.jpg" alt="Sea Lion" />
+          <span>CROWD</span>
+        </div>
+      </div>
+
+      <div class="drawer-tabs" role="tablist">
+        <button class="drawer-tab-btn is-active" data-tab="video" id="tab-btn-video" type="button">Watch Clip</button>
+        <button class="drawer-tab-btn" data-tab="lyrics" id="tab-btn-lyrics" type="button">Duet Lyrics</button>
+        <button class="drawer-tab-btn" data-tab="lore" id="tab-btn-lore" type="button">Track Story</button>
+      </div>
+    </div>
+
+    <!-- Drawer Scrollable Body -->
+    <div class="drawer-body" id="drawer-body">
+      <!-- PANE 1: 9:16 VERTICAL INSTAGRAM CLIP PLAYER (DEFAULT ACTIVE) -->
+      <div class="tab-pane is-active" id="pane-video">
+        <div class="reel-player-stage">
+          <div class="clip-variants-bar" id="clip-variants-bar"></div>
+
+          <div class="reel-vertical-frame" id="reel-vertical-frame">
+            <video controlslist="nodownload" oncontextmenu="return false;" id="drawer-reel-video" playsinline loop preload="metadata" poster="images/reels/reel_01_loud_enough.jpg"></video>
+            <button class="reel-floating-fullscreen-btn" id="reel-floating-fs-btn" type="button">
+              <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
+            </button>
+
+            <!-- Shown when an Unmapped Upcoming Song (no clip yet) is selected -->
+            <div class="unmapped-clip-placeholder" id="unmapped-clip-placeholder" style="display:none;">
+              <img class="unmapped-bg-art" id="unmapped-bg-art" src="images/overworld/stage_playground_spark.jpg" alt="Upcoming Song Artwork" />
+              <div class="unmapped-radar-sweep"></div>
+              <div class="unmapped-placeholder-content">
+                <div class="unmapped-stamp-badge" id="i18n-unmapped-card-stamp">🎬 CLIP IN PRODUCTION · LOCATION: ???</div>
+                <div class="unmapped-coords-chip">📍 MAP COORDS: [ ??.?? , ??.?? ] · UNASSIGNED</div>
+                <h3 class="unmapped-placeholder-title" id="i18n-unmapped-card-title">AUDIO PREMIERE — NO MAP LOCATION YET</h3>
+                <p class="unmapped-placeholder-desc" id="i18n-unmapped-card-desc">
+                  This track is already recorded and mastered, but its official music video and city district coordinates are still classified.
+                </p>
+                <button class="hud-pill-btn solid-orange" id="unmapped-open-lyrics-btn" type="button">
+                  <span id="i18n-unmapped-lyrics-btn">🎤 Open Synced Duet Lyrics</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="clip-action-toolbar">
+            <button class="hud-pill-btn solid-orange" id="cinema-fullscreen-btn" type="button">
+              <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
+            </button>
+            <button class="hud-pill-btn" id="cinema-snap-btn" type="button">📸 PERFECT!</button>
+            <button class="hud-pill-btn" id="cinema-gallery-btn" type="button">
+              <span id="i18n-open-gallery-btn">🖼 Open Photo Gallery</span>
+            </button>
+          </div>
+
+          <!-- Official Social Links Strip inside Drawer -->
+          <div class="drawer-socials-strip">
+            <a class="social-pill-link ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener">📸 Instagram</a>
+            <a class="social-pill-link threads" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener">🌀 Threads</a>
+            <a class="social-pill-link fb" href="https://www.facebook.com/profile.php?id=61595280781729" target="_blank" rel="noopener">📘 Facebook</a>
+            <a class="social-pill-link tiktok" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener">🎵 TikTok</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANE 2: TIME-SYNCED DUET LYRICS -->
+      <div class="tab-pane" id="pane-lyrics">
+        <div class="lyrics-hint-bar">
+          <span id="i18n-click-lyric-hint">Click any lyric line to jump the song &amp; video to that exact beat</span>
+          <span id="active-singer-indicator">READY</span>
+        </div>
+        <div class="lyrics-list" id="lyrics-list"></div>
+      </div>
+
+      <!-- PANE 3: DUDA CANON & 9 EXPRESSIONS (NO CONCEPT ADS) -->
+      <div class="tab-pane" id="pane-lore">
+        <div class="lore-story-card">
+          <div class="lore-quote-banner" id="lore-hook-quote">"HE CAME TO STOP THE BAND — NOW HE'S CONDUCTING WITH A BROOM!"</div>
+          <p class="lore-story-text" id="lore-story-text"></p>
+
+          <div class="lore-specs-grid">
+            <div class="lore-spec-box">
+              <div class="lore-spec-label">TEMPO</div>
+              <div class="lore-spec-val" id="lore-spec-bpm">132 BPM</div>
+            </div>
+            <div class="lore-spec-box">
+              <div class="lore-spec-label">KEY</div>
+              <div class="lore-spec-val" id="lore-spec-key">D Minor</div>
+            </div>
+            <div class="lore-spec-box">
+              <div class="lore-spec-label">DURATION</div>
+              <div class="lore-spec-val" id="lore-spec-dur">1:12</div>
+            </div>
+          </div>
+
+          <div class="props-tag-row" id="lore-props-row"></div>
+        </div>
+
+        <!-- Duda Bezizian Signature Deadpan Quotes -->
+        <div class="duda-matrix-section">
+          <div class="section-micro-title" id="i18n-duda-matrix-title">DUDA BEZIZIAN — SIGNATURE DEADPAN QUOTES</div>
+          <div class="section-micro-sub" id="i18n-duda-matrix-sub">Click any quote card to test her deadpan reaction.</div>
+          <div class="duda-9-grid" id="duda-9-grid"></div>
+          <div class="duda-quote-readout" id="duda-quote-readout">
+            <span id="duda-quote-text">"Oh boy, you're looking crazy like you never seen a prize."</span>
+            <span style="font-family:var(--font-mono); font-size:10px; color:var(--hoop-orange);">V3 CANON</span>
+          </div>
+        </div>
+
+        <!-- Exclusive Copyright & IP Ownership Declaration -->
+        <div class="lore-story-card" style="margin-top:12px; padding:10px 12px; font-family:var(--font-mono); font-size:10px; color:var(--text-secondary); line-height:1.45;">
+          <div style="color:var(--hoop-orange); font-weight:700; margin-bottom:3px;" id="i18n-rights-title">© 2026 DMYTRO / BEZIZIAN STUDIO — ALL RIGHTS RESERVED</div>
+          <div id="i18n-rights-body">All musical compositions, sound recordings, lyrics, video clips, characters (Duda Bezizian, Inspector Miles, Sea Lion), and website design/code are the exclusive intellectual property of Dmytro (@bezizian). Unauthorized copying or AI training prohibited.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reopen Drawer Button when minimized -->
+  <button class="drawer-reopen-btn" id="drawer-reopen-btn" type="button">
+    <span>OPEN STAGE PLAYER</span>
+  </button>
+
+  <!-- ========================================================================
+       BOTTOM SONIC TRANSPORT DOCK & LIVE 3-BAND TELEMETRY
+       ======================================================================== -->
+  <footer class="bottom-sonic-dock" aria-label="Audio Transport &amp; Spectrum Telemetry">
+    <div class="dock-track-info">
+      <div class="dock-art-wrap" id="dock-art-btn" title="Click to open Fullscreen Clip">
+        <img id="dock-art-img" src="images/reels/reel_01_loud_enough.jpg" alt="Track cover" />
+      </div>
+      <div class="dock-meta">
+        <div class="dock-status-label" id="dock-status-label">READY — CLICK PLAY</div>
+        <div class="dock-title" id="dock-title">01 · Loud Enough</div>
+        <div class="dock-subtitle" id="dock-subtitle">01 · ELEVATOR 4B BRASS SHAFT</div>
+      </div>
+    </div>
+
+    <div class="dock-transport-center">
+      <div class="transport-btns">
+        <button class="transport-icon-btn" id="prev-track-btn" type="button" title="Previous Stage">⏮</button>
+        <button class="transport-play-btn" id="play-pause-btn" type="button" title="Play / Pause (Space)">▶</button>
+        <button class="transport-icon-btn" id="next-track-btn" type="button" title="Next Stage">⏭</button>
+      </div>
+
+      <div class="timeline-scrubber-wrap">
+        <div class="timeline-track" id="timeline-track">
+          <div class="timeline-fill" id="timeline-fill"></div>
+        </div>
+        <div class="timeline-meta-row">
+          <span id="time-current">0:00</span>
+          <span class="live-lyric-ticker" id="live-lyric-ticker">HE CAME TO STOP THE BAND — NOW HE'S CONDUCTING WITH A BROOM!</span>
+          <span id="time-total">1:12</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dock-telemetry-right">
+      <button class="hud-pill-btn solid-orange" id="dock-fullscreen-btn" type="button" style="padding: 8px 12px; font-size: 10px;">
+        <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
+      </button>
+
+      <div class="telemetry-meters">
+        <div class="meter-col sub">
+          <div class="meter-bar-bg"><div class="meter-bar-fill" id="meter-sub"></div></div>
+          <span class="meter-label" id="i18n-meter-bass">808 SUB</span>
+        </div>
+        <div class="meter-col brass">
+          <div class="meter-bar-bg"><div class="meter-bar-fill" id="meter-brass"></div></div>
+          <span class="meter-label" id="i18n-meter-brass">BRASS HORN</span>
+        </div>
+        <div class="meter-col vox">
+          <div class="meter-bar-bg"><div class="meter-bar-fill" id="meter-vox"></div></div>
+          <span class="meter-label" id="i18n-meter-vox">DUET VOX</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       MODAL 1: FULLSCREEN CINEMA THEATER (WATCH ANY CLIP FULL SCREEN WITH SOUND)
+       ======================================================================== -->
+  <div class="modal-backdrop" id="fullscreen-cinema-modal" role="dialog" aria-modal="true" aria-label="Fullscreen Clip Cinema">
+    <div class="cinema-theater-shell" id="cinema-theater-shell">
+      <div class="cinema-theater-top">
+        <div>
+          <div class="section-micro-title" id="fs-cinema-badge">BEZIZIAN CINEMA THEATER · FULL SCREEN</div>
+          <h2 class="modal-title" id="fs-cinema-title">01 · Loud Enough</h2>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="hud-pill-btn highlight-orange" id="fs-native-fullscreen-btn" type="button">⛶ Monitor Fullscreen</button>
+          <button class="drawer-close-btn" id="close-fs-cinema-btn" type="button" title="Close Theater (Esc)">✕</button>
+        </div>
+      </div>
+
+      <div class="cinema-stage-viewport">
+        <video controlslist="nodownload" oncontextmenu="return false;" id="fs-cinema-video" controls playsinline></video>
+      </div>
+
+      <div class="cinema-theater-bottom">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="hud-pill-btn" id="fs-prev-clip-btn" type="button">⏮ Prev Clip</button>
+          <button class="hud-pill-btn" id="fs-next-clip-btn" type="button">Next Clip ⏭</button>
+        </div>
+        <div class="clip-variants-bar" id="fs-variants-bar" style="width:auto;"></div>
+        <div style="font-family:var(--font-mono); font-size:11px; color:var(--brass-gold);" id="fs-cinema-meta">
+          1080×1920 · ORIGINAL SOUND ON
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 2: CHRONOLOGICAL INSTAGRAM REELS WALL (@BEZIZIAN/REELS)
+       ======================================================================== -->
+  <div class="modal-backdrop" id="reels-modal" role="dialog" aria-modal="true" aria-label="Official Instagram Reels Chronology">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <div class="section-micro-title">CHRONOLOGICAL PUBLICATION ORDER · @BEZIZIAN/REELS</div>
+          <h2 class="modal-title">Official Instagram Reels + New Premiere</h2>
+        </div>
+        <button class="drawer-close-btn" id="close-reels-btn" type="button">✕</button>
+      </div>
+      <div class="drawer-socials-strip" style="margin-bottom: 14px;">
+        <a class="social-pill-link ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener">📸 Instagram (@bezizian)</a>
+        <a class="social-pill-link threads" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener">🌀 Threads (@bezizian)</a>
+        <a class="social-pill-link fb" href="https://www.facebook.com/profile.php?id=61595280781729" target="_blank" rel="noopener">📘 Facebook</a>
+        <a class="social-pill-link tiktok" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener">🎵 TikTok (@bezizian0)</a>
+      </div>
+      <div class="reels-wall-grid" id="reels-wall-grid"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 3: CURATED PHOTO GALLERY (NANO BANANA + CLIP STILLS)
+       ======================================================================== -->
+  <div class="modal-backdrop" id="gallery-modal" role="dialog" aria-modal="true" aria-label="Bezizian Photo Gallery">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <div class="section-micro-title">NANO BANANA WORLD PLATES · OFFICIAL INSTAGRAM CLIP STILLS</div>
+          <h2 class="modal-title">Bezizian Studio Photo Gallery (18 Photos)</h2>
+        </div>
+        <button class="drawer-close-btn" id="close-gallery-btn" type="button">✕</button>
+      </div>
+
+      <div class="gallery-filter-bar" id="gallery-filter-bar">
+        <button class="hud-pill-btn is-active" data-filter="all" type="button" id="filter-btn-all">All Photos (18)</button>
+        <button class="hud-pill-btn" data-filter="nano" type="button" id="filter-btn-nano">Nano Banana Worlds (10)</button>
+        <button class="hud-pill-btn" data-filter="clips" type="button" id="filter-btn-clips">Instagram Clip Stills (8)</button>
+      </div>
+
+      <div class="gallery-masonry-grid" id="gallery-masonry-grid"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 3B: FULLSCREEN PHOTO LIGHTBOX VIEWER
+       ======================================================================== -->
+  <div class="modal-backdrop" id="photo-lightbox-modal" role="dialog" aria-modal="true" aria-label="Fullscreen Photo Lightbox">
+    <div class="lightbox-shell">
+      <div class="cinema-theater-top" style="width:100%;">
+        <div>
+          <div class="section-micro-title" id="lightbox-sub">NANO BANANA WORLD PLATE</div>
+          <h2 class="modal-title" id="lightbox-title">Bezizian Nocturne Overworld</h2>
+        </div>
+        <button class="drawer-close-btn" id="close-lightbox-btn" type="button">✕</button>
+      </div>
+
+      <div class="lightbox-img-stage">
+        <img id="lightbox-img" src="images/overworld/overworld_city_map.jpg" alt="Gallery photo" />
+      </div>
+
+      <div class="cinema-theater-bottom" style="width:100%;">
+        <button class="hud-pill-btn" id="lightbox-prev-btn" type="button">← Previous Photo</button>
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);" id="lightbox-counter">1 / 18</span>
+        <button class="hud-pill-btn" id="lightbox-next-btn" type="button">Next Photo →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 4: BRAND STING V7 ("THE GRILLE") THEATER
+       ======================================================================== -->
+  <div class="modal-backdrop" id="sting-modal" role="dialog" aria-modal="true" aria-label="Bezizian Brand Sting v7">
+    <div class="modal-window" style="max-width: 760px;">
+      <div class="modal-header">
+        <div>
+          <div class="section-micro-title">DIRECTION B · CANONICAL STUDIO IDENT</div>
+          <h2 class="modal-title">BEZIZIAN — "The Grille" Brand Sting v7 (5.2s)</h2>
+        </div>
+        <button class="drawer-close-btn" id="close-sting-btn" type="button">✕</button>
+      </div>
+      <div style="border-radius:16px; overflow:hidden; border:1px solid var(--border-mid); background:#000;">
+        <video controlslist="nodownload" oncontextmenu="return false;" id="sting-video-player" src="video/sting_v7_16x9.mp4" controls playsinline style="width:100%; display:block;"></video>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">
+        <span>HOOP ORANGE #FF5A1F · OBSIDIAN #0B0B0F · SEA LION DOUBLE BARK</span>
+        <button class="hud-pill-btn is-active" id="replay-sting-btn" type="button">↻ Replay Sting v7</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="tracks-data.js?v=6"></script>
+  <script src="app.js?v=6"></script>
+</body>
+</html>
