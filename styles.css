@@ -2460,6 +2460,15 @@ html, body {
   box-shadow: 0 4px 12px rgba(255, 90, 31, 0.25);
 }
 
+.social-pill-link.yt {
+  border-color: rgba(255, 45, 45, 0.55);
+  background: linear-gradient(135deg, rgba(255, 35, 35, 0.22), rgba(255, 90, 31, 0.14));
+}
+
+.official-socials-grid .social-pill-link.yt {
+  grid-column: span 2;
+}
+
 .social-pill-link.ig {
   border-color: rgba(255, 90, 31, 0.45);
   background: linear-gradient(135deg, rgba(255, 90, 31, 0.16), rgba(225, 48, 108, 0.16));
