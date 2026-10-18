@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=13" />
+  <link rel="stylesheet" href="styles.css?v=14" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -111,6 +111,11 @@
         <span id="nyc-env-label">NYC LIVE · --:--</span>
       </button>
 
+      <button class="hud-pill-btn cat-hud-pill" id="hud-cat-btn" type="button" title="Find &amp; interact with the Ginger Street Cat (Hotkey: K)">
+        <span>🐱</span>
+        <span id="hud-cat-label">Cat Cam</span>
+      </button>
+
       <button class="hud-pill-btn" id="ambience-toggle-btn" type="button">
         <span class="status-dot"></span>
         <span id="i18n-ambience-label">AMBIENCE OFF</span>
@@ -122,6 +127,27 @@
       </div>
     </div>
   </header>
+
+  <!-- ========================================================================
+       GINGER CAT RESIDENT INTERACTIVE BAR (DESKTOP & MOBILE)
+       ======================================================================== -->
+  <div class="cat-resident-bar" id="cat-resident-bar" aria-hidden="true">
+    <div class="cat-bar-status">
+      <span class="cat-bar-avatar">🐱</span>
+      <div>
+        <div class="cat-bar-title" id="cat-bar-title">GINGER CAT · STREET RESIDENT</div>
+        <div class="cat-bar-sub" id="cat-bar-sub">🐾 Strolling along the sidewalk...</div>
+      </div>
+    </div>
+    <div class="cat-bar-actions">
+      <button class="cat-act-btn highlight" id="cat-act-feed" type="button" title="Toss a fish treat to the cat">🐟 Feed</button>
+      <button class="cat-act-btn" id="cat-act-groom" type="button" title="Make the cat sit &amp; wash its face">🧼 Groom</button>
+      <button class="cat-act-btn" id="cat-act-nap" type="button" title="Make the cat curl up &amp; lie down">💤 Lie Down</button>
+      <button class="cat-act-btn" id="cat-act-walk" type="button" title="Resume walking patrol">🐾 Walk</button>
+      <button class="cat-act-btn dj" id="cat-act-dj" type="button" title="Let the Ginger Cat pick a song for you!">🎲 Cat DJ</button>
+      <button class="cat-act-close" id="cat-bar-close" type="button" title="Stop following cat">✕</button>
+    </div>
+  </div>
 
   <!-- ========================================================================
        NEW YORK LIVE ATMOSPHERE POPOVER (TIME OF DAY · WEATHER · 4 SEASONS)
@@ -186,6 +212,14 @@
           <span id="i18n-toy-bark">Sea Lion Bark</span>
         </span>
         <kbd class="toy-kbd">B</kbd>
+      </button>
+
+      <button class="toy-btn" id="toy-cat-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">🐱</span>
+          <span id="i18n-toy-cat">Ginger Cat Cam</span>
+        </span>
+        <kbd class="toy-kbd">K</kbd>
       </button>
 
       <button class="toy-btn" id="toy-flash-btn" type="button">
@@ -625,6 +659,6 @@
 
   <!-- Scripts -->
   <script src="tracks-data.js?v=10"></script>
-  <script src="app.js?v=13"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>

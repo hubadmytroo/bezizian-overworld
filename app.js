@@ -700,53 +700,140 @@
   }
 
   // ============================================================================
-  // GINGER TABBY CAT FROM THE CLIP — PATROL ROUTE ALONG DMYTRO'S ARROWS
+  // GINGER TABBY CAT RESIDENT — COLLISION-FREE ROUTE, GROOMING, NAPPING & DJ
   // ============================================================================
   const GINGER_CAT_ROUTE = [
-    // 1. Inside ochre courtyard archway (Episode 2) -> out onto sidewalk
-    { x: 0.768, y: 0.525, pause: 45, bubble: "🐾" },
-    { x: 0.745, y: 0.575 },
-    { x: 0.708, y: 0.585 },
-    // 2. Sidewalk behind the dark-green 90s coupe
-    { x: 0.658, y: 0.548 },
-    { x: 0.595, y: 0.575 },
-    { x: 0.552, y: 0.625 },
-    // 3. Around crosswalk pole up to the corner cafe door (Arrow 1!)
-    { x: 0.495, y: 0.615 },
-    { x: 0.458, y: 0.565 },
-    { x: 0.468, y: 0.522, pause: 65, bubble: "MEOW ♪" },
-    // 4. Back down cafe sidewalk toward the green coupe (Arrow 2!)
-    { x: 0.458, y: 0.565 },
-    { x: 0.495, y: 0.615 },
-    { x: 0.535, y: 0.612, pause: 40, bubble: "🐟?" },
-    { x: 0.465, y: 0.618 },
-    // 5. Across the wet white zebra crosswalk (Episode 3 / One Trip)
-    { x: 0.395, y: 0.680 },
-    { x: 0.325, y: 0.728, pause: 45, bubble: "PURR..." },
-    { x: 0.260, y: 0.685 },
-    { x: 0.238, y: 0.595 },
-    // 6. Up the curved marina street under the festoon lights
-    { x: 0.275, y: 0.515 },
-    { x: 0.345, y: 0.455 },
-    { x: 0.358, y: 0.395 },
-    { x: 0.265, y: 0.325, pause: 40, bubble: "🐾" },
-    // 7. Along the brownstone street & up the stoop stairs (Arrow 3!)
-    { x: 0.358, y: 0.395 },
-    { x: 0.485, y: 0.340 },
-    { x: 0.412, y: 0.375 },
-    { x: 0.402, y: 0.345 },
-    { x: 0.432, y: 0.308, pause: 75, bubble: "MEOW! 🐱" },
-    // 8. Back down the stoop stairs & along the street curve to the archway
-    { x: 0.402, y: 0.345 },
-    { x: 0.412, y: 0.375 },
-    { x: 0.345, y: 0.455 },
-    { x: 0.425, y: 0.535 },
-    { x: 0.465, y: 0.618 },
-    { x: 0.552, y: 0.625 },
-    { x: 0.595, y: 0.575 },
-    { x: 0.658, y: 0.548 },
-    { x: 0.708, y: 0.585 },
-    { x: 0.745, y: 0.575 }
+    // 1. Inside ochre courtyard archway (Episode 2) -> out onto cobblestone sidewalk
+    {
+      x: 0.762,
+      y: 0.542,
+      pose: "look",
+      pause: 110,
+      bubble: "🐾 Courtyard Arch",
+      statusEn: "Exploring the Ochre Courtyard Arch",
+      statusUk: "Гуляє під аркою двору"
+    },
+    { x: 0.742, y: 0.582 },
+    {
+      x: 0.712,
+      y: 0.595,
+      pose: "lie",
+      pause: 260,
+      bubble: "PURR... 💤",
+      statusEn: "💤 Curled up & lying down under the warm archway lantern",
+      statusUk: "💤 Лежить калачиком і муркоче під ліхтарем арки"
+    },
+    // 2. Sidewalk strictly between the cafe window wall and the parked 90s green coupe
+    {
+      x: 0.682,
+      y: 0.574,
+      statusEn: "🐾 Strolling past the parked 90s green coupe",
+      statusUk: "🐾 Неспішно йде по тротуару повз зелене купе"
+    },
+    { x: 0.648, y: 0.562 },
+    { x: 0.592, y: 0.602 },
+    { x: 0.548, y: 0.632 },
+    { x: 0.498, y: 0.635 },
+    // 3. Warm Corner Cafe entrance — sits down to groom & wash behind its ear!
+    {
+      x: 0.488,
+      y: 0.598,
+      pose: "groom",
+      pause: 250,
+      bubble: "🧼 *lick-lick* 🐾",
+      statusEn: "🧼 Sitting & washing its face with a paw by the Corner Café",
+      statusUk: "🧼 Сидить і вмивається лапкою біля дверей кафе"
+    },
+    { x: 0.465, y: 0.614 },
+    { x: 0.448, y: 0.572 },
+    {
+      x: 0.445,
+      y: 0.538,
+      pose: "look",
+      pause: 115,
+      bubble: "MEOW ♪",
+      statusEn: "Listening to jazz-brass outside the steamed café window",
+      statusUk: "Слухає музику під теплим вікном кафе"
+    },
+    { x: 0.448, y: 0.572 },
+    // 4. Across the center of the wet white zebra crosswalk (clear of lamppost!)
+    {
+      x: 0.455,
+      y: 0.618,
+      speedMult: 1.22,
+      statusEn: "🐾 Trotting across the wet white zebra crosswalk",
+      statusUk: "🐾 Переходить дорогу по пішохідній зебрі"
+    },
+    { x: 0.398, y: 0.648, speedMult: 1.22 },
+    { x: 0.348, y: 0.678, speedMult: 1.22 },
+    { x: 0.308, y: 0.696 },
+    { x: 0.262, y: 0.668 },
+    // 5. Marina Harbor Promenade — sits down to groom & sniff the ocean breeze!
+    {
+      x: 0.218,
+      y: 0.612,
+      pose: "groom",
+      pause: 240,
+      bubble: "🧼 Harbor grooming 🐟",
+      statusEn: "🧼 Sitting & grooming on the Marina Promenade by the yachts",
+      statusUk: "🧼 Сидить і чистить шерсть на набережній біля яхт"
+    },
+    {
+      x: 0.235,
+      y: 0.555,
+      statusEn: "🐾 Walking along the Marina under the warm festoon bulbs",
+      statusUk: "🐾 Прогулюється набережною під гірляндами"
+    },
+    { x: 0.275, y: 0.505 },
+    { x: 0.325, y: 0.465 },
+    { x: 0.365, y: 0.432 },
+    { x: 0.395, y: 0.412 },
+    // 6. Up the Brownstone Stoop Stairs (exact stone steps!) -> lies down on top landing!
+    {
+      x: 0.402,
+      y: 0.358,
+      speedMult: 0.88,
+      statusEn: "🐾 Climbing up the Brownstone stoop stone stairs",
+      statusUk: "🐾 Піднімається кам'яними сходами браунстоуну"
+    },
+    { x: 0.418, y: 0.332, speedMult: 0.88 },
+    {
+      x: 0.432,
+      y: 0.308,
+      pose: "lie",
+      pause: 270,
+      bubble: "💤 Cozy Stoop Nap",
+      statusEn: "💤 Lying down on the top Brownstone stoop landing",
+      statusUk: "💤 Лежить і відпочиває на верхній сходинці ганку"
+    },
+    // 7. Back down the stoop stairs & along the sidewalk to the cafe and archway
+    { x: 0.418, y: 0.332, speedMult: 0.92 },
+    { x: 0.402, y: 0.358, speedMult: 0.92 },
+    { x: 0.395, y: 0.412 },
+    { x: 0.365, y: 0.432 },
+    {
+      x: 0.412,
+      y: 0.498,
+      statusEn: "🐾 Strolling back down the street toward the café",
+      statusUk: "🐾 Повертається вздовж вулиці до кафе"
+    },
+    { x: 0.448, y: 0.572 },
+    { x: 0.465, y: 0.614 },
+    { x: 0.498, y: 0.635 },
+    { x: 0.548, y: 0.632 },
+    {
+      x: 0.592,
+      y: 0.602,
+      pose: "groom",
+      pause: 210,
+      bubble: "🧼 Purrrr... 🐾",
+      statusEn: "🧼 Sitting & grooming its white paws on the sidewalk",
+      statusUk: "🧼 Сидить і чистить білі лапки на тротуарі"
+    },
+    { x: 0.648, y: 0.562 },
+    { x: 0.682, y: 0.574 },
+    { x: 0.712, y: 0.595 },
+    { x: 0.742, y: 0.582 }
   ];
 
   const gingerCat = {
@@ -755,43 +842,214 @@
     wy: GINGER_CAT_ROUTE[0].y * WORLD.height,
     facing: -1, // -1 = left, +1 = right
     smoothFacing: -1,
+    smoothSlope: 0,
     walkPhase: 0,
+    pose: "walk", // "walk" | "groom" | "lie" | "look"
     pauseFrames: 0,
     bubbleText: "",
     bubbleTimer: 0,
     hopOffset: 0,
     hopVel: 0,
-    stepCounter: 0
+    stepCounter: 0,
+    followCam: false,
+    statusEn: "🐾 Strolling along the sidewalk...",
+    statusUk: "🐾 Прогулюється тротуаром...",
+    hearts: []
   };
   const catPawPrints = [];
+  const catFishTreats = [];
 
-  function triggerCatMeow() {
-    gingerCat.hopVel = -6.5;
-    const phrases = ["MEOW! 🐱", "PURRRR ♪", "GOT FISH? 🐟", "MEOW! ✨"];
-    gingerCat.bubbleText = phrases[Math.floor(Math.random() * phrases.length)];
-    gingerCat.bubbleTimer = 110;
-    spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#FF8C24", 90);
-    spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#F4A23E", 55);
-
+  function playCatSound(mode = "meow") {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       const ctxAudio = audioCtx || new AudioContextClass();
       if (ctxAudio.state === "suspended") ctxAudio.resume().catch(() => {});
       const now = ctxAudio.currentTime;
-      const osc = ctxAudio.createOscillator();
-      const gain = ctxAudio.createGain();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(520, now);
-      osc.frequency.exponentialRampToValueAtTime(880, now + 0.11);
-      osc.frequency.exponentialRampToValueAtTime(610, now + 0.34);
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.18, now + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
-      osc.connect(gain);
-      gain.connect(ctxAudio.destination);
-      osc.start(now);
-      osc.stop(now + 0.38);
+
+      if (mode === "purr") {
+        const osc = ctxAudio.createOscillator();
+        const gain = ctxAudio.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(28, now);
+        osc.frequency.linearRampToValueAtTime(34, now + 0.35);
+        osc.frequency.linearRampToValueAtTime(26, now + 0.7);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.09, now + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+        osc.connect(gain);
+        gain.connect(ctxAudio.destination);
+        osc.start(now);
+        osc.stop(now + 0.78);
+      } else {
+        const osc = ctxAudio.createOscillator();
+        const gain = ctxAudio.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(890, now + 0.11);
+        osc.frequency.exponentialRampToValueAtTime(610, now + 0.36);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.18, now + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+        osc.connect(gain);
+        gain.connect(ctxAudio.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
     } catch (_) {}
+  }
+
+  function syncCatResidentHud() {
+    const bar = document.getElementById("cat-resident-bar");
+    const hudBtn = document.getElementById("hud-cat-btn");
+    const toyBtn = document.getElementById("toy-cat-btn");
+    const subEl = document.getElementById("cat-bar-sub");
+    const titleEl = document.getElementById("cat-bar-title");
+
+    if (bar) bar.classList.toggle("is-open", gingerCat.followCam);
+    if (hudBtn) hudBtn.classList.toggle("is-active", gingerCat.followCam);
+    if (toyBtn) toyBtn.classList.toggle("is-active", gingerCat.followCam);
+
+    if (titleEl) {
+      titleEl.textContent =
+        state.lang === "uk" ? "🐱 РУДИЙ КОТИК · ЖИТЕЛЬ МІСТА" : "🐱 GINGER CAT · STREET RESIDENT";
+    }
+    if (subEl) {
+      subEl.textContent = state.lang === "uk" ? gingerCat.statusUk : gingerCat.statusEn;
+    }
+
+    const groomBtn = document.getElementById("cat-act-groom");
+    const napBtn = document.getElementById("cat-act-nap");
+    const walkBtn = document.getElementById("cat-act-walk");
+    if (groomBtn) groomBtn.classList.toggle("is-active", gingerCat.pose === "groom" && gingerCat.pauseFrames > 0);
+    if (napBtn) napBtn.classList.toggle("is-active", gingerCat.pose === "lie" && gingerCat.pauseFrames > 0);
+    if (walkBtn) walkBtn.classList.toggle("is-active", gingerCat.pauseFrames <= 0 || gingerCat.pose === "walk");
+  }
+
+  function tossFishToCat() {
+    playCatSound("meow");
+    setTimeout(() => playCatSound("purr"), 180);
+    const startX = gingerCat.wx + (gingerCat.smoothFacing >= 0 ? 75 : -75);
+    const startY = gingerCat.wy - 65;
+    catFishTreats.push({
+      startX,
+      startY,
+      targetX: gingerCat.wx,
+      targetY: gingerCat.wy - 6,
+      progress: 0
+    });
+    for (let i = 0; i < 5; i++) {
+      gingerCat.hearts.push({
+        ox: (Math.random() - 0.5) * 26,
+        oy: -18 - Math.random() * 10,
+        vy: -0.6 - Math.random() * 0.5,
+        alpha: 1,
+        symbol: i % 2 === 0 ? "🧡" : "🐟"
+      });
+    }
+  }
+
+  function setCatPoseManual(pose) {
+    if (pose === "walk") {
+      gingerCat.pauseFrames = 0;
+      gingerCat.pose = "walk";
+      gingerCat.bubbleText = "🐾 ON PATROL!";
+      gingerCat.bubbleTimer = 95;
+      gingerCat.statusEn = "🐾 Strolling along the neighborhood sidewalk";
+      gingerCat.statusUk = "🐾 Прогулюється тротуарами міста";
+      playCatSound("meow");
+    } else if (pose === "groom") {
+      gingerCat.pose = "groom";
+      gingerCat.pauseFrames = 380;
+      gingerCat.bubbleText = "🧼 *lick-lick* 🐾";
+      gingerCat.bubbleTimer = 180;
+      gingerCat.statusEn = "🧼 Sitting & washing behind its ear with a white paw";
+      gingerCat.statusUk = "🧼 Сидить і старанно вмивається білою лапкою";
+      playCatSound("purr");
+    } else if (pose === "lie") {
+      gingerCat.pose = "lie";
+      gingerCat.pauseFrames = 420;
+      gingerCat.bubbleText = "PURR... 💤";
+      gingerCat.bubbleTimer = 200;
+      gingerCat.statusEn = "💤 Curled up on the warm stones & purring";
+      gingerCat.statusUk = "💤 Лежить калачиком на теплому камінні й муркоче";
+      playCatSound("purr");
+    }
+    syncCatResidentHud();
+  }
+
+  function triggerCatDjPick() {
+    if (!TRACKS.length) return;
+    // Pick a different track from current
+    let pickIdx = Math.floor(Math.random() * TRACKS.length);
+    if (pickIdx === state.currentTrackIndex) {
+      pickIdx = (pickIdx + 1) % TRACKS.length;
+    }
+    const chosen = TRACKS[pickIdx];
+    gingerCat.hopVel = -6.0;
+    playCatSound("meow");
+    gingerCat.bubbleText = `🎵 CAT DJ: #${chosen.num} ${chosen.title.split(" (")[0]}!`;
+    gingerCat.bubbleTimer = 210;
+    gingerCat.statusEn = `🎧 Cat DJ picked #${chosen.num} · ${chosen.title}!`;
+    gingerCat.statusUk = `🎧 Котик-DJ обрав #${chosen.num} · ${chosen.title}!`;
+    for (let i = 0; i < 6; i++) {
+      gingerCat.hearts.push({
+        ox: (Math.random() - 0.5) * 30,
+        oy: -18 - Math.random() * 10,
+        vy: -0.7 - Math.random() * 0.5,
+        alpha: 1,
+        symbol: i % 2 === 0 ? "🎵" : "🐾"
+      });
+    }
+    selectTrack(pickIdx, true);
+    // Keep camera on the cat if followCam is active
+    if (gingerCat.followCam) {
+      camera.targetX = gingerCat.wx;
+      camera.targetY = gingerCat.wy - 20;
+      camera.targetZoom = Math.max(camera.targetZoom, 1.55);
+      clampCameraTargets();
+    }
+    syncCatResidentHud();
+  }
+
+  function toggleCatFollowCam(forceState) {
+    gingerCat.followCam = typeof forceState === "boolean" ? forceState : !gingerCat.followCam;
+    if (gingerCat.followCam) {
+      camera.targetX = gingerCat.wx;
+      camera.targetY = gingerCat.wy - 18;
+      camera.targetZoom = Math.max(camera.targetZoom, 1.62);
+      clampCameraTargets();
+      // On mobile, collapse the stage drawer so the cat & map are in full view!
+      if (window.innerWidth <= 860) {
+        const drawer = document.getElementById("stage-drawer");
+        if (drawer) drawer.classList.add("is-collapsed");
+        syncMobileDrawerBtnLabel();
+      }
+      tossFishToCat();
+    }
+    syncCatResidentHud();
+  }
+
+  function triggerCatMeow() {
+    gingerCat.hopVel = -5.8;
+    if (!gingerCat.followCam) {
+      gingerCat.followCam = true;
+      camera.targetX = gingerCat.wx;
+      camera.targetY = gingerCat.wy - 18;
+      camera.targetZoom = Math.max(camera.targetZoom, 1.58);
+      clampCameraTargets();
+    }
+    tossFishToCat();
+    const phrases = [
+      "MEOW! THANKS FOR THE FISH! 🐟",
+      "PURRRR... PET ME AGAIN! 🧡",
+      "TRY 'CAT DJ' FOR MY FAVORITE SONG! 🎵",
+      "MEOW! I RUN THIS BLOCK! 🐾"
+    ];
+    gingerCat.bubbleText = phrases[Math.floor(Math.random() * phrases.length)];
+    gingerCat.bubbleTimer = 165;
+    spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#FF8C24", 85);
+    spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#F4A23E", 50);
+    syncCatResidentHud();
   }
 
   // ============================================================================
@@ -919,6 +1177,10 @@
   }
 
   function resetCameraOverview() {
+    if (gingerCat && gingerCat.followCam) {
+      gingerCat.followCam = false;
+      syncCatResidentHud();
+    }
     camera.targetX = WORLD.width * 0.54;
     camera.targetY = WORLD.height * 0.48;
     camera.targetZoom = Math.max(window.innerWidth / WORLD.width, window.innerHeight / WORLD.height) * 1.06;
@@ -1740,6 +2002,8 @@
     document.getElementById("i18n-meter-brass").textContent = dict.brassMeter;
     document.getElementById("i18n-meter-vox").textContent = dict.vocalMeter;
 
+    syncNycEnvHud();
+    syncCatResidentHud();
     buildMapMarkersAndQuickStrip();
     selectTrack(state.currentTrackIndex, state.isPlaying);
   }
@@ -1889,11 +2153,12 @@
     const targetPt = GINGER_CAT_ROUTE[nextIdx];
     const tx = targetPt.x * WORLD.width;
     const ty = targetPt.y * WORLD.height;
+    const t = performance.now() * 0.001;
 
-    // Hop physics when clicked
+    // Hop physics when clicked or fed a fish
     if (gingerCat.hopOffset < 0 || gingerCat.hopVel !== 0) {
       gingerCat.hopOffset += gingerCat.hopVel;
-      gingerCat.hopVel += 0.55;
+      gingerCat.hopVel += 0.52;
       if (gingerCat.hopOffset >= 0) {
         gingerCat.hopOffset = 0;
         gingerCat.hopVel = 0;
@@ -1908,54 +2173,81 @@
     if (isPaused) {
       gingerCat.pauseFrames--;
       gingerCat.walkPhase *= 0.85;
+      gingerCat.smoothSlope *= 0.88;
+      if (gingerCat.pauseFrames === 0) {
+        gingerCat.pose = "walk";
+        syncCatResidentHud();
+      }
     } else {
+      gingerCat.pose = "walk";
       const dx = tx - gingerCat.wx;
       const dy = ty - gingerCat.wy;
       const dist = Math.hypot(dx, dy);
-      const speed = 1.35 + audioEnergy.sub * 0.75;
 
-      if (Math.abs(dx) > 0.2) {
+      // Realistic, unhurried feline walking speed (~0.62 px/frame, slowing down smoothly before sitting/lying stops)
+      const mult = targetPt.speedMult || 1.0;
+      const slowDown = targetPt.pause && dist < 24 ? Math.max(0.45, dist / 24) : 1.0;
+      const speed = (0.62 + audioEnergy.sub * 0.22) * mult * slowDown;
+
+      if (Math.abs(dx) > 0.15) {
         gingerCat.facing = dx >= 0 ? 1 : -1;
       }
-      gingerCat.smoothFacing += (gingerCat.facing - gingerCat.smoothFacing) * 0.18;
+      gingerCat.smoothFacing += (gingerCat.facing - gingerCat.smoothFacing) * 0.16;
+
+      // Subtle body tilt along stairs & isometric slopes
+      const rawSlope = Math.max(-0.38, Math.min(0.38, (dy / Math.max(1, Math.abs(dx))) * 0.45));
+      gingerCat.smoothSlope += (rawSlope - gingerCat.smoothSlope) * 0.14;
 
       if (dist <= speed) {
         gingerCat.wx = tx;
         gingerCat.wy = ty;
         gingerCat.segIndex = nextIdx;
+        if (targetPt.statusEn) gingerCat.statusEn = targetPt.statusEn;
+        if (targetPt.statusUk) gingerCat.statusUk = targetPt.statusUk;
+
         if (targetPt.pause) {
           gingerCat.pauseFrames = targetPt.pause;
+          gingerCat.pose = targetPt.pose || "look";
           if (targetPt.bubble && gingerCat.bubbleTimer <= 0) {
             gingerCat.bubbleText = targetPt.bubble;
-            gingerCat.bubbleTimer = targetPt.pause;
+            gingerCat.bubbleTimer = Math.min(180, targetPt.pause);
           }
         }
+        syncCatResidentHud();
       } else {
         gingerCat.wx += (dx / dist) * speed;
         gingerCat.wy += (dy / dist) * speed;
-        gingerCat.walkPhase += 0.24;
+        // Natural feline stride cadence matched to actual ground speed
+        gingerCat.walkPhase += speed * 0.23;
         gingerCat.stepCounter++;
 
-        // Leave glowing wet pawprints along the route
-        if (gingerCat.stepCounter % 11 === 0) {
-          const side = (gingerCat.stepCounter % 22 === 0 ? 1 : -1) * 3.5;
+        // Leave subtle glowing pawprints along the wet stone sidewalk
+        if (gingerCat.stepCounter % 18 === 0) {
+          const side = (gingerCat.stepCounter % 36 === 0 ? 1 : -1) * 3.2;
           catPawPrints.push({
             wx: gingerCat.wx + (-dy / dist) * side,
             wy: gingerCat.wy + (dx / dist) * side,
-            alpha: 0.72
+            alpha: 0.65
           });
-          if (catPawPrints.length > 28) catPawPrints.shift();
+          if (catPawPrints.length > 26) catPawPrints.shift();
         }
-        if (gingerCat.stepCounter % 34 === 0) {
-          spawnWorldRipple(gingerCat.wx, gingerCat.wy + 4, "rgba(255, 145, 45, 0.45)", 26);
+        if (gingerCat.stepCounter % 55 === 0) {
+          spawnWorldRipple(gingerCat.wx, gingerCat.wy + 4, "rgba(255, 145, 45, 0.35)", 22);
         }
       }
+    }
+
+    // Smoothly track the cat if Follow Cat Cam is active (and user isn't currently dragging)
+    if (gingerCat.followCam && !camera.isDragging) {
+      camera.targetX += (gingerCat.wx - camera.targetX) * 0.08;
+      camera.targetY += (gingerCat.wy - 18 - camera.targetY) * 0.08;
+      clampCameraTargets();
     }
 
     // 1. Draw glowing pawprints behind the ginger cat
     for (let i = catPawPrints.length - 1; i >= 0; i--) {
       const p = catPawPrints[i];
-      p.alpha *= 0.992;
+      p.alpha *= 0.993;
       if (p.alpha < 0.04) {
         catPawPrints.splice(i, 1);
         continue;
@@ -1963,19 +2255,47 @@
       ctx.save();
       ctx.fillStyle = `rgba(255, 155, 55, ${p.alpha.toFixed(3)})`;
       ctx.beginPath();
-      ctx.arc(p.wx, p.wy, 2.3, 0, Math.PI * 2);
+      ctx.arc(p.wx, p.wy, 2.1, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // 2. Draw the Ginger Tabby Cat at (gingerCat.wx, gingerCat.wy)
+    // 2. Draw any flying fish treats tossed to the cat!
+    for (let i = catFishTreats.length - 1; i >= 0; i--) {
+      const ft = catFishTreats[i];
+      ft.progress += 0.045;
+      if (ft.progress >= 1) {
+        catFishTreats.splice(i, 1);
+        gingerCat.hopVel = -4.5;
+        spawnWorldRipple(gingerCat.wx, gingerCat.wy, "#38BDF8", 45);
+        continue;
+      }
+      const p = ft.progress;
+      const fx = ft.startX + (gingerCat.wx - ft.startX) * p;
+      const fy = ft.startY + (gingerCat.wy - 8 - ft.startY) * p - Math.sin(p * Math.PI) * 38;
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.rotate(p * Math.PI * 2.5);
+      ctx.fillStyle = "#7DD3FC";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 6.5, 3.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-5.5, 0);
+      ctx.lineTo(-9.5, -3.5);
+      ctx.lineTo(-9.5, 3.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 3. Draw the Ginger Tabby Cat at (gingerCat.wx, gingerCat.wy)
     ctx.save();
-    const bob = isPaused ? Math.sin(performance.now() * 0.005) * 0.6 : Math.abs(Math.sin(gingerCat.walkPhase)) * -2.2;
     ctx.translate(gingerCat.wx, gingerCat.wy + gingerCat.hopOffset);
 
-    // Warm streetlamp aura under the cat so it stands out on the night street
+    // Warm streetlamp aura under the cat
     const aura = ctx.createRadialGradient(0, 2, 2, 0, 2, 30);
-    aura.addColorStop(0, "rgba(255, 140, 36, 0.34)");
+    aura.addColorStop(0, gingerCat.followCam ? "rgba(255, 145, 40, 0.50)" : "rgba(255, 140, 36, 0.34)");
     aura.addColorStop(1, "rgba(255, 140, 36, 0)");
     ctx.fillStyle = aura;
     ctx.beginPath();
@@ -1983,95 +2303,14 @@
     ctx.fill();
 
     // Ground shadow
-    ctx.fillStyle = "rgba(5, 6, 10, 0.68)";
+    ctx.fillStyle = "rgba(5, 6, 10, 0.70)";
     ctx.beginPath();
-    ctx.ellipse(0, 5, 14, 5.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 5, gingerCat.pose === "lie" ? 15.5 : 13.5, 5.2, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.save();
-    ctx.translate(0, bob);
     const flip = gingerCat.smoothFacing >= 0 ? 1 : -1;
-    ctx.scale(flip, 1);
 
-    const legSwing = isPaused ? 0 : Math.sin(gingerCat.walkPhase) * 4.5;
-    const legSwingOpp = -legSwing;
-
-    // Animated waving striped ginger tail
-    const tailWave = Math.sin(performance.now() * 0.007 + gingerCat.walkPhase * 0.5) * 5;
-    ctx.strokeStyle = "#D96216";
-    ctx.lineWidth = 4.2;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(-10, -6);
-    ctx.quadraticCurveTo(-19, -15 + tailWave * 0.4, -16 + tailWave * 0.5, -23);
-    ctx.stroke();
-
-    // Tail tip (cream white)
-    ctx.strokeStyle = "#FFEAD0";
-    ctx.lineWidth = 3.4;
-    ctx.beginPath();
-    ctx.moveTo(-16 + tailWave * 0.4, -20);
-    ctx.lineTo(-16 + tailWave * 0.5, -23.5);
-    ctx.stroke();
-
-    // Back legs (darker ginger + white paws)
-    const drawLeg = (xOff, swing, color) => {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3.4;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(xOff, -3);
-      ctx.lineTo(xOff + swing * 0.65, 4);
-      ctx.stroke();
-      // White sock paw
-      ctx.fillStyle = "#FFF4E4";
-      ctx.beginPath();
-      ctx.ellipse(xOff + swing * 0.65 + 0.8, 4.3, 2.3, 1.4, 0, 0, Math.PI * 2);
-      ctx.fill();
-    };
-
-    drawLeg(-7, legSwingOpp, "#C4510C");
-    drawLeg(6, legSwingOpp, "#C4510C");
-
-    // Plump Ginger Tabby Body
-    ctx.fillStyle = "#F27D24";
-    ctx.beginPath();
-    ctx.ellipse(-1, -6.5, 11.5, 6.8, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Cream-white chest & belly fur
-    ctx.fillStyle = "#FFEBD2";
-    ctx.beginPath();
-    ctx.ellipse(6.5, -5.2, 5.2, 4.5, -0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Dark ginger tabby stripes across the back
-    ctx.strokeStyle = "#9E3B06";
-    ctx.lineWidth = 1.8;
-    [-6, -2.5, 1].forEach((sx) => {
-      ctx.beginPath();
-      ctx.moveTo(sx, -12.5);
-      ctx.quadraticCurveTo(sx - 1, -8.5, sx + 0.5, -5.5);
-      ctx.stroke();
-    });
-
-    // Front legs (bright ginger + white socks)
-    drawLeg(-5.5, legSwing, "#F27D24");
-    drawLeg(7.2, legSwing, "#F27D24");
-
-    // Ginger Head
-    ctx.fillStyle = "#F5882E";
-    ctx.beginPath();
-    ctx.arc(10.5, -11.5, 6.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // White muzzle cheeks
-    ctx.fillStyle = "#FFF4E4";
-    ctx.beginPath();
-    ctx.ellipse(12.8, -9.2, 3.8, 2.6, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Pointed Ears (outer ginger + inner pink)
+    // Helper for pointed ears (outer ginger + inner pink)
     const drawEar = (ex, ey, tilt) => {
       ctx.save();
       ctx.translate(ex, ey);
@@ -2092,59 +2331,384 @@
       ctx.fill();
       ctx.restore();
     };
-    drawEar(7.8, -16.2, -0.18);
-    drawEar(13.0, -16.2, 0.15);
 
-    // Emerald-green eyes (blink occasionally)
-    const isBlinking = Math.sin(performance.now() * 0.003) > 0.96;
-    if (isBlinking) {
+    ctx.save();
+    ctx.scale(flip, 1);
+
+    if (gingerCat.pose === "lie" && isPaused) {
+      // ======================================================================
+      // POSE A: LYING DOWN CURLED / LOAFING ON THE WARM STONES ("кое где лежал")
+      // ======================================================================
+      const breath = 1 + Math.sin(t * 3.2) * 0.045;
+      const tailTwitch = Math.sin(t * 2.4) * 2.8;
+
+      // Curled striped tail resting along the cobblestones behind/around body
+      ctx.strokeStyle = "#D96216";
+      ctx.lineWidth = 4.2;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-11, -1);
+      ctx.quadraticCurveTo(-19, -3 + tailTwitch * 0.4, -15, 3.5 + tailTwitch * 0.5);
+      ctx.stroke();
+      ctx.strokeStyle = "#FFEAD0";
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-16.2, 1.8 + tailTwitch * 0.4);
+      ctx.lineTo(-14.5, 3.8 + tailTwitch * 0.5);
+      ctx.stroke();
+
+      // Cozy low-slung curled ginger body (breathing gently)
+      ctx.save();
+      ctx.scale(1, breath);
+      ctx.fillStyle = "#F27D24";
+      ctx.beginPath();
+      ctx.ellipse(-1.5, -3.2, 12.5, 6.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cream belly edge
+      ctx.fillStyle = "#FFEBD2";
+      ctx.beginPath();
+      ctx.ellipse(4.5, -1.2, 6.5, 3.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dark ginger tabby stripes on curled back
+      ctx.strokeStyle = "#9E3B06";
+      ctx.lineWidth = 1.8;
+      [-6.5, -2.5, 1.5].forEach((sx) => {
+        ctx.beginPath();
+        ctx.moveTo(sx, -8.8);
+        ctx.quadraticCurveTo(sx - 1, -5.2, sx + 0.5, -2.2);
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      // Tucked white front paws in front of chest
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(9.2, 2.8, 3.2, 1.8, 0, 0, Math.PI * 2);
+      ctx.ellipse(12.2, 3.2, 2.8, 1.6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Resting Ginger Head lowered onto front paws
+      ctx.save();
+      ctx.translate(9.8, -5.8 + Math.sin(t * 3.2) * 0.4);
+      ctx.fillStyle = "#F5882E";
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // White muzzle
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(2.4, 2.1, 3.6, 2.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawEar(-2.5, -4.6, -0.22);
+      drawEar(2.5, -4.6, 0.18);
+
+      // Contented sleeping crescent eye
+      ctx.strokeStyle = "#1E1B18";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(2.0, -0.2, 1.8, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+
+      // Pink nose & whiskers
+      ctx.fillStyle = "#FB7185";
+      ctx.beginPath();
+      ctx.arc(5.0, 1.5, 1.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.82)";
+      ctx.lineWidth = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(4.0, 2.0);
+      ctx.lineTo(8.8, 1.4);
+      ctx.moveTo(4.0, 2.6);
+      ctx.lineTo(8.5, 3.0);
+      ctx.stroke();
+      ctx.restore();
+    } else if (gingerCat.pose === "groom" && isPaused) {
+      // ======================================================================
+      // POSE B: SITTING & GROOMING / WASHING WITH PAW ("сел чиститься")
+      // ======================================================================
+      const lickCycle = Math.sin(t * 7.2); // rhythmic paw-licking & ear-washing cycle
+      const tailCurl = Math.sin(t * 3.0) * 2.5;
+
+      // Tail curled neatly behind sitting haunches
+      ctx.strokeStyle = "#D96216";
+      ctx.lineWidth = 4.0;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-7, 2);
+      ctx.quadraticCurveTo(-16, 0 + tailCurl * 0.4, -14, -9 + tailCurl * 0.6);
+      ctx.stroke();
+      ctx.strokeStyle = "#FFEAD0";
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(-14.5, -6.5 + tailCurl * 0.5);
+      ctx.lineTo(-14, -9.5 + tailCurl * 0.6);
+      ctx.stroke();
+
+      // Sitting upright ginger torso (angled up)
+      ctx.fillStyle = "#F27D24";
+      ctx.beginPath();
+      ctx.ellipse(-1.5, -5.5, 7.8, 10.2, 0.32, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Fluffy cream chest patch
+      ctx.fillStyle = "#FFEBD2";
+      ctx.beginPath();
+      ctx.ellipse(3.2, -7.2, 4.2, 6.2, 0.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dark ginger stripes on sitting back
+      ctx.strokeStyle = "#9E3B06";
+      ctx.lineWidth = 1.7;
+      [-9, -5.5, -2].forEach((sy) => {
+        ctx.beginPath();
+        ctx.moveTo(-7.5, sy);
+        ctx.quadraticCurveTo(-4, sy - 0.5, -1, sy + 1);
+        ctx.stroke();
+      });
+
+      // Supporting front leg planted on the sidewalk
+      ctx.strokeStyle = "#F27D24";
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(2.5, -3.5);
+      ctx.lineTo(3.8, 4.0);
+      ctx.stroke();
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(4.4, 4.3, 2.5, 1.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ginger Head tilted slightly down/sideways into the grooming paw!
+      ctx.save();
+      ctx.translate(4.8, -15.2 + lickCycle * 0.9);
+      ctx.rotate(0.12 + lickCycle * 0.08);
+
+      ctx.fillStyle = "#F5882E";
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(2.5, 2.0, 3.6, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawEar(-2.6, -4.6, -0.2);
+      drawEar(2.4, -4.6, 0.22 + lickCycle * 0.08);
+
+      // Happy closed eye while washing face
       ctx.strokeStyle = "#1E1B18";
       ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.moveTo(10.5, -11.8);
-      ctx.lineTo(14.5, -11.8);
+      ctx.moveTo(0.5, -0.4);
+      ctx.lineTo(4.0, -0.2);
       ctx.stroke();
+
+      // Little pink tongue licking the raised white paw!
+      if (lickCycle > -0.2) {
+        ctx.fillStyle = "#FB7185";
+        ctx.beginPath();
+        ctx.ellipse(5.2, 2.8 - lickCycle * 0.8, 1.7, 1.1, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Pink nose
+      ctx.fillStyle = "#FB7185";
+      ctx.beginPath();
+      ctx.arc(5.2, 1.2, 1.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Raised Front Paw rubbing cheek & ear in a circle!
+      const pawX = 8.8 + Math.cos(t * 7.2) * 1.4;
+      const pawY = -12.2 + Math.sin(t * 7.2) * 2.2;
+      ctx.strokeStyle = "#F27D24";
+      ctx.lineWidth = 3.4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(3.5, -7.5);
+      ctx.quadraticCurveTo(8.5, -8.5, pawX, pawY);
+      ctx.stroke();
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.arc(pawX, pawY, 2.4, 0, Math.PI * 2);
+      ctx.fill();
     } else {
-      ctx.fillStyle = "#34D399";
+      // ======================================================================
+      // POSE C: LIFELIKE 4-LEGGED FELINE WALK / TROT / LOOK
+      // ======================================================================
+      const wp = gingerCat.walkPhase;
+      const bodyBob = isPaused ? Math.sin(t * 3.5) * 0.45 : Math.sin(wp * 2) * -1.1;
+      ctx.translate(0, bodyBob);
+      ctx.rotate(gingerCat.smoothSlope * flip);
+
+      // 4-leg diagonal feline gait with true paw lift-off arc!
+      const drawWalkLeg = (hipX, phaseOffset, legColor, isBack) => {
+        const ph = wp + phaseOffset;
+        const strideX = isPaused ? 0 : Math.sin(ph) * 4.4;
+        const liftY = isPaused ? 0 : Math.max(0, -Math.cos(ph)) * 2.5;
+        const kneeX = hipX + strideX * 0.35 + (isBack ? -1.2 : 1.0);
+        const kneeY = -0.2 - liftY * 0.5;
+        const footX = hipX + strideX;
+        const footY = 4.1 - liftY;
+
+        ctx.strokeStyle = legColor;
+        ctx.lineWidth = 3.2;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hipX, -3.5);
+        ctx.lineTo(kneeX, kneeY);
+        ctx.lineTo(footX, footY);
+        ctx.stroke();
+
+        // White sock paw
+        ctx.fillStyle = "#FFF4E4";
+        ctx.beginPath();
+        ctx.ellipse(footX + 0.7, footY + 0.2, 2.2, 1.35, 0, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      // Far-side legs (drawn behind body: back-right & front-right)
+      drawWalkLeg(-7.2, Math.PI, "#B84709", true);
+      drawWalkLeg(5.8, 0, "#CC5612", false);
+
+      // Sinuous S-curve striped ginger tail held high
+      const tailSway = Math.sin(t * 4.2 + wp * 0.4) * 4.2;
+      ctx.strokeStyle = "#D96216";
+      ctx.lineWidth = 4.1;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.arc(12.6, -11.8, 1.65, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#090A0F";
+      ctx.moveTo(-10.5, -6.5);
+      ctx.bezierCurveTo(-17, -11, -18 + tailSway * 0.3, -18, -14 + tailSway * 0.5, -23.5);
+      ctx.stroke();
+
+      // Cream-white tail tip
+      ctx.strokeStyle = "#FFEAD0";
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
-      ctx.ellipse(12.9, -11.8, 0.65, 1.3, 0, 0, Math.PI * 2);
+      ctx.moveTo(-15.2 + tailSway * 0.42, -20.2);
+      ctx.lineTo(-14 + tailSway * 0.5, -23.5);
+      ctx.stroke();
+
+      // Supple Ginger Tabby Body
+      ctx.fillStyle = "#F27D24";
+      ctx.beginPath();
+      ctx.ellipse(-1, -6.5, 11.8, 6.5, 0, 0, Math.PI * 2);
       ctx.fill();
+
+      // Cream-white chest & belly fur
+      ctx.fillStyle = "#FFEBD2";
+      ctx.beginPath();
+      ctx.ellipse(6.5, -5.2, 5.2, 4.4, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dark ginger tabby stripes across the back
+      ctx.strokeStyle = "#9E3B06";
+      ctx.lineWidth = 1.8;
+      [-6.2, -2.5, 1.2].forEach((sx) => {
+        ctx.beginPath();
+        ctx.moveTo(sx, -12.4);
+        ctx.quadraticCurveTo(sx - 1, -8.5, sx + 0.5, -5.2);
+        ctx.stroke();
+      });
+
+      // Near-side legs (drawn in front of body: back-left & front-left)
+      drawWalkLeg(-5.5, 0, "#E06919", true);
+      drawWalkLeg(7.2, Math.PI, "#F27D24", false);
+
+      // Ginger Head (with subtle head bob)
+      ctx.save();
+      const headNod = isPaused ? Math.sin(t * 2.5) * 0.6 : Math.cos(wp) * 0.65;
+      ctx.translate(10.6, -11.6 + headNod);
+
+      ctx.fillStyle = "#F5882E";
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // White muzzle cheeks
+      ctx.fillStyle = "#FFF4E4";
+      ctx.beginPath();
+      ctx.ellipse(2.3, 2.3, 3.8, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawEar(-2.7, -4.6, -0.18);
+      drawEar(2.4, -4.6, 0.15);
+
+      // Emerald-green eyes (blink occasionally)
+      const isBlinking = Math.sin(t * 3.1) > 0.96;
+      if (isBlinking) {
+        ctx.strokeStyle = "#1E1B18";
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(0, -0.2);
+        ctx.lineTo(3.8, -0.2);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = "#34D399";
+        ctx.beginPath();
+        ctx.arc(2.0, -0.2, 1.65, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#090A0F";
+        ctx.beginPath();
+        ctx.ellipse(2.3, -0.2, 0.65, 1.3, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Pink nose & white whiskers
+      ctx.fillStyle = "#FB7185";
+      ctx.beginPath();
+      ctx.arc(5.2, 1.7, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.lineWidth = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(4.0, 2.3);
+      ctx.lineTo(9.0, 1.3);
+      ctx.moveTo(4.0, 3.0);
+      ctx.lineTo(8.7, 3.3);
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // Pink nose
-    ctx.fillStyle = "#FB7185";
-    ctx.beginPath();
-    ctx.arc(15.8, -9.8, 1.2, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.restore(); // undo flip
 
-    // White whiskers
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-    ctx.lineWidth = 0.85;
-    ctx.beginPath();
-    ctx.moveTo(14.5, -9.2);
-    ctx.lineTo(19.5, -10.2);
-    ctx.moveTo(14.5, -8.5);
-    ctx.lineTo(19.2, -8.2);
-    ctx.stroke();
+    // 4. Floating Hearts / Fish / Music Notes when petted or fed
+    for (let i = gingerCat.hearts.length - 1; i >= 0; i--) {
+      const h = gingerCat.hearts[i];
+      h.oy += h.vy;
+      h.alpha -= 0.016;
+      if (h.alpha <= 0.02) {
+        gingerCat.hearts.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.globalAlpha = h.alpha;
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(h.symbol, h.ox, h.oy);
+      ctx.restore();
+    }
 
-    ctx.restore(); // undo flip & bob
-
-    // Speech bubble when paused at arrow stops or clicked
+    // 5. Speech bubble when paused, grooming, napping, or clicked
     if (gingerCat.bubbleTimer > 0 && gingerCat.bubbleText) {
       ctx.save();
       ctx.font = "700 9.5px 'JetBrains Mono', monospace";
       const textW = ctx.measureText(gingerCat.bubbleText).width;
-      const bw = textW + 12;
-      const bh = 16;
+      const bw = textW + 14;
+      const bh = 17;
       const bx = -bw * 0.5;
-      const by = -36;
-      ctx.fillStyle = "rgba(11, 11, 15, 0.9)";
+      const by = -38;
+      ctx.fillStyle = "rgba(11, 11, 15, 0.92)";
       ctx.strokeStyle = "#FF8C24";
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.25;
       ctx.beginPath();
       ctx.roundRect(bx, by, bw, bh, 8);
       ctx.fill();
@@ -2886,6 +3450,41 @@
     }
     document.getElementById("toy-reset-btn").addEventListener("click", resetCameraOverview);
 
+    // Ginger Cat Resident Controls (HUD Button, Toybox Button & Floating Action Bar)
+    const hudCatBtn = document.getElementById("hud-cat-btn");
+    const toyCatBtn = document.getElementById("toy-cat-btn");
+    const catActFeed = document.getElementById("cat-act-feed");
+    const catActGroom = document.getElementById("cat-act-groom");
+    const catActNap = document.getElementById("cat-act-nap");
+    const catActWalk = document.getElementById("cat-act-walk");
+    const catActDj = document.getElementById("cat-act-dj");
+    const catBarClose = document.getElementById("cat-bar-close");
+
+    if (hudCatBtn) {
+      hudCatBtn.addEventListener("click", () => toggleCatFollowCam());
+    }
+    if (toyCatBtn) {
+      toyCatBtn.addEventListener("click", () => toggleCatFollowCam());
+    }
+    if (catActFeed) {
+      catActFeed.addEventListener("click", () => tossFishToCat());
+    }
+    if (catActGroom) {
+      catActGroom.addEventListener("click", () => setCatPoseManual("groom"));
+    }
+    if (catActNap) {
+      catActNap.addEventListener("click", () => setCatPoseManual("lie"));
+    }
+    if (catActWalk) {
+      catActWalk.addEventListener("click", () => setCatPoseManual("walk"));
+    }
+    if (catActDj) {
+      catActDj.addEventListener("click", () => triggerCatDjPick());
+    }
+    if (catBarClose) {
+      catBarClose.addEventListener("click", () => toggleCatFollowCam(false));
+    }
+
     // New York City Live Atmosphere HUD Button & Popover Controls
     const nycEnvBtn = document.getElementById("nyc-env-btn");
     const nycPopover = document.getElementById("nyc-env-popover");
@@ -3030,6 +3629,8 @@
       } else if (k === "w") {
         const snowBtn = document.getElementById("toy-snow-btn");
         if (snowBtn) snowBtn.click();
+      } else if (k === "k") {
+        toggleCatFollowCam();
       } else if (k === "c") {
         resetCameraOverview();
       } else if (e.key === "Escape") {
@@ -3065,6 +3666,7 @@
     buildInstagramReelsWall();
     buildPhotoGallery("all");
     bindEvents();
+    syncCatResidentHud();
     // On mobile screens, start with the drawer minimized so the All-8-Songs top bar & interactive map are 100% open
     if (window.innerWidth <= 860) {
       const drawer = document.getElementById("stage-drawer");
