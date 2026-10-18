@@ -129,13 +129,574 @@
     });
   }
 
-  for (let i = 0; i < 110; i++) {
+  for (let i = 0; i < 130; i++) {
     rainDrops.push({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       len: 14 + Math.random() * 18,
       speed: 13 + Math.random() * 9
     });
+  }
+
+  // ============================================================================
+  // NEW YORK CITY LIVE TIME OF DAY · LIVE WEATHER · 4 SEASONS ENGINE
+  // ============================================================================
+  const nycEnv = {
+    todOverride: "auto",     // "auto" | "dawn" | "day" | "sunset" | "night"
+    weatherOverride: "auto", // "auto" | "clear" | "rain" | "snow" | "storm" | "fog"
+    seasonOverride: "auto",  // "auto" | "winter" | "spring" | "summer" | "autumn"
+    liveTimeStr: "--:--",
+    liveHourFloat: 22.0,
+    liveTod: "night",
+    liveSeason: "autumn",
+    liveWeather: "clear",
+    liveTempC: null,
+    liveTempF: null,
+    liveWindKmh: 12,
+    liveWeatherDesc: "CLEAR",
+    stormFlashAlpha: 0,
+    popoverOpen: false
+  };
+
+  // Multi-depth Snowflakes (190 flakes across 3 depth layers)
+  const snowFlakes = [];
+  for (let i = 0; i < 190; i++) {
+    const layer = i < 45 ? 2 : i < 120 ? 1 : 0; // 2=foreground big, 1=mid, 0=distant powder
+    snowFlakes.push({
+      x: Math.random() * 2000,
+      y: Math.random() * 1200,
+      r: layer === 2 ? 3.2 + Math.random() * 2.2 : layer === 1 ? 1.8 + Math.random() * 1.4 : 1.0 + Math.random() * 0.9,
+      speedY: layer === 2 ? 1.8 + Math.random() * 1.3 : layer === 1 ? 1.1 + Math.random() * 0.9 : 0.65 + Math.random() * 0.5,
+      driftX: (Math.random() - 0.35) * 0.8,
+      swayAmp: 0.4 + Math.random() * 1.1,
+      swayFreq: 0.01 + Math.random() * 0.02,
+      phase: Math.random() * Math.PI * 2,
+      alpha: layer === 2 ? 0.88 : layer === 1 ? 0.68 : 0.45,
+      star: layer === 2 && Math.random() > 0.45
+    });
+  }
+
+  // Swirling World-Space Autumn Leaves (75 leaves)
+  const autumnLeaves = [];
+  const AUTUMN_COLORS = ["#EA580C", "#F59E0B", "#DC2626", "#D97706", "#B45309"];
+  for (let i = 0; i < 75; i++) {
+    autumnLeaves.push({
+      wx: Math.random() * WORLD.width,
+      wy: Math.random() * WORLD.height,
+      vx: 0.65 + Math.random() * 1.15,
+      vy: 0.45 + Math.random() * 0.85,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.06,
+      size: 4.2 + Math.random() * 3.8,
+      color: AUTUMN_COLORS[i % AUTUMN_COLORS.length],
+      swayPhase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Floating World-Space Spring Cherry/Magnolia Petals (70 petals)
+  const springPetals = [];
+  const SPRING_COLORS = ["#F9A8D4", "#FBCFE8", "#FFF1F2", "#F472B6"];
+  for (let i = 0; i < 70; i++) {
+    springPetals.push({
+      wx: Math.random() * WORLD.width,
+      wy: Math.random() * WORLD.height,
+      vx: 0.45 + Math.random() * 0.75,
+      vy: 0.3 + Math.random() * 0.55,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.04,
+      size: 3.2 + Math.random() * 2.6,
+      color: SPRING_COLORS[i % SPRING_COLORS.length],
+      swayPhase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Glowing World-Space Summer Fireflies (60 fireflies)
+  const summerFireflies = [];
+  for (let i = 0; i < 60; i++) {
+    summerFireflies.push({
+      wx: (0.15 + Math.random() * 0.78) * WORLD.width,
+      wy: (0.22 + Math.random() * 0.65) * WORLD.height,
+      vx: (Math.random() - 0.5) * 0.55,
+      vy: (Math.random() - 0.5) * 0.45,
+      phase: Math.random() * Math.PI * 2,
+      size: 2.2 + Math.random() * 2.2
+    });
+  }
+
+  // Volumetric Harbor Fog Banks
+  const fogBanks = [];
+  for (let i = 0; i < 7; i++) {
+    fogBanks.push({
+      xRatio: Math.random(),
+      yRatio: 0.12 + (i / 7) * 0.75,
+      wRatio: 0.45 + Math.random() * 0.35,
+      hRatio: 0.16 + Math.random() * 0.12,
+      speed: (0.00018 + Math.random() * 0.00022) * (i % 2 === 0 ? 1 : -1),
+      alpha: 0.14 + Math.random() * 0.12
+    });
+  }
+
+  function getEffectiveTod() {
+    return nycEnv.todOverride === "auto" ? nycEnv.liveTod : nycEnv.todOverride;
+  }
+  function getEffectiveWeather() {
+    return nycEnv.weatherOverride === "auto" ? nycEnv.liveWeather : nycEnv.weatherOverride;
+  }
+  function getEffectiveSeason() {
+    return nycEnv.seasonOverride === "auto" ? nycEnv.liveSeason : nycEnv.seasonOverride;
+  }
+
+  function updateNycClockAndSeason() {
+    try {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        hour12: false,
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).formatToParts(now);
+
+      const map = {};
+      parts.forEach((p) => {
+        map[p.type] = p.value;
+      });
+      const month = parseInt(map.month || "10", 10);
+      let hour24 = parseInt(map.hour || "22", 10);
+      if (hour24 === 24) hour24 = 0;
+      const minute = parseInt(map.minute || "0", 10);
+
+      nycEnv.liveHourFloat = hour24 + minute / 60;
+      const ampm = hour24 >= 12 ? "PM" : "AM";
+      const hr12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+      nycEnv.liveTimeStr = `${String(hr12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${ampm}`;
+
+      // Determine Time of Day in New York
+      const h = nycEnv.liveHourFloat;
+      if (h >= 5.5 && h < 8.25) {
+        nycEnv.liveTod = "dawn";
+      } else if (h >= 8.25 && h < 16.75) {
+        nycEnv.liveTod = "day";
+      } else if (h >= 16.75 && h < 19.75) {
+        nycEnv.liveTod = "sunset";
+      } else {
+        nycEnv.liveTod = "night";
+      }
+
+      // Determine Season in New York
+      if (month === 12 || month === 1 || month === 2) {
+        nycEnv.liveSeason = "winter";
+      } else if (month >= 3 && month <= 5) {
+        nycEnv.liveSeason = "spring";
+      } else if (month >= 6 && month <= 8) {
+        nycEnv.liveSeason = "summer";
+      } else {
+        nycEnv.liveSeason = "autumn";
+      }
+    } catch (_) {}
+
+    syncNycEnvHud();
+  }
+
+  async function fetchLiveNycWeather() {
+    try {
+      const url =
+        "https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current=temperature_2m,weather_code,wind_speed_10m,is_day&timezone=America%2FNew_York";
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Weather fetch failed");
+      const data = await res.json();
+      if (data && data.current) {
+        const c = data.current;
+        const tempC = Math.round(c.temperature_2m);
+        nycEnv.liveTempC = tempC;
+        nycEnv.liveTempF = Math.round((tempC * 9) / 5 + 32);
+        nycEnv.liveWindKmh = Math.round(c.wind_speed_10m || 10);
+        const code = Number(c.weather_code || 0);
+
+        if ([71, 73, 75, 77, 85, 86].includes(code)) {
+          nycEnv.liveWeather = "snow";
+          nycEnv.liveWeatherDesc = "SNOW";
+        } else if ([95, 96, 99].includes(code)) {
+          nycEnv.liveWeather = "storm";
+          nycEnv.liveWeatherDesc = "THUNDERSTORM";
+        } else if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) {
+          nycEnv.liveWeather = "rain";
+          nycEnv.liveWeatherDesc = "RAIN";
+        } else if ([45, 48].includes(code)) {
+          nycEnv.liveWeather = "fog";
+          nycEnv.liveWeatherDesc = "HARBOR FOG";
+        } else if ([2, 3].includes(code)) {
+          nycEnv.liveWeather = "clear";
+          nycEnv.liveWeatherDesc = "CLOUDY";
+        } else {
+          nycEnv.liveWeather = "clear";
+          nycEnv.liveWeatherDesc = "CLEAR";
+        }
+      }
+    } catch (_) {
+      // Fallback if offline
+      if (nycEnv.liveTempC === null) {
+        nycEnv.liveTempC = 12;
+        nycEnv.liveTempF = 54;
+      }
+    }
+    syncNycEnvHud();
+  }
+
+  function syncNycEnvHud() {
+    const tod = getEffectiveTod();
+    const weather = getEffectiveWeather();
+    const season = getEffectiveSeason();
+    const isAuto =
+      nycEnv.todOverride === "auto" &&
+      nycEnv.weatherOverride === "auto" &&
+      nycEnv.seasonOverride === "auto";
+
+    // Keep state.rainActive synced for backwards compatibility
+    state.rainActive = weather === "rain" || weather === "storm";
+
+    const rainBtn = document.getElementById("toy-rain-btn");
+    const snowBtn = document.getElementById("toy-snow-btn");
+    if (rainBtn) rainBtn.classList.toggle("is-active", weather === "rain" || weather === "storm");
+    if (snowBtn) snowBtn.classList.toggle("is-active", weather === "snow");
+
+    const envBtn = document.getElementById("nyc-env-btn");
+    const envIcon = document.getElementById("nyc-env-icon");
+    const envLabel = document.getElementById("nyc-env-label");
+    const telemetryEl = document.getElementById("nyc-pop-telemetry");
+    const autoBtn = document.getElementById("nyc-sync-auto-btn");
+
+    if (envBtn) {
+      envBtn.classList.toggle("is-manual", !isAuto);
+      envBtn.classList.toggle("is-synced", isAuto);
+    }
+    if (autoBtn) {
+      autoBtn.classList.toggle("is-active", isAuto);
+    }
+
+    const weatherIcons = {
+      snow: "❄️",
+      rain: "🌧️",
+      storm: "⛈️",
+      fog: "🌫️",
+      clear: tod === "day" ? "☀️" : tod === "dawn" ? "🌅" : tod === "sunset" ? "🌇" : "🌙"
+    };
+    const seasonShort = {
+      winter: "❄️ WINTER",
+      spring: "🌸 SPRING",
+      summer: "☀️ SUMMER",
+      autumn: "🍂 AUTUMN"
+    };
+
+    if (envIcon) envIcon.textContent = weatherIcons[weather] || "🗽";
+    const tempPart = nycEnv.liveTempC !== null ? `${nycEnv.liveTempC}°C` : "";
+    const modePrefix = isAuto ? "NYC" : "NYC*";
+    if (envLabel) {
+      envLabel.textContent = `${modePrefix} ${nycEnv.liveTimeStr}${tempPart ? " · " + tempPart : ""} · ${seasonShort[season] || "AUTUMN"}`;
+    }
+
+    if (telemetryEl) {
+      const statusMode = isAuto ? "LIVE MANHATTAN SYNC" : "MANUAL PREVIEW OVERRIDE";
+      const tStr = nycEnv.liveTempC !== null ? `${nycEnv.liveTempC}°C (${nycEnv.liveTempF}°F)` : "SYNCED";
+      telemetryEl.textContent = `${statusMode} · ${nycEnv.liveTimeStr} · ${tStr} · ${weather.toUpperCase()} · ${season.toUpperCase()}`;
+    }
+
+    // Highlight active pills in popover
+    document.querySelectorAll("#nyc-tod-pills .nyc-opt-pill").forEach((b) => {
+      b.classList.toggle("is-active", b.dataset.tod === nycEnv.todOverride);
+    });
+    document.querySelectorAll("#nyc-weather-pills .nyc-opt-pill").forEach((b) => {
+      b.classList.toggle("is-active", b.dataset.weather === nycEnv.weatherOverride);
+    });
+    document.querySelectorAll("#nyc-season-pills .nyc-opt-pill").forEach((b) => {
+      b.classList.toggle("is-active", b.dataset.season === nycEnv.seasonOverride);
+    });
+  }
+
+  // World-space seasonal & time-of-day rendering on top of the city map
+  function drawNycWorldAtmosphere(ctx) {
+    const tod = getEffectiveTod();
+    const weather = getEffectiveWeather();
+    const season = getEffectiveSeason();
+    const t = performance.now() * 0.001;
+
+    // 1. TIME OF DAY LIGHTING & SKY GRADING OVER CITY DIORAMA
+    ctx.save();
+    if (tod === "day") {
+      // Lift nocturnal shadows into crisp New York daylight
+      ctx.globalCompositeOperation = "screen";
+      const dayGrad = ctx.createLinearGradient(0, 0, WORLD.width, WORLD.height);
+      dayGrad.addColorStop(0, "rgba(120, 180, 250, 0.30)");
+      dayGrad.addColorStop(0.5, "rgba(255, 232, 185, 0.22)");
+      dayGrad.addColorStop(1, "rgba(95, 155, 225, 0.24)");
+      ctx.fillStyle = dayGrad;
+      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+
+      // Diagonal warm sunbeams streaming from top-left across rooftops & marina
+      const beamGrad = ctx.createLinearGradient(0, 0, WORLD.width * 0.85, WORLD.height * 0.85);
+      beamGrad.addColorStop(0, "rgba(255, 240, 190, 0.22)");
+      beamGrad.addColorStop(0.6, "rgba(255, 210, 130, 0.08)");
+      beamGrad.addColorStop(1, "rgba(255, 200, 110, 0)");
+      ctx.fillStyle = beamGrad;
+      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+    } else if (tod === "dawn") {
+      // Rose-gold & lavender NYC sunrise glow
+      ctx.globalCompositeOperation = "screen";
+      const dawnGrad = ctx.createLinearGradient(WORLD.width, 0, 0, WORLD.height);
+      dawnGrad.addColorStop(0, "rgba(255, 135, 115, 0.28)");
+      dawnGrad.addColorStop(0.45, "rgba(235, 150, 185, 0.18)");
+      dawnGrad.addColorStop(1, "rgba(95, 110, 210, 0.14)");
+      ctx.fillStyle = dawnGrad;
+      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+    } else if (tod === "sunset") {
+      // Rich Golden-Hour Sunset (copper-orange & magenta dusk)
+      ctx.globalCompositeOperation = "screen";
+      const sunGrad = ctx.createLinearGradient(0, 0, WORLD.width, WORLD.height);
+      sunGrad.addColorStop(0, "rgba(255, 94, 32, 0.28)");
+      sunGrad.addColorStop(0.5, "rgba(245, 145, 55, 0.20)");
+      sunGrad.addColorStop(1, "rgba(175, 48, 115, 0.18)");
+      ctx.fillStyle = sunGrad;
+      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+    }
+    ctx.restore();
+
+    // 2. WINTER OR SNOW ACCUMULATION ON ROOFTOPS, CAR, AWNING, AND CURBS
+    if (season === "winter" || weather === "snow") {
+      ctx.save();
+      // Frosty blue atmospheric rim
+      ctx.fillStyle = "rgba(185, 225, 255, 0.07)";
+      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+
+      // Soft snowdrift patches on ledges, parked coupe roof, cafe awning, stoop stairs, and curbs
+      const snowPatches = [
+        { x: 0.625, y: 0.508, rx: 46, ry: 15, rot: -0.22 }, // Parked green coupe roof snow
+        { x: 0.592, y: 0.526, rx: 28, ry: 10, rot: -0.25 }, // Green coupe hood snow
+        { x: 0.448, y: 0.445, rx: 72, ry: 18, rot: 0.22 },  // Corner cafe awning snow
+        { x: 0.778, y: 0.455, rx: 64, ry: 16, rot: 0.25 },  // Courtyard archway ledge snow
+        { x: 0.415, y: 0.348, rx: 48, ry: 14, rot: -0.24 }, // Brownstone stoop steps snow
+        { x: 0.215, y: 0.435, rx: 68, ry: 15, rot: -0.28 }, // Marina promenade snowbank
+        { x: 0.525, y: 0.635, rx: 55, ry: 12, rot: 0.18 },  // Crosswalk curb snowbank
+        { x: 0.854, y: 0.318, rx: 46, ry: 9, rot: 0.25 }    // Floor 5 balcony railing snow cap
+      ];
+      snowPatches.forEach((sp) => {
+        const sx = sp.x * WORLD.width;
+        const sy = sp.y * WORLD.height;
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(sp.rot);
+        const sg = ctx.createRadialGradient(0, 0, 2, 0, 0, sp.rx);
+        sg.addColorStop(0, "rgba(245, 250, 255, 0.72)");
+        sg.addColorStop(0.6, "rgba(215, 235, 255, 0.42)");
+        sg.addColorStop(1, "rgba(200, 225, 255, 0)");
+        ctx.fillStyle = sg;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sp.rx, sp.ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    // 3. AUTUMN: SWIRLING GOLDEN & CRIMSON LEAVES ACROSS THE STREETS
+    if (season === "autumn" && weather !== "snow") {
+      ctx.save();
+      const windBoost = weather === "storm" ? 2.4 : 1.0;
+      autumnLeaves.forEach((lf) => {
+        lf.wx += lf.vx * windBoost + Math.sin(t * 2.0 + lf.swayPhase) * 0.45;
+        lf.wy += lf.vy * windBoost + Math.cos(t * 1.6 + lf.swayPhase) * 0.25;
+        lf.rot += lf.rotSpeed * windBoost;
+        if (lf.wx > WORLD.width + 20) lf.wx = -20;
+        if (lf.wy > WORLD.height + 20) {
+          lf.wy = -20;
+          lf.wx = Math.random() * WORLD.width;
+        }
+        ctx.save();
+        ctx.translate(lf.wx, lf.wy);
+        ctx.rotate(lf.rot);
+        ctx.fillStyle = lf.color;
+        ctx.globalAlpha = 0.86;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, lf.size, lf.size * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    // 4. SPRING: DRIFTING PINK & WHITE CHERRY BLOSSOM PETALS
+    if (season === "spring" && weather !== "snow") {
+      ctx.save();
+      springPetals.forEach((pt) => {
+        pt.wx += pt.vx + Math.sin(t * 1.8 + pt.swayPhase) * 0.55;
+        pt.wy += pt.vy + Math.cos(t * 1.4 + pt.swayPhase) * 0.25;
+        pt.rot += pt.rotSpeed;
+        if (pt.wx > WORLD.width + 20) pt.wx = -20;
+        if (pt.wy > WORLD.height + 20) {
+          pt.wy = -20;
+          pt.wx = Math.random() * WORLD.width;
+        }
+        ctx.save();
+        ctx.translate(pt.wx, pt.wy);
+        ctx.rotate(pt.rot);
+        ctx.fillStyle = pt.color;
+        ctx.globalAlpha = 0.84;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, pt.size, pt.size * 0.62, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    // 5. SUMMER: GLOWING GOLDEN-EMERALD FIREFLIES AT DUSK/NIGHT & HARBOR SUN SPARKLES BY DAY
+    if (season === "summer") {
+      ctx.save();
+      summerFireflies.forEach((ff) => {
+        ff.wx += ff.vx + Math.sin(t * 1.5 + ff.phase) * 0.3;
+        ff.wy += ff.vy + Math.cos(t * 1.3 + ff.phase) * 0.3;
+        const pulse = 0.35 + 0.65 * Math.abs(Math.sin(t * 2.6 + ff.phase));
+        const fg = ctx.createRadialGradient(ff.wx, ff.wy, 0.5, ff.wx, ff.wy, ff.size * 3.5);
+        fg.addColorStop(0, `rgba(235, 255, 120, ${(0.88 * pulse).toFixed(3)})`);
+        fg.addColorStop(1, "rgba(190, 242, 100, 0)");
+        ctx.fillStyle = fg;
+        ctx.beginPath();
+        ctx.arc(ff.wx, ff.wy, ff.size * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+  }
+
+  // Screen-space weather rendering (Snowfall, Rain/Storm, Harbor Fog)
+  function drawNycScreenWeather(ctx, vw, vh) {
+    const weather = getEffectiveWeather();
+    const season = getEffectiveSeason();
+    const t = performance.now() * 0.001;
+
+    // 1. VOLUMETRIC HARBOR FOG (when weather === "fog" or dawn mist)
+    if (weather === "fog") {
+      ctx.save();
+      fogBanks.forEach((fb) => {
+        fb.xRatio += fb.speed;
+        if (fb.xRatio > 1.3) fb.xRatio = -0.4;
+        if (fb.xRatio < -0.4) fb.xRatio = 1.3;
+        const fx = fb.xRatio * vw;
+        const fy = fb.yRatio * vh;
+        const fw = fb.wRatio * vw;
+        const fh = fb.hRatio * vh;
+        const fg = ctx.createRadialGradient(fx, fy, fw * 0.1, fx, fy, fw * 0.65);
+        fg.addColorStop(0, `rgba(210, 222, 238, ${fb.alpha.toFixed(3)})`);
+        fg.addColorStop(1, "rgba(210, 222, 238, 0)");
+        ctx.fillStyle = fg;
+        ctx.beginPath();
+        ctx.ellipse(fx, fy, fw * 0.65, fh * 0.65, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    // 2. RAIN & THUNDERSTORM
+    if (weather === "rain" || weather === "storm") {
+      const isStorm = weather === "storm";
+      ctx.save();
+      ctx.strokeStyle = isStorm ? "rgba(210, 228, 255, 0.34)" : "rgba(195, 215, 255, 0.22)";
+      ctx.lineWidth = isStorm ? 1.35 : 1.1;
+      const windSlant = isStorm ? -5.8 : -3.5;
+      const speedMult = isStorm ? 1.45 : 1.0;
+      ctx.beginPath();
+      rainDrops.forEach((d) => {
+        ctx.moveTo(d.x, d.y);
+        ctx.lineTo(d.x + windSlant, d.y + d.len * speedMult);
+        d.x += windSlant * 0.65;
+        d.y += d.speed * speedMult;
+        if (d.y > vh) {
+          d.y = -20;
+          d.x = Math.random() * vw;
+        }
+        if (d.x < 0) d.x = vw;
+      });
+      ctx.stroke();
+      ctx.restore();
+
+      // Spawn occasional rain puddle splashes in world space
+      if (Math.random() < (isStorm ? 0.45 : 0.2)) {
+        spawnWorldRipple(
+          (0.2 + Math.random() * 0.65) * WORLD.width,
+          (0.35 + Math.random() * 0.45) * WORLD.height,
+          "rgba(195, 220, 255, 0.32)",
+          32
+        );
+      }
+
+      // Distant NYC lightning flash during thunderstorm
+      if (isStorm) {
+        if (nycEnv.stormFlashAlpha <= 0.01 && Math.random() < 0.006) {
+          nycEnv.stormFlashAlpha = 0.55;
+        }
+        if (nycEnv.stormFlashAlpha > 0.01) {
+          ctx.save();
+          ctx.fillStyle = `rgba(225, 238, 255, ${nycEnv.stormFlashAlpha.toFixed(3)})`;
+          ctx.fillRect(0, 0, vw, vh);
+          ctx.restore();
+          nycEnv.stormFlashAlpha *= 0.86;
+        }
+      }
+    }
+
+    // 3. SNOWFALL (full snowfall when weather === "snow", or gentle flurries in winter)
+    if (weather === "snow" || (season === "winter" && weather === "clear")) {
+      const count = weather === "snow" ? snowFlakes.length : 45; // 190 full snow vs 45 light winter flurries
+      ctx.save();
+      for (let i = 0; i < count; i++) {
+        const sf = snowFlakes[i];
+        const sway = Math.sin(t * 2.2 + sf.phase) * sf.swayAmp;
+        sf.x += sf.driftX + sway;
+        sf.y += sf.speedY;
+        if (sf.y > vh + 12) {
+          sf.y = -12;
+          sf.x = Math.random() * vw;
+        }
+        if (sf.x > vw + 12) sf.x = -12;
+        if (sf.x < -12) sf.x = vw + 12;
+
+        ctx.fillStyle = `rgba(248, 252, 255, ${sf.alpha})`;
+        ctx.beginPath();
+        ctx.arc(sf.x, sf.y, sf.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Foreground crystalline snow glint
+        if (sf.star) {
+          ctx.strokeStyle = `rgba(255, 255, 255, ${(sf.alpha * 0.7).toFixed(2)})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(sf.x - sf.r * 1.7, sf.y);
+          ctx.lineTo(sf.x + sf.r * 1.7, sf.y);
+          ctx.moveTo(sf.x, sf.y - sf.r * 1.7);
+          ctx.lineTo(sf.x, sf.y + sf.r * 1.7);
+          ctx.stroke();
+        }
+      }
+
+      // Subtle frosty screen-edge vignette during active snowfall
+      if (weather === "snow") {
+        const frostGrad = ctx.createRadialGradient(vw * 0.5, vh * 0.5, Math.min(vw, vh) * 0.38, vw * 0.5, vh * 0.5, Math.max(vw, vh) * 0.72);
+        frostGrad.addColorStop(0, "rgba(220, 240, 255, 0)");
+        frostGrad.addColorStop(1, "rgba(215, 238, 255, 0.14)");
+        ctx.fillStyle = frostGrad;
+        ctx.fillRect(0, 0, vw, vh);
+
+        if (Math.random() < 0.14) {
+          spawnWorldRipple(
+            (0.22 + Math.random() * 0.62) * WORLD.width,
+            (0.35 + Math.random() * 0.45) * WORLD.height,
+            "rgba(235, 248, 255, 0.35)",
+            24
+          );
+        }
+      }
+      ctx.restore();
+    }
   }
 
   // ============================================================================
@@ -1123,6 +1684,9 @@
       ctx.fillRect(0, 0, WORLD.width, WORLD.height);
     }
 
+    // Live New York Time-of-Day Sky/Street Grading + Seasonal World Elements (Snowbanks, Autumn Leaves, Spring Petals, Fireflies)
+    drawNycWorldAtmosphere(ctx);
+
     // Sonic Ley-Lines connecting mapped stages (01 -> 05)
     ctx.save();
     ctx.beginPath();
@@ -1180,7 +1744,7 @@
       ctx.restore();
     }
 
-    // Ginger Tabby Cat Patrol along Dmytro's route
+    // Ginger Tabby Cat Patrol along Dmytro's route + Floor 5 Balcony Show
     updateAndDrawGingerCat(ctx);
 
     // Rising Golden & Hoop-Orange Sparks
@@ -1203,26 +1767,8 @@
 
     ctx.restore();
 
-    // Screen-Space Nocturnal Rain
-    if (state.rainActive) {
-      ctx.save();
-      ctx.strokeStyle = "rgba(195, 215, 255, 0.20)";
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      rainDrops.forEach((d) => {
-        ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x - 3.5, d.y + d.len);
-        d.x -= 2.2;
-        d.y += d.speed;
-        if (d.y > vh) {
-          d.y = -20;
-          d.x = Math.random() * vw;
-        }
-        if (d.x < 0) d.x = vw;
-      });
-      ctx.stroke();
-      ctx.restore();
-    }
+    // Screen-Space Live NYC Weather (Snowfall, Rain, Thunderstorm, Harbor Fog)
+    drawNycScreenWeather(ctx, vw, vh);
 
     // Project HTML Stage Markers
     const beatScale = (1 + audioEnergy.sub * 0.42).toFixed(3);
@@ -1934,19 +2480,32 @@
     ctx.fill();
     ctx.stroke();
 
-    // Little warm flowers/foliage in the flower box
-    ctx.fillStyle = "#2E6F40";
-    [-12, -5, 2, 9, 14].forEach((fx) => {
+    // Little warm flowers/foliage in the flower box (adapts to NYC season & snow!)
+    const activeSeason = getEffectiveSeason();
+    const activeWeather = getEffectiveWeather();
+    if (activeSeason === "winter" || activeWeather === "snow") {
+      // Fluffy white snow cap resting on the flower box and iron railing!
+      ctx.fillStyle = "rgba(245, 250, 255, 0.92)";
       ctx.beginPath();
-      ctx.arc(fx, railTopY + 1.5, 3.2, 0, Math.PI * 2);
+      ctx.roundRect(-19, railTopY - 0.5, 38, 4.5, 2.5);
       ctx.fill();
-    });
-    ctx.fillStyle = "#FF7A2F";
-    [-9, 0, 10].forEach((fx) => {
       ctx.beginPath();
-      ctx.arc(fx, railTopY + 1.0, 1.8, 0, Math.PI * 2);
+      ctx.roundRect(-railHalf, railTopY - 2.2, railW, 2.2, 1.2);
       ctx.fill();
-    });
+    } else {
+      ctx.fillStyle = activeSeason === "autumn" ? "#9A3412" : "#2E6F40";
+      [-12, -5, 2, 9, 14].forEach((fx) => {
+        ctx.beginPath();
+        ctx.arc(fx, railTopY + 1.5, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.fillStyle = activeSeason === "spring" ? "#F472B6" : activeSeason === "autumn" ? "#F59E0B" : "#FF7A2F";
+      [-9, 0, 10].forEach((fx) => {
+        ctx.beginPath();
+        ctx.arc(fx, railTopY + 1.0, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
     ctx.restore();
 
     // 5. Floating Caption Pill above the Balcony while doors are open
@@ -2173,12 +2732,79 @@
         window.innerHeight * 0.48 + (Math.random() - 0.5) * 120
       );
     });
-    document.getElementById("toy-rain-btn").addEventListener("click", (e) => {
-      state.rainActive = !state.rainActive;
-      e.currentTarget.classList.toggle("is-active", state.rainActive);
+    document.getElementById("toy-rain-btn").addEventListener("click", () => {
+      const cur = getEffectiveWeather();
+      nycEnv.weatherOverride = cur === "rain" ? "clear" : "rain";
+      syncNycEnvHud();
       playSfx("splash", 0.4);
     });
+    const toySnowBtn = document.getElementById("toy-snow-btn");
+    if (toySnowBtn) {
+      toySnowBtn.addEventListener("click", () => {
+        const cur = getEffectiveWeather();
+        if (cur === "snow") {
+          nycEnv.weatherOverride = "auto";
+          nycEnv.seasonOverride = "auto";
+        } else {
+          nycEnv.weatherOverride = "snow";
+          nycEnv.seasonOverride = "winter";
+        }
+        syncNycEnvHud();
+        playSfx("splash", 0.32);
+      });
+    }
     document.getElementById("toy-reset-btn").addEventListener("click", resetCameraOverview);
+
+    // New York City Live Atmosphere HUD Button & Popover Controls
+    const nycEnvBtn = document.getElementById("nyc-env-btn");
+    const nycPopover = document.getElementById("nyc-env-popover");
+    const nycSyncAutoBtn = document.getElementById("nyc-sync-auto-btn");
+
+    if (nycEnvBtn && nycPopover) {
+      nycEnvBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        nycEnv.popoverOpen = !nycEnv.popoverOpen;
+        nycPopover.classList.toggle("is-open", nycEnv.popoverOpen);
+      });
+      nycPopover.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+      window.addEventListener("click", () => {
+        if (nycEnv.popoverOpen) {
+          nycEnv.popoverOpen = false;
+          nycPopover.classList.remove("is-open");
+        }
+      });
+    }
+
+    if (nycSyncAutoBtn) {
+      nycSyncAutoBtn.addEventListener("click", () => {
+        nycEnv.todOverride = "auto";
+        nycEnv.weatherOverride = "auto";
+        nycEnv.seasonOverride = "auto";
+        updateNycClockAndSeason();
+        fetchLiveNycWeather();
+      });
+    }
+
+    document.querySelectorAll("#nyc-tod-pills .nyc-opt-pill").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        nycEnv.todOverride = btn.dataset.tod;
+        syncNycEnvHud();
+      });
+    });
+    document.querySelectorAll("#nyc-weather-pills .nyc-opt-pill").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        nycEnv.weatherOverride = btn.dataset.weather;
+        syncNycEnvHud();
+      });
+    });
+    document.querySelectorAll("#nyc-season-pills .nyc-opt-pill").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        nycEnv.seasonOverride = btn.dataset.season;
+        syncNycEnvHud();
+      });
+    });
 
     // Ambience Toggle
     const ambBtn = document.getElementById("ambience-toggle-btn");
@@ -2270,10 +2896,16 @@
         document.getElementById("toy-stamp-btn").click();
       } else if (k === "r") {
         document.getElementById("toy-rain-btn").click();
+      } else if (k === "w") {
+        const snowBtn = document.getElementById("toy-snow-btn");
+        if (snowBtn) snowBtn.click();
       } else if (k === "c") {
         resetCameraOverview();
       } else if (e.key === "Escape") {
-        if (lightboxModal.classList.contains("is-open")) {
+        if (nycEnv.popoverOpen && nycPopover) {
+          nycEnv.popoverOpen = false;
+          nycPopover.classList.remove("is-open");
+        } else if (lightboxModal.classList.contains("is-open")) {
           lightboxModal.classList.remove("is-open");
         } else if (state.fsCinemaOpen) {
           closeFullscreenCinema();
@@ -2292,6 +2924,10 @@
   // ============================================================================
   function init() {
     resizeCanvas();
+    updateNycClockAndSeason();
+    fetchLiveNycWeather();
+    setInterval(updateNycClockAndSeason, 15000);
+    setInterval(fetchLiveNycWeather, 600000); // Refresh live NYC weather every 10 minutes
     buildMapMarkersAndQuickStrip();
     buildInstagramReelsWall();
     buildPhotoGallery("all");

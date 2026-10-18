@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=12" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -105,6 +105,12 @@
         </span>
       </button>
 
+      <button class="hud-pill-btn nyc-live-pill is-synced" id="nyc-env-btn" type="button" title="Live New York Time, Weather &amp; Season (Click to customize or preview Snow/Seasons)">
+        <span class="nyc-live-dot" id="nyc-live-dot"></span>
+        <span id="nyc-env-icon">🗽</span>
+        <span id="nyc-env-label">NYC LIVE · --:--</span>
+      </button>
+
       <button class="hud-pill-btn" id="ambience-toggle-btn" type="button">
         <span class="status-dot"></span>
         <span id="i18n-ambience-label">AMBIENCE OFF</span>
@@ -116,6 +122,53 @@
       </div>
     </div>
   </header>
+
+  <!-- ========================================================================
+       NEW YORK LIVE ATMOSPHERE POPOVER (TIME OF DAY · WEATHER · 4 SEASONS)
+       ======================================================================== -->
+  <div class="nyc-env-popover" id="nyc-env-popover" aria-hidden="true">
+    <div class="nyc-pop-header">
+      <div>
+        <div class="nyc-pop-title">🗽 NEW YORK CITY LIVE ATMOSPHERE</div>
+        <div class="nyc-pop-sub" id="nyc-pop-telemetry">MANHATTAN 40.71°N · SYNCING LIVE WEATHER &amp; CLOCK...</div>
+      </div>
+      <button class="nyc-sync-reset-btn is-active" id="nyc-sync-auto-btn" type="button">🟢 LIVE NYC AUTO</button>
+    </div>
+
+    <div class="nyc-pop-section">
+      <div class="nyc-pop-label" id="i18n-nyc-tod-label">TIME OF DAY (AMERICA/NEW_YORK)</div>
+      <div class="nyc-pop-pills" id="nyc-tod-pills">
+        <button class="nyc-opt-pill is-active" data-tod="auto" type="button">🗽 Auto</button>
+        <button class="nyc-opt-pill" data-tod="dawn" type="button">🌅 Dawn</button>
+        <button class="nyc-opt-pill" data-tod="day" type="button">☀️ Day</button>
+        <button class="nyc-opt-pill" data-tod="sunset" type="button">🌇 Sunset</button>
+        <button class="nyc-opt-pill" data-tod="night" type="button">🌙 Night</button>
+      </div>
+    </div>
+
+    <div class="nyc-pop-section">
+      <div class="nyc-pop-label" id="i18n-nyc-weather-label">STREET WEATHER (OPEN-METEO NYC)</div>
+      <div class="nyc-pop-pills" id="nyc-weather-pills">
+        <button class="nyc-opt-pill is-active" data-weather="auto" type="button">🗽 Auto</button>
+        <button class="nyc-opt-pill" data-weather="clear" type="button">✨ Clear</button>
+        <button class="nyc-opt-pill" data-weather="rain" type="button">🌧️ Rain</button>
+        <button class="nyc-opt-pill" data-weather="snow" type="button">❄️ Snow</button>
+        <button class="nyc-opt-pill" data-weather="storm" type="button">⛈️ Storm</button>
+        <button class="nyc-opt-pill" data-weather="fog" type="button">🌫️ Fog</button>
+      </div>
+    </div>
+
+    <div class="nyc-pop-section">
+      <div class="nyc-pop-label" id="i18n-nyc-season-label">SEASON OF THE YEAR</div>
+      <div class="nyc-pop-pills" id="nyc-season-pills">
+        <button class="nyc-opt-pill is-active" data-season="auto" type="button">🗽 Auto</button>
+        <button class="nyc-opt-pill" data-season="winter" type="button">❄️ Winter</button>
+        <button class="nyc-opt-pill" data-season="spring" type="button">🌸 Spring</button>
+        <button class="nyc-opt-pill" data-season="summer" type="button">☀️ Summer</button>
+        <button class="nyc-opt-pill" data-season="autumn" type="button">🍂 Autumn</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================================
        LEFT FLOATING BEZIZIAN INTERACTIVE TOYBOX
@@ -151,12 +204,20 @@
         <kbd class="toy-kbd">P</kbd>
       </button>
 
-      <button class="toy-btn is-active" id="toy-rain-btn" type="button">
+      <button class="toy-btn" id="toy-rain-btn" type="button">
         <span class="toy-btn-left">
           <span class="toy-icon">🌧️</span>
           <span id="i18n-toy-rain">Street Rain</span>
         </span>
         <kbd class="toy-kbd">R</kbd>
+      </button>
+
+      <button class="toy-btn" id="toy-snow-btn" type="button">
+        <span class="toy-btn-left">
+          <span class="toy-icon">❄️</span>
+          <span id="i18n-toy-snow">NYC Snow</span>
+        </span>
+        <kbd class="toy-kbd">W</kbd>
       </button>
 
       <button class="toy-btn" id="toy-reset-btn" type="button">
@@ -527,6 +588,6 @@
 
   <!-- Scripts -->
   <script src="tracks-data.js?v=10"></script>
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
