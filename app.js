@@ -553,22 +553,6 @@
     // Populate Time-Synced Lyrics List
     renderLyricsList(track);
 
-    // Populate Duda Canon / Lore Tab
-    document.getElementById("lore-hook-quote").textContent = `"${track.hookQuote}"`;
-    document.getElementById("lore-story-text").textContent = track.story[state.lang];
-    document.getElementById("lore-spec-bpm").textContent = `${track.bpm} BPM`;
-    document.getElementById("lore-spec-key").textContent = track.key;
-    document.getElementById("lore-spec-dur").textContent = track.duration;
-
-    const propsRow = document.getElementById("lore-props-row");
-    propsRow.innerHTML = "";
-    (track.props || []).forEach((prop) => {
-      const chip = document.createElement("span");
-      chip.className = "prop-chip";
-      chip.textContent = prop;
-      propsRow.appendChild(chip);
-    });
-
     // Update Bottom Sonic Dock
     document.getElementById("dock-art-img").src = track.posterImage || track.portraitImage;
     document.getElementById("dock-title").textContent = `${track.num} · ${track.title}`;
@@ -962,18 +946,14 @@
 
     document.getElementById("tab-btn-video").textContent = dict.modeVideo;
     document.getElementById("tab-btn-lyrics").textContent = dict.modeLyrics;
-    document.getElementById("tab-btn-lore").textContent = dict.modeLore;
 
     document.getElementById("i18n-click-lyric-hint").textContent = dict.clickLyricHint;
-    document.getElementById("i18n-duda-matrix-title").textContent = dict.dudaMatrixTitle;
-    document.getElementById("i18n-duda-matrix-sub").textContent = dict.dudaMatrixSub;
 
     document.getElementById("i18n-meter-bass").textContent = dict.bassMeter;
     document.getElementById("i18n-meter-brass").textContent = dict.brassMeter;
     document.getElementById("i18n-meter-vox").textContent = dict.vocalMeter;
 
     buildMapMarkersAndQuickStrip();
-    buildDudaExpressionMatrix();
     selectTrack(state.currentTrackIndex, state.isPlaying);
   }
 
@@ -1280,7 +1260,6 @@
         });
         document.getElementById("pane-video").classList.toggle("is-active", tab === "video");
         document.getElementById("pane-lyrics").classList.toggle("is-active", tab === "lyrics");
-        document.getElementById("pane-lore").classList.toggle("is-active", tab === "lore");
       });
     });
 
@@ -1442,7 +1421,6 @@
     buildMapMarkersAndQuickStrip();
     buildInstagramReelsWall();
     buildPhotoGallery("all");
-    buildDudaExpressionMatrix();
     bindEvents();
     // Start on 01 · Loud Enough so chronological order 01 -> 06 is immediately clear
     selectTrack(0, false);
