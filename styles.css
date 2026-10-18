@@ -2093,11 +2093,36 @@ html, body {
 }
 
 /* ============================================================================
-   RESPONSIVE ADAPTATION
+   RESPONSIVE ADAPTATION & MOBILE-FIRST SONG ACCESSIBILITY
    ============================================================================ */
-@media (max-width: 1080px) {
+.mobile-dock-quick-btns {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  /* Keep All 8 Songs Strip visible right below top HUD on tablets & phones! */
   .district-quick-strip {
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    z-index: 48;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    padding: 5px 8px;
+    background: rgba(11, 11, 15, 0.92);
+    border: 1px solid rgba(255, 90, 31, 0.35);
+  }
+  .district-quick-strip::-webkit-scrollbar {
     display: none;
+  }
+  .quick-stage-btn {
+    flex-shrink: 0;
+  }
+  .quick-stage-btn .quick-title {
+    display: inline !important;
   }
   .left-toybox-dock {
     bottom: 98px;
@@ -2112,38 +2137,16 @@ html, body {
   .stage-drawer {
     width: 400px;
     right: 12px;
+    top: 112px;
     bottom: 98px;
   }
   .bottom-sonic-dock {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 210px 1fr;
     left: 12px;
     right: 12px;
     bottom: 10px;
   }
   .dock-telemetry-right {
-    display: none;
-  }
-}
-
-@media (max-width: 680px) {
-  .left-toybox-dock {
-    display: none;
-  }
-  .stage-drawer {
-    left: 10px;
-    right: 10px;
-    width: auto;
-    top: auto;
-    height: 64dvh;
-    bottom: 92px;
-  }
-  .bottom-sonic-dock {
-    grid-template-columns: 1fr;
-    height: auto;
-    padding: 10px 14px;
-    gap: 8px;
-  }
-  .dock-track-info {
     display: none;
   }
 }
@@ -2648,4 +2651,342 @@ html, body {
   font-weight: 700;
   box-shadow: 0 3px 10px rgba(255, 90, 31, 0.38);
 }
+
+/* ============================================================================
+   ALL 8 SONGS INSTANT PLAYLIST DRAWER & MOBILE ERGONOMIC LAYOUT
+   ============================================================================ */
+.mobile-playlist-window {
+  max-width: 560px;
+  padding: 18px;
+}
+
+.all-songs-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.song-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.song-sheet-row:hover {
+  border-color: var(--hoop-orange);
+  background: rgba(255, 90, 31, 0.12);
+}
+
+.song-sheet-row.is-active {
+  border-color: var(--hoop-orange);
+  background: linear-gradient(135deg, rgba(255, 90, 31, 0.24), rgba(16, 18, 26, 0.95));
+  box-shadow: 0 6px 20px rgba(255, 90, 31, 0.25);
+}
+
+.song-sheet-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.song-sheet-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 90, 31, 0.5);
+  flex-shrink: 0;
+}
+
+.song-sheet-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.song-sheet-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.song-sheet-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--hoop-orange);
+  color: #0B0B0F;
+  flex-shrink: 0;
+}
+
+.song-sheet-row.is-unmapped .song-sheet-num {
+  background: var(--brass-gold);
+}
+
+.song-sheet-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bone-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-sheet-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-sheet-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.song-sheet-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--bone-cream);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.song-sheet-btn.primary {
+  background: var(--hoop-orange);
+  border-color: var(--hoop-orange);
+  color: #0B0B0F;
+}
+
+#dock-meta-btn {
+  cursor: pointer;
+}
+
+/* ============================================================================
+   PHONE & COMPACT MOBILE OPTIMIZATION (@media max-width: 860px)
+   ============================================================================ */
+@media (max-width: 860px) {
+  .top-hud-bar {
+    top: 6px;
+    left: 8px;
+    right: 8px;
+    padding: 4px 6px;
+    gap: 8px;
+    background: rgba(11, 11, 15, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+  }
+
+  .brand-lockup {
+    padding: 4px 8px 4px 5px;
+    gap: 7px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    flex-shrink: 0;
+  }
+
+  .brand-grille-badge {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-wordmark {
+    font-size: 15px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .top-actions-cluster {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 5px;
+    padding-right: 2px;
+  }
+
+  .top-actions-cluster::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hud-pill-btn {
+    padding: 6px 10px;
+    font-size: 10px;
+    gap: 5px;
+  }
+
+  #open-sting-btn {
+    display: none;
+  }
+
+  /* Pinned All 8 Songs Ribbon directly under top bar — zero map-hunting! */
+  .district-quick-strip {
+    top: 52px;
+    left: 8px;
+    right: 8px;
+    padding: 5px 6px;
+    gap: 5px;
+    border-radius: 14px;
+    background: rgba(11, 11, 15, 0.94);
+    border: 1px solid rgba(255, 90, 31, 0.45);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.7);
+  }
+
+  .quick-stage-btn {
+    padding: 6px 10px;
+    font-size: 10.5px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .quick-stage-btn .quick-title {
+    display: inline !important;
+    font-size: 11px;
+  }
+
+  /* Keep the city map 100% open & uncluttered on mobile! */
+  .left-toybox-dock,
+  .unmapped-vault-dock,
+  .drawer-reopen-btn {
+    display: none !important;
+  }
+
+  /* Ergonomic 2-row Mobile Bottom Player Dock */
+  .bottom-sonic-dock {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    height: auto;
+    padding: 10px 12px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(11, 12, 18, 0.96);
+    border: 1px solid rgba(255, 90, 31, 0.38);
+  }
+
+  .dock-track-info {
+    display: flex !important;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dock-art-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .dock-status-label {
+    font-size: 8.5px;
+  }
+
+  .dock-title {
+    font-size: 13.5px;
+  }
+
+  .dock-subtitle {
+    font-size: 9.5px;
+  }
+
+  .dock-transport-center {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .transport-btns {
+    gap: 6px;
+  }
+
+  .transport-play-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+  }
+
+  .transport-icon-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .mobile-dock-quick-btns {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .mobile-quick-btn {
+    padding: 7px 10px;
+    font-size: 10px;
+    border-radius: 10px;
+  }
+
+  .timeline-scrubber-wrap {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .live-lyric-ticker {
+    display: none;
+  }
+
+  /* Stage Drawer behaves as a clean Mobile Bottom Sheet above the player dock */
+  .stage-drawer {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    top: 98px;
+    bottom: 134px;
+    height: auto;
+    z-index: 56;
+    border-radius: 20px;
+  }
+
+  .stage-drawer.is-collapsed {
+    transform: translateY(115%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .nyc-env-popover {
+    top: 96px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+}
+
 

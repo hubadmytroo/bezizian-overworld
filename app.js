@@ -934,6 +934,19 @@
   // ============================================================================
   // BUILD DOM MARKERS, UNMAPPED VAULT, QUICK STRIP, REELS WALL, GALLERY & MATRIX
   // ============================================================================
+  function syncMobileDrawerBtnLabel() {
+    const drawer = document.getElementById("stage-drawer");
+    const btnLabel = document.getElementById("i18n-mobile-clip-btn");
+    const btn = document.getElementById("mobile-open-drawer-btn");
+    if (!drawer || !btnLabel || !btn) return;
+    const isCollapsed = drawer.classList.contains("is-collapsed");
+    if (state.lang === "uk") {
+      btnLabel.textContent = isCollapsed ? "Кліп і Текст" : "На Карту 🗺️";
+    } else {
+      btnLabel.textContent = isCollapsed ? "Clip & Lyrics" : "Show Map 🗺️";
+    }
+  }
+
   function buildMapMarkersAndQuickStrip() {
     markersLayer.innerHTML = "";
     markerDomNodes.length = 0;
@@ -941,6 +954,8 @@
     quickStrip.innerHTML = "";
     const unmappedList = document.getElementById("unmapped-vault-list");
     if (unmappedList) unmappedList.innerHTML = "";
+    const allSongsSheet = document.getElementById("all-songs-sheet-list");
+    if (allSongsSheet) allSongsSheet.innerHTML = "";
 
     TRACKS.forEach((track, idx) => {
       if (!track.unmapped && track.mapCoords) {
@@ -979,6 +994,7 @@
           e.stopPropagation();
           selectTrack(idx, true);
           document.getElementById("stage-drawer").classList.remove("is-collapsed");
+          syncMobileDrawerBtnLabel();
         });
 
         markersLayer.appendChild(marker);
@@ -1005,6 +1021,7 @@
         uCard.addEventListener("click", () => {
           selectTrack(idx, true);
           document.getElementById("stage-drawer").classList.remove("is-collapsed");
+          syncMobileDrawerBtnLabel();
         });
         unmappedList.appendChild(uCard);
       }
@@ -1020,10 +1037,85 @@
       const prefix = track.unmapped ? `📡${track.num}` : track.num;
       qBtn.innerHTML = `<span>${prefix}</span><span class="quick-title">${track.title.split(" (")[0]}</span>`;
       qBtn.addEventListener("click", () => {
-        selectTrack(idx, true);
-        document.getElementById("stage-drawer").classList.remove("is-collapsed");
+        const isMobile = window.innerWidth <= 860;
+        const drawer = document.getElementById("stage-drawer");
+        if (isMobile) {
+          // On mobile: first tap plays the song & flies across the map; tapping active song again opens clip/lyrics sheet
+          if (idx === state.currentTrackIndex && drawer.classList.contains("is-collapsed")) {
+            drawer.classList.remove("is-collapsed");
+          }
+          selectTrack(idx, true);
+          syncMobileDrawerBtnLabel();
+        } else {
+          selectTrack(idx, true);
+          drawer.classList.remove("is-collapsed");
+          syncMobileDrawerBtnLabel();
+        }
       });
       quickStrip.appendChild(qBtn);
+
+      // Populate All 8 Songs Sheet Row (#all-songs-sheet-list)
+      if (allSongsSheet) {
+        const row = document.createElement("div");
+        row.className =
+          "song-sheet-row" +
+          (idx === state.currentTrackIndex ? " is-active" : "") +
+          (track.unmapped ? " is-unmapped" : "");
+        row.dataset.index = String(idx);
+        const subText = track.unmapped
+          ? state.lang === "uk"
+            ? `Нова пісня · Локація: ??? · ${track.duration}`
+            : `New Song · Location: ??? · ${track.duration}`
+          : `${track.districtName[state.lang]} · ${track.duration}`;
+        const clipLabel = track.unmapped
+          ? state.lang === "uk"
+            ? "🎤 Текст"
+            : "🎤 Lyrics"
+          : state.lang === "uk"
+          ? "🎬 Кліп"
+          : "🎬 Clip";
+
+        row.innerHTML = `
+          <div class="song-sheet-left">
+            <img class="song-sheet-thumb" src="${track.posterImage || track.portraitImage}" alt="${track.title}" loading="lazy" />
+            <div class="song-sheet-meta">
+              <div class="song-sheet-title-line">
+                <span class="song-sheet-num">${prefix}</span>
+                <span class="song-sheet-title">${track.title}</span>
+              </div>
+              <div class="song-sheet-sub">${subText}</div>
+            </div>
+          </div>
+          <div class="song-sheet-actions">
+            <button class="song-sheet-btn primary" data-act="play" type="button">▶ Play</button>
+            <button class="song-sheet-btn" data-act="clip" type="button">${clipLabel}</button>
+          </div>
+        `;
+
+        row.addEventListener("click", (e) => {
+          const actBtn = e.target.closest("[data-act]");
+          const act = actBtn ? actBtn.dataset.act : "play";
+          const modal = document.getElementById("mobile-playlist-modal");
+          if (modal) modal.classList.remove("is-open");
+          selectTrack(idx, true);
+          const drawer = document.getElementById("stage-drawer");
+          if (act === "clip") {
+            drawer.classList.remove("is-collapsed");
+            if (track.unmapped) {
+              const lyricsTabBtn = document.getElementById("tab-btn-lyrics");
+              if (lyricsTabBtn) lyricsTabBtn.click();
+            } else {
+              const videoTabBtn = document.getElementById("tab-btn-video");
+              if (videoTabBtn) videoTabBtn.click();
+            }
+          } else if (window.innerWidth <= 860) {
+            drawer.classList.add("is-collapsed");
+          }
+          syncMobileDrawerBtnLabel();
+        });
+
+        allSongsSheet.appendChild(row);
+      }
     });
   }
 
@@ -1159,8 +1251,17 @@
     document.querySelectorAll(".unmapped-song-card").forEach((card) => {
       card.classList.toggle("is-active", Number(card.dataset.index) === index);
     });
+    document.querySelectorAll(".song-sheet-row").forEach((row) => {
+      row.classList.toggle("is-active", Number(row.dataset.index) === index);
+    });
     document.querySelectorAll(".quick-stage-btn").forEach((btn, i) => {
-      btn.classList.toggle("is-active", i === index);
+      const active = i === index;
+      btn.classList.toggle("is-active", active);
+      if (active && typeof btn.scrollIntoView === "function") {
+        try {
+          btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        } catch (_) {}
+      }
     });
 
     // Update Stage Drawer Header
@@ -2704,14 +2805,44 @@
       });
     }
 
-    // Drawer Collapse / Reopen
+    // Drawer Collapse / Reopen + Mobile Clip & Lyrics Toggle
     const drawer = document.getElementById("stage-drawer");
     document.getElementById("drawer-collapse-btn").addEventListener("click", (e) => {
       e.stopPropagation();
       drawer.classList.add("is-collapsed");
+      syncMobileDrawerBtnLabel();
     });
     document.getElementById("drawer-reopen-btn").addEventListener("click", () => {
       drawer.classList.remove("is-collapsed");
+      syncMobileDrawerBtnLabel();
+    });
+    const mobileDrawerBtn = document.getElementById("mobile-open-drawer-btn");
+    if (mobileDrawerBtn) {
+      mobileDrawerBtn.addEventListener("click", () => {
+        drawer.classList.toggle("is-collapsed");
+        syncMobileDrawerBtnLabel();
+      });
+    }
+
+    // All 8 Songs Instant Playlist Modal (#mobile-playlist-modal)
+    const mobilePlaylistModal = document.getElementById("mobile-playlist-modal");
+    const openPlaylistFn = () => {
+      if (mobilePlaylistModal) mobilePlaylistModal.classList.add("is-open");
+    };
+    const closePlaylistBtn = document.getElementById("close-mobile-playlist-btn");
+    if (closePlaylistBtn && mobilePlaylistModal) {
+      closePlaylistBtn.addEventListener("click", () => {
+        mobilePlaylistModal.classList.remove("is-open");
+      });
+      mobilePlaylistModal.addEventListener("click", (e) => {
+        if (e.target === mobilePlaylistModal) {
+          mobilePlaylistModal.classList.remove("is-open");
+        }
+      });
+    }
+    ["mobile-open-playlist-btn", "dock-playlist-btn", "dock-meta-btn"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("click", openPlaylistFn);
     });
 
     // PERFECT! Snapshot & Gallery buttons in Watch Clip tab
@@ -2905,6 +3036,8 @@
         if (nycEnv.popoverOpen && nycPopover) {
           nycEnv.popoverOpen = false;
           nycPopover.classList.remove("is-open");
+        } else if (mobilePlaylistModal && mobilePlaylistModal.classList.contains("is-open")) {
+          mobilePlaylistModal.classList.remove("is-open");
         } else if (lightboxModal.classList.contains("is-open")) {
           lightboxModal.classList.remove("is-open");
         } else if (state.fsCinemaOpen) {
@@ -2932,6 +3065,12 @@
     buildInstagramReelsWall();
     buildPhotoGallery("all");
     bindEvents();
+    // On mobile screens, start with the drawer minimized so the All-8-Songs top bar & interactive map are 100% open
+    if (window.innerWidth <= 860) {
+      const drawer = document.getElementById("stage-drawer");
+      if (drawer) drawer.classList.add("is-collapsed");
+    }
+    syncMobileDrawerBtnLabel();
     // Start on 01 · Loud Enough so chronological order 01 -> 06 is immediately clear
     selectTrack(0, false);
     requestAnimationFrame(renderOverworldLoop);

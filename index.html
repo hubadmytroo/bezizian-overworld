@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=13" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -407,7 +407,7 @@
       <div class="dock-art-wrap" id="dock-art-btn" title="Click to open Fullscreen Clip">
         <img id="dock-art-img" src="images/reels/reel_01_loud_enough.jpg" alt="Track cover" />
       </div>
-      <div class="dock-meta">
+      <div class="dock-meta" id="dock-meta-btn" title="Tap to open All 8 Songs">
         <div class="dock-status-label" id="dock-status-label">READY — CLICK PLAY</div>
         <div class="dock-title" id="dock-title">01 · Loud Enough</div>
         <div class="dock-subtitle" id="dock-subtitle">01 · ELEVATOR 4B BRASS SHAFT</div>
@@ -419,6 +419,15 @@
         <button class="transport-icon-btn" id="prev-track-btn" type="button" title="Previous Stage">⏮</button>
         <button class="transport-play-btn" id="play-pause-btn" type="button" title="Play / Pause (Space)">▶</button>
         <button class="transport-icon-btn" id="next-track-btn" type="button" title="Next Stage">⏭</button>
+      </div>
+
+      <div class="mobile-dock-quick-btns">
+        <button class="hud-pill-btn solid-orange mobile-quick-btn" id="mobile-open-drawer-btn" type="button">
+          <span>🎬</span><span id="i18n-mobile-clip-btn">Clip &amp; Lyrics</span>
+        </button>
+        <button class="hud-pill-btn highlight-orange mobile-quick-btn" id="mobile-open-playlist-btn" type="button">
+          <span>🎵</span><span id="i18n-mobile-songs-btn">All 8 Songs</span>
+        </button>
       </div>
 
       <div class="timeline-scrubber-wrap">
@@ -434,6 +443,9 @@
     </div>
 
     <div class="dock-telemetry-right">
+      <button class="hud-pill-btn highlight-orange" id="dock-playlist-btn" type="button" style="padding: 8px 12px; font-size: 10px;">
+        <span>🎵 All 8 Songs</span>
+      </button>
       <button class="hud-pill-btn solid-orange" id="dock-fullscreen-btn" type="button" style="padding: 8px 12px; font-size: 10px;">
         <span class="i18n-watch-fullscreen">⛶ Fullscreen Clip</span>
       </button>
@@ -454,6 +466,31 @@
       </div>
     </div>
   </footer>
+
+  <!-- ========================================================================
+       ALL 8 SONGS INSTANT PLAYLIST DRAWER (NO MAP HUNTING NEEDED!)
+       ======================================================================== -->
+  <div class="modal-backdrop" id="mobile-playlist-modal" role="dialog" aria-modal="true" aria-label="All 8 Bezizian Songs">
+    <div class="modal-window mobile-playlist-window">
+      <div class="modal-header" style="margin-bottom: 12px;">
+        <div>
+          <div class="section-micro-title">INSTANT TRACK SELECTOR · 5 CLIPS + 3 NEW PREMIERES</div>
+          <h2 class="modal-title" style="font-size: 20px;">🎵 All 8 Bezizian Songs</h2>
+        </div>
+        <button class="drawer-close-btn" id="close-mobile-playlist-btn" type="button">✕</button>
+      </div>
+
+      <div class="drawer-socials-strip" style="margin-bottom: 12px; margin-top: 0;">
+        <a class="social-pill-link yt" href="https://www.youtube.com/@bezizian" target="_blank" rel="noopener">▶️ YouTube</a>
+        <a class="social-pill-link ig" href="https://www.instagram.com/bezizian/reels/" target="_blank" rel="noopener">📸 Instagram</a>
+        <a class="social-pill-link threads" href="https://www.threads.com/@bezizian" target="_blank" rel="noopener">🌀 Threads</a>
+        <a class="social-pill-link fb" href="https://www.facebook.com/profile.php?id=61595280781729" target="_blank" rel="noopener">📘 Facebook</a>
+        <a class="social-pill-link tiktok" href="https://www.tiktok.com/@bezizian0" target="_blank" rel="noopener">🎵 TikTok</a>
+      </div>
+
+      <div class="all-songs-sheet-list" id="all-songs-sheet-list"></div>
+    </div>
+  </div>
 
   <!-- ========================================================================
        MODAL 1: FULLSCREEN CINEMA THEATER (WATCH ANY CLIP FULL SCREEN WITH SOUND)
@@ -588,6 +625,6 @@
 
   <!-- Scripts -->
   <script src="tracks-data.js?v=10"></script>
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
