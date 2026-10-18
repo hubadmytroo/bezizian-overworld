@@ -581,6 +581,23 @@
     bar2.innerHTML = "";
 
     const variants = track.clipVariants || [];
+    const igTarget = track.igUrl || "https://www.instagram.com/bezizian/reels/";
+
+    if (variants.length === 1) {
+      // Single clip: clicking "Official Instagram Reel (9:16) ↗" opens the reel on Instagram!
+      [bar1, bar2].forEach((bar) => {
+        const link = document.createElement("a");
+        link.href = igTarget;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.className = "clip-variant-btn is-active";
+        link.style.textDecoration = "none";
+        link.textContent = `📸 ${variants[0].label[state.lang]} ↗`;
+        bar.appendChild(link);
+      });
+      return;
+    }
+
     variants.forEach((v, vIdx) => {
       [bar1, bar2].forEach((bar) => {
         const btn = document.createElement("button");
@@ -603,6 +620,19 @@
         bar.appendChild(btn);
       });
     });
+
+    if (variants.length > 1) {
+      [bar1, bar2].forEach((bar) => {
+        const link = document.createElement("a");
+        link.href = igTarget;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.className = "clip-variant-btn";
+        link.style.textDecoration = "none";
+        link.textContent = "📸 Instagram ↗";
+        bar.appendChild(link);
+      });
+    }
   }
 
   function openFullscreenCinema(customVideoSrc, customTitle) {
