@@ -2562,7 +2562,7 @@
 
     if (gingerCat.pose === "lie" && isPaused) {
       // ======================================================================
-      // POSE A: LONG LYING DOWN — SPHINX LOAF + DEEP CURLED SLEEP ("лежал дольше")
+      // POSE A: LONG LYING DOWN — SPHINX LOAF + DEEP CURLED SLEEP
       // ======================================================================
       const breath = 1 + Math.sin(t * 2.4) * 0.042;
       const tailTwitch = Math.sin(t * 1.7) * 2.4;
@@ -2756,7 +2756,7 @@
       ctx.restore();
     } else if (gingerCat.pose === "groom" && isPaused) {
       // ======================================================================
-      // POSE B: 3-STAGE SELF-GROOMING & LICKING ("что б он чистился вылизывался")
+      // POSE B: 3-STAGE SELF-GROOMING & LICKING (PAW, CHEST, AND BACK FUR)
       // Sub-mode 0: Licking raised front white paw & rubbing behind ear
       // Sub-mode 1: Bowing head to lick fluffy chest & shoulder fur
       // Sub-mode 2: Turning head back to lick striped back/flank fur
